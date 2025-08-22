@@ -9,10 +9,10 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-20 h-20 rounded-full overflow-hidden">
+          <div className="flex items-center space-x-1">
+            <div className="w-10 h-10 rounded-full overflow-hidden">
               <img
-                src="/only-logo.jpg"
+                src="/only-logo-xx.jpg"
                 alt="CareerSpark Logo"
                 className="w-full h-full object-cover"
               />
