@@ -1,8 +1,24 @@
 import React, { useState } from 'react';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  currentPage?: string;
+  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  currentPage = 'home',
+  onNavigate,
+}) => {
   // State để quản lý trạng thái đăng nhập (có thể thay bằng context/redux sau)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleNavigation = (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai'
+  ) => {
+    if (onNavigate) {
+      onNavigate(page);
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm">
@@ -24,33 +40,52 @@ const Header: React.FC = () => {
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-blue-600 font-medium">
+            <button
+              onClick={() => handleNavigation('home')}
+              className={`font-medium transition-colors ${
+                currentPage === 'home'
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
+            >
               Trang chủ
-            </a>
+            </button>
             <a
               href="#"
               className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               Test RIASEC
             </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+            <button
+              onClick={() => handleNavigation('forum')}
+              className={`transition-colors ${
+                currentPage === 'forum'
+                  ? 'text-blue-600 font-medium'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
             >
               Diễn Đàn
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+            </button>
+            <button
+              onClick={() => handleNavigation('news')}
+              className={`transition-colors ${
+                currentPage === 'news'
+                  ? 'text-blue-600 font-medium'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
             >
               Tin Tức
-            </a>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+            </button>
+            <button
+              onClick={() => handleNavigation('ai')}
+              className={`transition-colors ${
+                currentPage === 'ai'
+                  ? 'text-blue-600 font-medium'
+                  : 'text-gray-600 hover:text-blue-600'
+              }`}
             >
               AI Hỗ trợ
-            </a>
+            </button>
           </nav>
 
           {/* Auth Buttons */}

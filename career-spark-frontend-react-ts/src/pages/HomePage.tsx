@@ -9,10 +9,14 @@ import {
   TestimonialsSection,
 } from '@/components/home';
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen">
-      <Header />
+      <Header currentPage="home" onNavigate={onNavigate} />
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
