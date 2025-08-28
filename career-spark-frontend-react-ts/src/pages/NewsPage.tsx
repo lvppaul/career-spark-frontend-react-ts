@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header } from '@/components/shared';
+import { Header, Footer } from '@/components/shared';
 
 interface NewsArticle {
   id: number;
@@ -349,6 +349,8 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

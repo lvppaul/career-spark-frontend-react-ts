@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header } from '@/components/shared';
+import { Header, Footer } from '@/components/shared';
 
 interface Post {
   id: number;
@@ -296,6 +296,8 @@ const ForumPage: React.FC<ForumPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

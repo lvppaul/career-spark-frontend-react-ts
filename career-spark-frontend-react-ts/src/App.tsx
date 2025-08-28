@@ -15,7 +15,7 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'login':
-        return <LoginPage />;
+        return <LoginPage onNavigate={setCurrentPage} />;
       case 'forum':
         return <ForumPage onNavigate={setCurrentPage} />;
       case 'news':

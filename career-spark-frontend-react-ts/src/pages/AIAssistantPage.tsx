@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header } from '@/components/shared';
+import { Header, Footer } from '@/components/shared';
 
 interface ChatMessage {
   id: number;
@@ -280,6 +280,8 @@ const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
