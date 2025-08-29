@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { notification } from 'antd';
 import { Header, Footer } from '@/components/shared';
 
 interface LoginPageProps {
@@ -21,23 +22,6 @@ interface LoginResponse {
   };
   token?: string;
 }
-
-interface FeatureItemProps {
-  icon: string;
-  text: string;
-  color: string;
-}
-
-const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, color }) => (
-  <div className="flex items-start space-x-3">
-    <div
-      className={`w-6 h-6 ${color} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}
-    >
-      <span className="text-white text-xs">{icon}</span>
-    </div>
-    <p className="text-gray-700 text-sm">{text}</p>
-  </div>
-);
 
 const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -94,18 +78,46 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         localStorage.setItem('user', JSON.stringify(response.user));
         localStorage.setItem('token', response.token || '');
 
-        // Show success message
-        alert(`Welcome back, ${response.user?.name || 'User'}!`);
+        // Show success notification with Ant Design
+        notification.success({
+          message: 'Đăng nhập thành công!',
+          description: `Chào mừng bạn trở lại, ${response.user?.name || 'User'}! Bạn đã đăng nhập thành công vào hệ thống CareerSpark.`,
+          placement: 'topRight',
+          duration: 4.5,
+          style: {
+            marginTop: 60,
+          },
+        });
 
-        // Navigate to home page
-        if (onNavigate) {
-          onNavigate('home');
-        }
+        // Navigate to home page after a short delay
+        setTimeout(() => {
+          if (onNavigate) {
+            onNavigate('home');
+          }
+        }, 1500);
       } else {
-        setError(response.message);
+        // Show error notification
+        notification.error({
+          message: 'Đăng nhập thất bại!',
+          description: response.message,
+          placement: 'topRight',
+          duration: 3,
+          style: {
+            marginTop: 60,
+          },
+        });
       }
     } catch (err) {
-      setError('An error occurred during login. Please try again.');
+      // Show error notification for network/system errors
+      notification.error({
+        message: 'Lỗi hệ thống!',
+        description: 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.',
+        placement: 'topRight',
+        duration: 3,
+        style: {
+          marginTop: 60,
+        },
+      });
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -137,7 +149,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         } else {
           resolve({
             success: false,
-            message: 'Invalid email or password',
+            message: 'Email hoặc mật khẩu không chính xác',
           });
         }
       }, 1000); // Simulate network delay
@@ -148,6 +160,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     setFormData({
       email: 'user@careerspark.com',
       password: 'password123',
+    });
+
+    // Show info notification about demo credentials
+    notification.info({
+      message: 'Tài khoản demo đã được điền!',
+      description: 'Nhấn "Sign In" để đăng nhập với tài khoản demo.',
+      placement: 'topRight',
+      duration: 3,
+      style: {
+        marginTop: 60,
+      },
     });
   };
 
@@ -332,57 +355,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                   Sign up here
                 </a>
               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Features */}
-        <div className="flex-1 bg-blue-50 p-8 flex flex-col justify-center">
-          <div className="max-w-md mx-auto">
-            {/* Logo */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="w-16 h-16 rounded-full overflow-hidden mr-3">
-                <img
-                  src="/only-logo-xx.jpg"
-                  alt="CareerSpark Logo"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="text-2xl font-bold text-blue-600">
-                CareerSpark
-              </span>
-            </div>
-
-            {/* Main Features Title */}
-            <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">
-              Main features
-            </h2>
-
-            {/* Features List */}
-            <div className="space-y-4">
-              <FeatureItem
-                icon="📊"
-                color="bg-blue-500"
-                text="The system offers career assessments to help identify strengths and interests."
-              />
-
-              <FeatureItem
-                icon="📈"
-                color="bg-green-500"
-                text="Progress tracking and goal setting to monitor user development."
-              />
-
-              <FeatureItem
-                icon="📅"
-                color="bg-purple-500"
-                text="Career event calendar with workshops, webinars, and networking sessions."
-              />
-
-              <FeatureItem
-                icon="🎯"
-                color="bg-orange-500"
-                text="Personalized career path suggestions based on user profiles and goals."
-              />
             </div>
           </div>
         </div>
