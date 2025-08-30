@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import { notification } from 'antd';
 import { Header, Footer } from '@/components/shared';
 
-interface LoginPageProps {
+interface SignUpPageProps {
   onNavigate?: (
     page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
   ) => void;
 }
 
-interface LoginFormData {
+interface SignUpFormData {
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-interface LoginResponse {
+interface SignUpResponse {
   success: boolean;
   message: string;
   user?: {
@@ -25,14 +26,33 @@ interface LoginResponse {
   token?: string;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
-  const [formData, setFormData] = useState<LoginFormData>({
+interface FeatureItemProps {
+  icon: string;
+  text: string;
+  color: string;
+}
+
+const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, color }) => (
+  <div className="flex items-start space-x-3">
+    <div
+      className={`w-6 h-6 ${color} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}
+    >
+      <span className="text-white text-xs">{icon}</span>
+    </div>
+    <p className="text-gray-700 text-sm">{text}</p>
+  </div>
+);
+
+const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
+  const [formData, setFormData] = useState<SignUpFormData>({
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Validation functions
   const validateEmail = (email: string): boolean => {
@@ -41,7 +61,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   };
 
   const validatePassword = (password: string): boolean => {
-    return password.length >= 8;
+    return (
+      password.length >= 8 &&
+      /[A-Z]/.test(password) &&
+      /[a-z]/.test(password) &&
+      /\d/.test(password) &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    );
+  };
+
+  const validateConfirmPassword = (
+    password: string,
+    confirmPassword: string
+  ): boolean => {
+    return password === confirmPassword && password.length > 0;
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +98,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     }
 
     if (!validatePassword(formData.password)) {
-      setError('Password must be at least 8 characters long');
+      setError('Password must meet all requirements');
+      return;
+    }
+
+    if (!validateConfirmPassword(formData.password, formData.confirmPassword)) {
+      setError('Passwords do not match');
       return;
     }
 
@@ -73,7 +111,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
     try {
       // Simulate API call (replace with actual API endpoint)
-      const response = await simulateLogin(formData);
+      const response = await simulateSignUp(formData);
 
       if (response.success) {
         // Store user data and token
@@ -82,8 +120,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
         // Show success notification with Ant Design
         notification.success({
-          message: 'Đăng nhập thành công!',
-          description: `Chào mừng bạn trở lại, ${response.user?.name || 'User'}! Bạn đã đăng nhập thành công vào hệ thống CareerSpark.`,
+          message: 'Đăng ký thành công!',
+          description: `Chào mừng bạn đến với CareerSpark, ${response.user?.name || 'User'}! Tài khoản của bạn đã được tạo thành công.`,
           placement: 'topRight',
           duration: 4.5,
           style: {
@@ -100,7 +138,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       } else {
         // Show error notification
         notification.error({
-          message: 'Đăng nhập thất bại!',
+          message: 'Đăng ký thất bại!',
           description: response.message,
           placement: 'topRight',
           duration: 3,
@@ -113,99 +151,59 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       // Show error notification for network/system errors
       notification.error({
         message: 'Lỗi hệ thống!',
-        description: 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.',
+        description: 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại sau.',
         placement: 'topRight',
         duration: 3,
         style: {
           marginTop: 60,
         },
       });
-      console.error('Login error:', err);
+      console.error('SignUp error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Simulate login API call (replace with real API)
-  const simulateLogin = async (
-    credentials: LoginFormData
-  ): Promise<LoginResponse> => {
+  // Simulate signup API call (replace with real API)
+  const simulateSignUp = async (
+    credentials: SignUpFormData
+  ): Promise<SignUpResponse> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Demo credentials
-        if (
-          credentials.email === 'user@careerspark.com' &&
-          credentials.password === 'password123'
-        ) {
+        // Check if email already exists (simulation)
+        if (credentials.email === 'existing@careerspark.com') {
           resolve({
-            success: true,
-            message: 'Login successful',
-            user: {
-              id: '1',
-              email: credentials.email,
-              name: 'John Doe',
-              role: 'user',
-            },
-            token: 'fake-jwt-token-12345',
+            success: false,
+            message: 'Email này đã được sử dụng. Vui lòng chọn email khác.',
           });
         } else {
           resolve({
-            success: false,
-            message: 'Email hoặc mật khẩu không chính xác',
+            success: true,
+            message: 'Account created successfully',
+            user: {
+              id: '2',
+              email: credentials.email,
+              name: credentials.email.split('@')[0],
+              role: 'user',
+            },
+            token: 'fake-jwt-token-67890',
           });
         }
       }, 1000); // Simulate network delay
     });
   };
 
-  const handleDemoLogin = () => {
-    setFormData({
-      email: 'user@careerspark.com',
-      password: 'password123',
-    });
-
-    // Show info notification about demo credentials
-    notification.info({
-      message: 'Tài khoản demo đã được điền!',
-      description: 'Nhấn "Sign In" để đăng nhập với tài khoản demo.',
-      placement: 'topRight',
-      duration: 3,
-      style: {
-        marginTop: 60,
-      },
-    });
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentPage="login" onNavigate={onNavigate} />
+      <Header currentPage="signup" onNavigate={onNavigate} />
 
       <div className="flex-1 bg-gradient-to-br from-blue-50 to-white flex">
-        {/* Left Side - Login Form */}
+        {/* Left Side - Sign Up Form */}
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="w-full max-w-md">
             <h1 className="text-4xl font-bold text-blue-600 mb-8 text-center">
-              Login
+              Sign up
             </h1>
-
-            {/* Demo Credentials */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-yellow-800 mb-2">
-                Demo Account:
-              </h3>
-              <p className="text-sm text-yellow-700 mb-2">
-                Email: user@careerspark.com
-                <br />
-                Password: password123
-              </p>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="text-xs bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition-colors"
-              >
-                Use Demo Credentials
-              </button>
-            </div>
 
             {/* Error Message */}
             {error && (
@@ -221,7 +219,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                   htmlFor="email"
                   className="block text-sm font-medium text-blue-600 mb-2"
                 >
-                  Email *
+                  Email
                 </label>
                 <input
                   type="email"
@@ -234,7 +232,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                       ? 'border-red-300 bg-red-50'
                       : 'border-gray-300'
                   }`}
-                  placeholder="Enter your email"
+                  placeholder=""
                   required
                   disabled={isLoading}
                 />
@@ -246,7 +244,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                   htmlFor="password"
                   className="block text-sm font-medium text-blue-600 mb-2"
                 >
-                  Password *
+                  Password
                 </label>
                 <div className="relative">
                   <input
@@ -262,7 +260,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                         ? 'border-red-300 bg-red-50'
                         : 'border-gray-300'
                     }`}
-                    placeholder="Enter your password"
+                    placeholder=""
                     required
                     disabled={isLoading}
                   />
@@ -273,6 +271,46 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                     disabled={isLoading}
                   >
                     {showPassword ? '🙈' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password Field */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-blue-600 mb-2"
+                >
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all pr-12 ${
+                      error &&
+                      !validateConfirmPassword(
+                        formData.password,
+                        formData.confirmPassword
+                      ) &&
+                      formData.confirmPassword
+                        ? 'border-red-300 bg-red-50'
+                        : 'border-gray-300'
+                    }`}
+                    placeholder=""
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    disabled={isLoading}
+                  >
+                    {showConfirmPassword ? '🙈' : '👁️'}
                   </button>
                 </div>
               </div>
@@ -318,43 +356,37 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input type="checkbox" className="mr-2 rounded" />
-                  <span className="text-sm text-gray-600">Remember me</span>
-                </label>
-                <a
-                  href="#"
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                >
-                  Forgot password?
-                </a>
-              </div>
-
-              {/* Sign In Button */}
+              {/* Sign Up Button */}
               <button
                 type="submit"
-                disabled={isLoading || !formData.email || !formData.password}
+                disabled={
+                  isLoading ||
+                  !formData.email ||
+                  !formData.password ||
+                  !formData.confirmPassword
+                }
                 className={`w-full font-semibold py-3 px-4 rounded-lg transition-colors duration-200 ${
-                  isLoading || !formData.email || !formData.password
+                  isLoading ||
+                  !formData.email ||
+                  !formData.password ||
+                  !formData.confirmPassword
                     ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                     : 'bg-blue-500 hover:bg-blue-600 text-white'
                 }`}
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? 'Creating Account...' : 'Sign up'}
               </button>
             </form>
 
-            {/* Sign Up Link */}
+            {/* Sign In Link */}
             <div className="text-center mt-6">
               <p className="text-gray-600">
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <button
-                  onClick={() => onNavigate && onNavigate('signup')}
+                  onClick={() => onNavigate && onNavigate('login')}
                   className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer bg-transparent border-none"
                 >
-                  Sign up here
+                  Sign in here
                 </button>
               </p>
             </div>
@@ -367,4 +399,4 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

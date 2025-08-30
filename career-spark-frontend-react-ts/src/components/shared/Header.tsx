@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 
 interface HeaderProps {
   currentPage?: string;
-  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+  onNavigate?: (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  ) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -13,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleNavigation = (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai'
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
   ) => {
     if (onNavigate) {
       onNavigate(page);
@@ -91,27 +93,33 @@ const Header: React.FC<HeaderProps> = ({
           {/* Auth Buttons */}
           <div className="flex items-center space-x-3">
             {!isLoggedIn ? (
-              // Trạng thái chưa đăng nhập - như ảnh đầu tiên
+              // Trạng thái chưa đăng nhập
               <>
                 <button
-                  onClick={() => setIsLoggedIn(true)}
+                  onClick={() => handleNavigation('login')}
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => handleNavigation('signup')}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Tài Khoản
+                  Sign Up
                 </button>
               </>
             ) : (
-              // Trạng thái đã đăng nhập - như ảnh thứ hai
+              // Trạng thái đã đăng nhập
               <>
                 <button className="flex items-center space-x-1 bg-blue-100 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors">
-                  <span>🔍</span>
-                  <span>Login</span>
+                  <span>�</span>
+                  <span>Profile</span>
                 </button>
                 <button
                   onClick={() => setIsLoggedIn(false)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
                 >
-                  Sign In
+                  Logout
                 </button>
               </>
             )}

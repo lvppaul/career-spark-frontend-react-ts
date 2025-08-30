@@ -16,7 +16,9 @@ interface NewsArticle {
 }
 
 interface NewsPageProps {
-  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+  onNavigate?: (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  ) => void;
 }
 
 const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {

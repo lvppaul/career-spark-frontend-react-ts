@@ -9,7 +9,9 @@ interface ChatMessage {
 }
 
 interface AIAssistantPageProps {
-  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+  onNavigate?: (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  ) => void;
 }
 
 const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ onNavigate }) => {

@@ -17,7 +17,9 @@ interface Post {
 }
 
 interface ForumPageProps {
-  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+  onNavigate?: (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  ) => void;
 }
 
 const ForumPage: React.FC<ForumPageProps> = ({ onNavigate }) => {

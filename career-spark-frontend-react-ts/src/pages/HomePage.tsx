@@ -10,7 +10,9 @@ import {
 } from '@/components/home';
 
 interface HomePageProps {
-  onNavigate?: (page: 'home' | 'login' | 'forum' | 'news' | 'ai') => void;
+  onNavigate?: (
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  ) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {

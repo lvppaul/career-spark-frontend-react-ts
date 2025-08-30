@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   HomePage,
   LoginPage,
+  SignUpPage,
   ForumPage,
   NewsPage,
   AIAssistantPage,
@@ -9,13 +10,15 @@ import {
 
 function App() {
   const [currentPage, setCurrentPage] = useState<
-    'home' | 'login' | 'forum' | 'news' | 'ai'
+    'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
   >('home');
 
   const renderPage = () => {
     switch (currentPage) {
       case 'login':
         return <LoginPage onNavigate={setCurrentPage} />;
+      case 'signup':
+        return <SignUpPage onNavigate={setCurrentPage} />;
       case 'forum':
         return <ForumPage onNavigate={setCurrentPage} />;
       case 'news':
