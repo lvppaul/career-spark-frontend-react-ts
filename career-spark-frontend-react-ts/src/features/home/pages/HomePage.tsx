@@ -1,5 +1,5 @@
 import React from 'react';
-import { Header, Footer } from '@/components/shared';
+import { Header, Footer } from '@/components';
 import {
   HeroSection,
   StatsSection,
@@ -7,7 +7,7 @@ import {
   CTASection,
   ProcessSection,
   TestimonialsSection,
-} from '@/components/home';
+} from '@/features/home/components';
 
 interface HomePageProps {
   onNavigate?: (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header, Footer } from '@/components/shared';
+import { Header, Footer } from '@/components';
 
 interface Post {
   id: number;

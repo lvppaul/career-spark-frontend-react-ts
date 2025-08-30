@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { notification } from 'antd';
-import { Header, Footer } from '@/components/shared';
+import { Header, Footer } from '@/components';
 
 interface SignUpPageProps {
   onNavigate?: (
@@ -25,23 +25,6 @@ interface SignUpResponse {
   };
   token?: string;
 }
-
-interface FeatureItemProps {
-  icon: string;
-  text: string;
-  color: string;
-}
-
-const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text, color }) => (
-  <div className="flex items-start space-x-3">
-    <div
-      className={`w-6 h-6 ${color} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}
-    >
-      <span className="text-white text-xs">{icon}</span>
-    </div>
-    <p className="text-gray-700 text-sm">{text}</p>
-  </div>
-);
 
 const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
   const [formData, setFormData] = useState<SignUpFormData>({

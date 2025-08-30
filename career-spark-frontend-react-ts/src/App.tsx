@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import {
-  HomePage,
-  LoginPage,
-  SignUpPage,
-  ForumPage,
-  NewsPage,
-  AIAssistantPage,
-} from './pages';
-
+import { HomePage } from './features/home/pages';
+import { LoginPage } from './features/auth/pages';
+import { SignUpPage } from './features/auth/pages';
+import { ForumPage } from './features/forum/pages';
+import { NewsPage } from './features/news/pages';
+import { AIAssistantPage } from './features/ai-assistant/pages';
 function App() {
   const [currentPage, setCurrentPage] = useState<
     'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
