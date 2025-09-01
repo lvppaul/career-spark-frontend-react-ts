@@ -1,35 +1,35 @@
 import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { HomePage } from './features/home/pages';
+import { LoginPage } from './features/auth/pages';
+import { SignUpPage } from './features/auth/pages';
+import { ForumPage } from './features/forum/pages';
+import { NewsPage } from './features/news/pages';
+import { AIAssistantPage } from './features/ai-assistant/pages';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState<
+    'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+  >('home');
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'login':
+        return <LoginPage onNavigate={setCurrentPage} />;
+      case 'signup':
+        return <SignUpPage onNavigate={setCurrentPage} />;
+      case 'forum':
+        return <ForumPage onNavigate={setCurrentPage} />;
+      case 'news':
+        return <NewsPage onNavigate={setCurrentPage} />;
+      case 'ai':
+        return <AIAssistantPage onNavigate={setCurrentPage} />;
+      case 'home':
+      default:
+        return <HomePage onNavigate={setCurrentPage} />;
+    }
+  };
+
+  return <div>{renderPage()}</div>;
 }
 
 export default App;
