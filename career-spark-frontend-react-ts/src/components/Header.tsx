@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useScrollVisibility } from '../hooks/useScrollDirection';
 
 interface HeaderProps {
   currentPage?: string;
@@ -14,6 +15,9 @@ const Header: React.FC<HeaderProps> = ({
   // State để quản lý trạng thái đăng nhập (có thể thay bằng context/redux sau)
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Hook để theo dõi scroll và hiển thị/ẩn header
+  const isHeaderVisible = useScrollVisibility(50);
+
   const handleNavigation = (
     page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
   ) => {
@@ -23,7 +27,11 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-white shadow-sm">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 bg-white shadow-sm transition-transform duration-300 ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
