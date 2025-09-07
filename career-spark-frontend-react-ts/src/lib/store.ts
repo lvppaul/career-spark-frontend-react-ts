@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // default: localStorage
-import authReducer from './features/auth/store/authSlice';
+import authReducer from '../features/auth/store/authSlice';
 
 const persistConfig = {
   key: 'root',
