@@ -11,7 +11,7 @@ import {
 
 interface HomePageProps {
   onNavigate?: (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
   ) => void;
 }
 

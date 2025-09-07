@@ -4,7 +4,7 @@ import { useScrollVisibility } from '../hooks/useScrollDirection';
 interface HeaderProps {
   currentPage?: string;
   onNavigate?: (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
   ) => void;
 }
 
@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({
   const isHeaderVisible = useScrollVisibility(50);
 
   const handleNavigation = (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
+    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
   ) => {
     if (onNavigate) {
       onNavigate(page);
@@ -95,6 +95,16 @@ const Header: React.FC<HeaderProps> = ({
               }`}
             >
               AI Hỗ trợ
+            </button>
+            <button
+              onClick={() => handleNavigation('admin')}
+              className={`transition-colors ${
+                currentPage === 'admin'
+                  ? 'text-purple-600 font-medium'
+                  : 'text-gray-600 hover:text-purple-600'
+              }`}
+            >
+              Admin
             </button>
           </nav>
 
