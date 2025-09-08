@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Header, Footer } from '@/components';
 
 interface Post {
   id: number;
@@ -22,7 +21,7 @@ interface ForumPageProps {
   ) => void;
 }
 
-const ForumPage: React.FC<ForumPageProps> = ({ onNavigate }) => {
+const ForumPage: React.FC<ForumPageProps> = ({ onNavigate: _ }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('Tất Cả');
 
@@ -93,8 +92,6 @@ const ForumPage: React.FC<ForumPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentPage="forum" onNavigate={onNavigate} />
-
       {/* Header section */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-8">
@@ -298,8 +295,6 @@ const ForumPage: React.FC<ForumPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

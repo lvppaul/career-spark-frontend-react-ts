@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Header, Footer } from '@/components';
 
 interface NewsArticle {
   id: number;
@@ -21,7 +20,7 @@ interface NewsPageProps {
   ) => void;
 }
 
-const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
+const NewsPage: React.FC<NewsPageProps> = ({ onNavigate: _ }) => {
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
 
   const featuredArticle: NewsArticle = {
@@ -129,8 +128,6 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentPage="news" onNavigate={onNavigate} />
-
       {/* Header section */}
       <div className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-8">
@@ -351,8 +348,6 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

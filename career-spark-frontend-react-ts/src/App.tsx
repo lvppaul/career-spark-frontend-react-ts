@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { HomePage } from './features/home/pages';
+import { MainLayout } from './layout';
+import { HomePage } from './features/user/home/pages';
 import { LoginPage } from './features/auth/pages';
 import { SignUpPage } from './features/auth/pages';
-import { ForumPage } from './features/forum/pages';
-import { NewsPage } from './features/news/pages';
-import { AIAssistantPage } from './features/ai-assistant/pages';
+import { ForumPage } from '@/features/user/forum/pages';
+import { NewsPage } from '@/features/user/news/pages';
+import { AIAssistantPage } from '@/features/user/ai-assistant/pages';
 import { AdminPage } from './features/admin/pages';
 
 function App() {
@@ -19,23 +20,35 @@ function App() {
   };
 
   const renderPage = () => {
-    switch (currentPage) {
-      case 'login':
-        return <LoginPage onNavigate={handleNavigation} />;
-      case 'signup':
-        return <SignUpPage onNavigate={handleNavigation} />;
-      case 'forum':
-        return <ForumPage onNavigate={handleNavigation} />;
-      case 'news':
-        return <NewsPage onNavigate={handleNavigation} />;
-      case 'ai':
-        return <AIAssistantPage onNavigate={handleNavigation} />;
-      case 'admin':
-        return <AdminPage onNavigate={handleNavigation} />;
-      case 'home':
-      default:
-        return <HomePage onNavigate={handleNavigation} />;
+    // Admin pages sử dụng layout riêng
+    if (currentPage === 'admin') {
+      return <AdminPage onNavigate={handleNavigation} />;
     }
+
+    // Các page khác sử dụng MainLayout
+    const content = (() => {
+      switch (currentPage) {
+        case 'login':
+          return <LoginPage onNavigate={handleNavigation} />;
+        case 'signup':
+          return <SignUpPage onNavigate={handleNavigation} />;
+        case 'forum':
+          return <ForumPage onNavigate={handleNavigation} />;
+        case 'news':
+          return <NewsPage onNavigate={handleNavigation} />;
+        case 'ai':
+          return <AIAssistantPage onNavigate={handleNavigation} />;
+        case 'home':
+        default:
+          return <HomePage onNavigate={handleNavigation} />;
+      }
+    })();
+
+    return (
+      <MainLayout currentPage={currentPage} onNavigate={handleNavigation}>
+        {content}
+      </MainLayout>
+    );
   };
 
   return <div>{renderPage()}</div>;

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { notification } from 'antd';
-import { Header, Footer } from '@/components';
 
 interface SignUpPageProps {
   onNavigate?: (
@@ -178,8 +177,6 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header currentPage="signup" onNavigate={onNavigate} />
-
       <div className="flex-1 bg-gradient-to-br from-blue-50 to-white flex">
         {/* Left Side - Sign Up Form */}
         <div className="flex-1 flex items-center justify-center px-8">
@@ -376,8 +373,6 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Header, Footer } from '@/components';
 import {
   HeroSection,
   StatsSection,
@@ -7,7 +6,7 @@ import {
   CTASection,
   ProcessSection,
   TestimonialsSection,
-} from '@/features/home/components';
+} from '@/features/user/home/components';
 
 interface HomePageProps {
   onNavigate?: (
@@ -15,17 +14,15 @@ interface HomePageProps {
   ) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
+const HomePage: React.FC<HomePageProps> = ({ onNavigate: _ }) => {
   return (
-    <div className="min-h-screen">
-      <Header currentPage="home" onNavigate={onNavigate} />
+    <div>
       <HeroSection />
       <StatsSection />
       <FeaturesSection />
       <ProcessSection />
       <TestimonialsSection />
       <CTASection />
-      <Footer />
     </div>
   );
 };
