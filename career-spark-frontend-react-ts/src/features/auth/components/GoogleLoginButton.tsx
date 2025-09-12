@@ -2,8 +2,8 @@
 import { useGoogleLogin } from '@react-oauth/google';
 
 interface GoogleLoginButtonProps {
-  onLoginSuccess?: (userInfo: any) => void;
-  onLoginError?: (error: any) => void;
+  onLoginSuccess?: (userInfo: unknown) => void;
+  onLoginError?: (error: unknown) => void;
 }
 
 export const GoogleLoginButton = ({

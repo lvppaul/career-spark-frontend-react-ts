@@ -8,13 +8,7 @@ import {
   TestimonialsSection,
 } from '@/features/user/home/components';
 
-interface HomePageProps {
-  onNavigate?: (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
-  ) => void;
-}
-
-const HomePage: React.FC<HomePageProps> = ({ onNavigate: _ }) => {
+const HomePage: React.FC = () => {
   return (
     <div>
       <HeroSection />

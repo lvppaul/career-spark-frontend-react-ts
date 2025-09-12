@@ -1,30 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useScrollVisibility } from '../hooks/useScrollDirection';
+import { useAuth } from '../features/auth/hooks/useAuth';
 
-interface HeaderProps {
-  currentPage?: string;
-  onNavigate?: (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
-  ) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({
-  currentPage = 'home',
-  onNavigate,
-}) => {
-  // State để quản lý trạng thái đăng nhập (có thể thay bằng context/redux sau)
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const Header: React.FC = () => {
+  const location = useLocation();
+  const { isAuthenticated, logout } = useAuth();
 
   // Hook để theo dõi scroll và hiển thị/ẩn header
   const isHeaderVisible = useScrollVisibility(50);
 
-  const handleNavigation = (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup' | 'admin'
-  ) => {
-    if (onNavigate) {
-      onNavigate(page);
-    }
+  const handleLogout = async () => {
+    await logout();
   };
+
+  const isActivePath = (path: string) => location.pathname === path;
 
   return (
     <header
@@ -50,96 +40,74 @@ const Header: React.FC<HeaderProps> = ({
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => handleNavigation('home')}
-              className={`font-medium transition-colors ${
-                currentPage === 'home'
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
+            <Link
+              to="/"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/') ? 'text-blue-600 font-medium' : ''
               }`}
             >
               Trang chủ
-            </button>
-            <a
-              href="#"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              Test RIASEC
-            </a>
-            <button
-              onClick={() => handleNavigation('forum')}
-              className={`transition-colors ${
-                currentPage === 'forum'
-                  ? 'text-blue-600 font-medium'
-                  : 'text-gray-600 hover:text-blue-600'
+            </Link>
+            <Link
+              to="/forum"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/forum') ? 'text-blue-600 font-medium' : ''
               }`}
             >
-              Diễn Đàn
-            </button>
-            <button
-              onClick={() => handleNavigation('news')}
-              className={`transition-colors ${
-                currentPage === 'news'
-                  ? 'text-blue-600 font-medium'
-                  : 'text-gray-600 hover:text-blue-600'
+              Diễn đàn
+            </Link>
+            <Link
+              to="/news"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/news') ? 'text-blue-600 font-medium' : ''
               }`}
             >
-              Tin Tức
-            </button>
-            <button
-              onClick={() => handleNavigation('ai')}
-              className={`transition-colors ${
-                currentPage === 'ai'
-                  ? 'text-blue-600 font-medium'
-                  : 'text-gray-600 hover:text-blue-600'
+              Tin tức
+            </Link>
+            <Link
+              to="/ai-assistant"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/ai-assistant') ? 'text-blue-600 font-medium' : ''
               }`}
             >
-              AI Hỗ trợ
-            </button>
-            <button
-              onClick={() => handleNavigation('admin')}
-              className={`transition-colors ${
-                currentPage === 'admin'
-                  ? 'text-purple-600 font-medium'
-                  : 'text-gray-600 hover:text-purple-600'
+              AI Assistant
+            </Link>
+            <Link
+              to="/admin"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/admin') ? 'text-blue-600 font-medium' : ''
               }`}
             >
               Admin
-            </button>
+            </Link>
           </nav>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-3">
-            {!isLoggedIn ? (
-              // Trạng thái chưa đăng nhập
+          <div className="flex items-center space-x-4">
+            {!isAuthenticated ? (
               <>
-                <button
-                  onClick={() => handleNavigation('login')}
-                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                <Link
+                  to="/auth/login"
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
-                  Login
-                </button>
-                <button
-                  onClick={() => handleNavigation('signup')}
+                  Đăng nhập
+                </Link>
+                <Link
+                  to="/auth/signup"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Sign Up
-                </button>
+                  Đăng ký
+                </Link>
               </>
             ) : (
-              // Trạng thái đã đăng nhập
-              <>
-                <button className="flex items-center space-x-1 bg-blue-100 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors">
-                  <span>�</span>
-                  <span>Profile</span>
-                </button>
+              <div className="relative">
                 <button
-                  onClick={() => setIsLoggedIn(false)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+                  onClick={handleLogout}
+                  className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
-                  Logout
+                  Đăng xuất
                 </button>
-              </>
+              </div>
             )}
           </div>
         </div>

@@ -16,13 +16,9 @@ import QuestionManagement from '../components/QuestionManagement';
 
 const { Sider } = Layout;
 
-interface AdminPageProps {
-  onNavigate: (page: string) => void;
-}
-
 type AdminView = 'dashboard' | 'user-management' | 'question-management';
 
-const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
+const AdminPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<AdminView>('dashboard');
   const [collapsed, setCollapsed] = useState(false);
 
@@ -48,8 +44,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
     setCurrentView(key as AdminView);
   };
 
-  const handleNavigate = (page: string) => {
-    setCurrentView(page as AdminView);
+  const handleNavigate = () => {
+    // TODO: Implement router-based navigation
   };
 
   const renderContent = () => {
@@ -57,9 +53,9 @@ const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
       case 'dashboard':
         return <AdminDashboard onNavigate={handleNavigate} />;
       case 'user-management':
-        return <UserManagement onNavigate={onNavigate} />;
+        return <UserManagement onNavigate={handleNavigate} />;
       case 'question-management':
-        return <QuestionManagement onNavigate={onNavigate} />;
+        return <QuestionManagement onNavigate={handleNavigate} />;
       default:
         return <AdminDashboard onNavigate={handleNavigate} />;
     }
@@ -67,7 +63,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ onNavigate }) => {
 
   return (
     <AdminLayout
-      header={<AdminHeader onNavigate={onNavigate} />}
+      header={<AdminHeader onNavigate={handleNavigate} />}
       sidebar={
         <Sider
           collapsible

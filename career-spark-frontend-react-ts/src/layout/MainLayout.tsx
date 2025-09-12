@@ -7,28 +7,10 @@ interface MainLayoutProps {
   onNavigate?: (page: string) => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({
-  children,
-  currentPage = 'home',
-  onNavigate,
-}) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header
-        currentPage={currentPage}
-        onNavigate={
-          onNavigate as (
-            page:
-              | 'home'
-              | 'login'
-              | 'forum'
-              | 'news'
-              | 'ai'
-              | 'signup'
-              | 'admin'
-          ) => void
-        }
-      />
+      <Header />
       <main className="pt-16">{children}</main>
 
       {/* Footer */}
