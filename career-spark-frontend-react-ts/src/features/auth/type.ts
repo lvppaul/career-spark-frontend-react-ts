@@ -21,16 +21,21 @@ export interface RefreshTokenRequest {
 
 // Logout Request
 export interface LogoutRequest {
+  accessToken: string;
   refreshToken: string;
 }
 
 // Auth Response (common for register, login, refreshToken)
 export interface AuthResponse {
   success: boolean;
-  accessToken: string | null;
-  refreshToken: string | null;
   message: string;
-  errors: string[] | null;
+  data?: {
+    accessToken: string;
+    refreshToken: string;
+  };
+  accessToken?: string | null; // Fallback for direct structure
+  refreshToken?: string | null; // Fallback for direct structure
+  errors?: string[] | null;
 }
 
 // User data from JWT token

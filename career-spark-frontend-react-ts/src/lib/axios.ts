@@ -68,15 +68,15 @@ api.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          // Import authService dynamically to avoid circular dependency
+          // Use authService for token refresh
           const { authService } = await import(
-            '../features/auth/api/authService'
+            '../features/auth/services/authService'
           );
           const response = await authService.refreshToken({ refreshToken });
 
           if (response.success && response.accessToken) {
             const newToken = response.accessToken;
-            localStorage.setItem('accessToken', newToken);
+
             api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
@@ -94,8 +94,8 @@ api.interceptors.response.use(
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('userData');
 
-          // Redirect to login page (you can customize this)
-          window.location.href = '/auth/login';
+          // Redirect to login page
+          window.location.href = '/login';
 
           return Promise.reject(refreshError);
         } finally {
@@ -112,7 +112,7 @@ api.interceptors.response.use(
         localStorage.removeItem('userData');
 
         // Redirect to login page
-        window.location.href = '/auth/login';
+        window.location.href = '/login';
 
         isRefreshing = false;
         return Promise.reject(error);

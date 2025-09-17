@@ -18,8 +18,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
-  const { login, isLoading, error, isAuthenticated, clearAuthError } =
-    useAuth();
+  const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -40,8 +39,8 @@ const LoginPage: React.FC = () => {
 
   // Clear errors when component mounts
   useEffect(() => {
-    clearAuthError();
-  }, [clearAuthError]);
+    clearError();
+  }, [clearError]);
 
   // Validation functions
   const validateEmail = (email: string): string | null => {
@@ -92,16 +91,14 @@ const LoginPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      const result = await login({
+      await login({
         email: formData.email.trim(),
         password: formData.password,
       });
 
-      if (result.meta.requestStatus === 'fulfilled') {
-        // Success - redirect will happen via useEffect
-        const redirectTo = state?.from?.pathname || '/';
-        navigate(redirectTo, { replace: true });
-      }
+      // Success - redirect will happen via useAuth hook
+      const redirectTo = state?.from?.pathname || '/';
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -128,7 +125,7 @@ const LoginPage: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             Hoặc{' '}
             <Link
-              to="/auth/signup"
+              to="/signup"
               state={state}
               className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-200"
             >

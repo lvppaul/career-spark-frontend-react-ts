@@ -42,8 +42,7 @@ const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
-  const { register, isLoading, error, isAuthenticated, clearAuthError } =
-    useAuth();
+  const { register, isLoading, error, isAuthenticated, clearError } = useAuth();
 
   const [formData, setFormData] = useState<SignUpFormData>({
     name: '',
@@ -73,8 +72,8 @@ const SignUpPage: React.FC = () => {
 
   // Clear errors when component mounts
   useEffect(() => {
-    clearAuthError();
-  }, [clearAuthError]);
+    clearError();
+  }, [clearError]);
 
   // Validation functions
   const validateName = (name: string): string | null => {
@@ -181,7 +180,7 @@ const SignUpPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      const result = await register({
+      await register({
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.replace(/\s/g, ''),
@@ -190,11 +189,9 @@ const SignUpPage: React.FC = () => {
         roleId: formData.roleId,
       });
 
-      if (result.meta.requestStatus === 'fulfilled') {
-        // Success - redirect will happen via useEffect
-        const redirectTo = state?.from?.pathname || '/';
-        navigate(redirectTo, { replace: true });
-      }
+      // Success - redirect will happen via useAuth hook
+      const redirectTo = state?.from?.pathname || '/';
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error('Registration failed:', error);
     }
@@ -226,7 +223,7 @@ const SignUpPage: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             Đã có tài khoản?{' '}
             <Link
-              to="/auth/login"
+              to="/login"
               state={state}
               className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-200"
             >

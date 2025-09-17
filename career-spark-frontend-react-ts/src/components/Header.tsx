@@ -87,13 +87,13 @@ const Header: React.FC = () => {
             {!isAuthenticated ? (
               <>
                 <Link
-                  to="/auth/login"
+                  to="/login"
                   className="text-gray-600 hover:text-blue-600 transition-colors"
                 >
                   Đăng nhập
                 </Link>
                 <Link
-                  to="/auth/signup"
+                  to="/signup"
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Đăng ký
