@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { tokenUtils } from '@/utils/tokenUtils';
 import { getDefaultRouteByRole } from '@/router/constants';
-import type { User, LoginRequest, RegisterRequest } from '../type';
+import type {
+  User,
+  LoginRequest,
+  RegisterRequest,
+  GoogleLoginRequest,
+} from '../type';
 
 interface UseAuthReturn {
   user: User | null;
@@ -11,6 +16,7 @@ interface UseAuthReturn {
   isLoading: boolean;
   error: string | null;
   login: (data: LoginRequest) => Promise<void>;
+  loginWithGoogle: (googleData: GoogleLoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -72,6 +78,35 @@ export const useAuth = (): UseAuthReturn => {
     } catch (err) {
       console.error('Login error in useAuth:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (
+    googleData: GoogleLoginRequest
+  ): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      console.log('useAuth: Google login attempt started...');
+      await authService.loginWithGoogle(googleData);
+
+      // Get user role and prepare redirect path
+      const userRole = tokenUtils.getUserRole();
+      const redirectPath = getDefaultRouteByRole(userRole);
+
+      console.log('useAuth: Google login successful, user role:', userRole);
+      console.log('useAuth: Setting pending redirect to:', redirectPath);
+
+      // Set pending redirect - the useEffect will handle navigation when auth state is updated
+      setPendingRedirect(redirectPath);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Google login failed';
       setError(errorMessage);
       throw err;
     } finally {
@@ -186,6 +221,7 @@ export const useAuth = (): UseAuthReturn => {
 
     // Actions
     login,
+    loginWithGoogle,
     register,
     logout,
     clearError,

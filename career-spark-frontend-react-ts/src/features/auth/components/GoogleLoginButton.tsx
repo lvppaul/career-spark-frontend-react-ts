@@ -5,6 +5,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 
 interface GoogleLoginButtonProps {
   onLoginSuccess?: (userInfo: unknown) => void;
+  onTokenReceived?: (tokenResponse: { access_token: string }) => void;
   onLoginError?: (error: unknown) => void;
   loading?: boolean;
   size?: 'small' | 'middle' | 'large';
@@ -40,6 +41,7 @@ const GoogleIcon: React.FC = () => (
 
 export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   onLoginSuccess,
+  onTokenReceived,
   onLoginError,
   loading = false,
   size = 'large',
@@ -48,7 +50,16 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        // Gọi API Google lấy thông tin user
+        console.log('Google token response:', tokenResponse);
+        console.log('Google access token:', tokenResponse.access_token);
+
+        // Call onTokenReceived if provided (for direct API integration)
+        if (onTokenReceived) {
+          onTokenReceived({ access_token: tokenResponse.access_token });
+          return;
+        }
+
+        // Fallback: Gọi API Google lấy thông tin user (legacy behavior)
         const res = await fetch(
           'https://www.googleapis.com/oauth2/v3/userinfo',
           {
@@ -63,6 +74,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
 
         onLoginSuccess?.(data);
       } catch (error) {
+        console.error('Google API call error:', error);
         onLoginError?.(error);
       }
     },
@@ -86,7 +98,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         borderRadius: '8px',
         borderColor: '#dadce0',
         backgroundColor: '#fff',
-        color: '#000',
+        color: '#000 !important',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -98,6 +110,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       onMouseEnter={(e) => {
         const target = e.currentTarget;
         target.style.backgroundColor = '#f8f9fa';
+        target.style.color = '#000';
         target.style.boxShadow =
           '0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15)';
         target.style.transform = 'translateY(-1px)';
@@ -105,6 +118,7 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
       onMouseLeave={(e) => {
         const target = e.currentTarget;
         target.style.backgroundColor = '#fff';
+        target.style.color = '#000';
         target.style.boxShadow =
           '0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15)';
         target.style.transform = 'translateY(0px)';

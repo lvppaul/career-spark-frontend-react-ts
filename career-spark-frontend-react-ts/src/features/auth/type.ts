@@ -14,6 +14,11 @@ export interface LoginRequest {
   password: string;
 }
 
+// Google Login Request
+export interface GoogleLoginRequest {
+  accessToken: string;
+}
+
 // Refresh Token Request
 export interface RefreshTokenRequest {
   refreshToken: string;

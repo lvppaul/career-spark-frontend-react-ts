@@ -18,7 +18,14 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState;
-  const { login, isLoading, error, isAuthenticated, clearError } = useAuth();
+  const {
+    login,
+    loginWithGoogle,
+    isLoading,
+    error,
+    isAuthenticated,
+    clearError,
+  } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
@@ -104,9 +111,30 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    // Google login logic will be implemented here
-    console.log('Google login clicked');
+  const handleGoogleLogin = async (googleTokenResponse: {
+    access_token: string;
+  }) => {
+    try {
+      console.log(
+        'LoginPage: Google login started with token response:',
+        googleTokenResponse
+      );
+
+      // Extract access token from Google response
+      const accessToken = googleTokenResponse.access_token;
+
+      if (!accessToken) {
+        throw new Error('No access token received from Google');
+      }
+
+      console.log('LoginPage: Calling loginWithGoogle with access token');
+      await loginWithGoogle({ accessToken });
+
+      console.log('LoginPage: Google login successful');
+    } catch (error) {
+      console.error('LoginPage: Google login failed:', error);
+      // Error is handled by useAuth hook
+    }
   };
 
   return (
@@ -283,7 +311,7 @@ const LoginPage: React.FC = () => {
           </div>
 
           {/* Google Login */}
-          <GoogleLoginButton onLoginSuccess={handleGoogleLogin} />
+          <GoogleLoginButton onTokenReceived={handleGoogleLogin} />
         </form>
 
         {/* Footer */}

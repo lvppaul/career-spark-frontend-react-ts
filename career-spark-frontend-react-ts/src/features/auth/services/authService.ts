@@ -3,6 +3,7 @@ import { tokenUtils } from '../../../utils/tokenUtils';
 import type {
   AuthResponse,
   LoginRequest,
+  GoogleLoginRequest,
   RegisterRequest,
   RefreshTokenRequest,
   LogoutRequest,
@@ -153,6 +154,67 @@ class AuthService {
 
       const errorMessage =
         error instanceof Error ? error.message : 'Login failed';
+      throw new Error(errorMessage);
+    }
+  }
+
+  // Google Login
+  async loginWithGoogle(googleData: GoogleLoginRequest): Promise<AuthResponse> {
+    try {
+      console.log('Google login request:', googleData);
+
+      const response = await api.post<AuthResponse>(
+        'Authentication/login-google',
+        googleData
+      );
+
+      const data = response.data;
+      console.log('Google login response data:', data);
+
+      // Handle both response structures: nested data or direct properties
+      const accessToken = data.data?.accessToken || data.accessToken;
+      const refreshToken = data.data?.refreshToken || data.refreshToken;
+
+      if (data.success && accessToken && refreshToken) {
+        console.log('Google login successful, storing tokens...');
+        // Store tokens
+        tokenUtils.setTokens(accessToken, refreshToken);
+
+        // Decode and store user data
+        const userData = tokenUtils.decodeToken(accessToken);
+        console.log('Decoded user data from Google login:', userData);
+        if (userData) {
+          tokenUtils.setUserData(userData);
+        }
+
+        // Notify listeners about auth state change
+        this.notifyListeners();
+        console.log('Google auth listeners notified');
+      } else {
+        console.log('Google login response indicates failure:', data);
+        console.log('Access token:', accessToken);
+        console.log('Refresh token:', refreshToken);
+      }
+
+      return data;
+    } catch (error: unknown) {
+      console.error('Google login error:', error);
+
+      // Handle axios error response
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response: { data: { message?: string; errors?: string[] } };
+        };
+        if (axiosError.response?.data) {
+          const errorData = axiosError.response.data;
+          const errorMessage =
+            errorData.message || errorData.errors?.[0] || 'Google login failed';
+          throw new Error(errorMessage);
+        }
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Google login failed';
       throw new Error(errorMessage);
     }
   }
