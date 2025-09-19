@@ -144,7 +144,7 @@ const LoginPage: React.FC = () => {
         <div className="text-center">
           <img
             className="mx-auto h-16 w-auto"
-            src="/logo_exe.jpg"
+            src="/only-logo-xx.jpg"
             alt="Career Spark"
           />
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">

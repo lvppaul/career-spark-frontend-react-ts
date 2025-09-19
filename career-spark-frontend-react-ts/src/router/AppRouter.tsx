@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import { MainLayout, AdminLayout, AdminSidebar } from '@/layout';
 import { HomePage } from '@/features/user/home/pages';
+import { TestPage } from '@/features/user/test-riasec';
 import { LoginPage, SignUpPage } from '@/features/auth/pages';
 import { ForumPage } from '@/features/user/forum/pages';
 import { NewsPage } from '@/features/user/news/pages';
@@ -68,6 +69,7 @@ const AppRouter: React.FC = () => {
           <Route path="forum" element={<ForumPage />} />
           <Route path="news" element={<NewsPage />} />
           <Route path="ai-assistant" element={<AIAssistantPage />} />
+          <Route path="test-riasec" element={<TestPage />} />
           {/* Add roadmap route when component is ready */}
           {/* <Route path="roadmap" element={<RoadmapPage />} /> */}
         </Route>

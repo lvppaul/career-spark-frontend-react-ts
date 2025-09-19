@@ -89,6 +89,14 @@ const Header: React.FC = () => {
               AI Assistant
             </Link>
             <Link
+              to="/test-riasec"
+              className={`text-gray-600 hover:text-blue-600 transition-colors ${
+                isActivePath('/test-riasec') ? 'text-blue-600 font-medium' : ''
+              }`}
+            >
+              Test RIASEC
+            </Link>
+            <Link
               to="/roadmap"
               className={`text-gray-600 hover:text-blue-600 transition-colors ${
                 isActivePath('/roadmap') ? 'text-blue-600 font-medium' : ''
