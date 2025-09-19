@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout } from 'antd';
-import AdminHeader from './AdminHeader';
+import AdminHeader from '../components/AdminHeader';
 
 const { Content, Sider } = Layout;
 
