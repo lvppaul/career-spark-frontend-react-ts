@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Card, Alert, Typography } from 'antd';
+import logoXX from '@/assets/images/only-logo-xx.jpg';
+import bgLogin from '@/assets/images/career_spark_login_background.png';
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -50,7 +53,7 @@ const SignUpPage: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    roleId: 1, // Default to User role
+    roleId: 2, // Fixed role (2)
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -180,6 +183,7 @@ const SignUpPage: React.FC = () => {
     if (!validateForm()) return;
 
     try {
+      // call hook register which will store tokens and set pending redirect
       await register({
         name: formData.name.trim(),
         email: formData.email.trim(),
@@ -188,12 +192,10 @@ const SignUpPage: React.FC = () => {
         confirmPassword: formData.confirmPassword,
         roleId: formData.roleId,
       });
-
-      // Success - redirect will happen via useAuth hook
-      const redirectTo = state?.from?.pathname || '/';
-      navigate(redirectTo, { replace: true });
-    } catch (error) {
-      console.error('Registration failed:', error);
+      // redirect is handled by useAuth when auth state updates
+    } catch (err: unknown) {
+      console.error('Registration failed:', err);
+      // error is set inside useAuth; no local state needed
     }
   };
 
@@ -208,317 +210,340 @@ const SignUpPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <img
-            className="mx-auto h-16 w-auto"
-            src="/logo_exe.jpg"
-            alt="Career Spark"
-          />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Tạo tài khoản mới
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Đã có tài khoản?{' '}
-            <Link
-              to="/login"
-              state={state}
-              className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-200"
-            >
-              đăng nhập tại đây
-            </Link>
-          </p>
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{
+        backgroundImage: `url(${bgLogin})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* dark overlay so content stays readable */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Fixed logo in top-left corner */}
+      <div className="fixed z-50 flex items-center gap-4 top-[40px] left-[70px] md:top-[70px]">
+        <img
+          src={logoXX}
+          alt="Career Spark"
+          className="rounded-full bg-white p-3 shadow-md"
+          style={{ height: 88, width: 88, objectFit: 'cover' }}
+        />
+        <div className="block">
+          <div className="text-white text-2xl font-extrabold">Career Spark</div>
         </div>
+      </div>
 
-        {/* Redirect message */}
-        {state?.message && (
-          <div className="rounded-md bg-yellow-50 p-4">
-            <p className="text-sm text-yellow-800">{state.message}</p>
-          </div>
-        )}
-
-        {/* Sign up form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Name field */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Họ và tên *
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  getFieldError('name') ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
-                placeholder="Nhập họ và tên của bạn"
-              />
-              {getFieldError('name') && (
-                <p className="mt-1 text-sm text-red-600">
-                  {getFieldError('name')}
-                </p>
-              )}
-            </div>
-
-            {/* Email field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email *
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  getFieldError('email') ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
-                placeholder="Nhập email của bạn"
-              />
-              {getFieldError('email') && (
-                <p className="mt-1 text-sm text-red-600">
-                  {getFieldError('email')}
-                </p>
-              )}
-            </div>
-
-            {/* Phone field */}
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Số điện thoại *
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                required
-                value={formData.phone}
-                onChange={handleInputChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  getFieldError('phone') ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
-                placeholder="Nhập số điện thoại"
-              />
-              {getFieldError('phone') && (
-                <p className="mt-1 text-sm text-red-600">
-                  {getFieldError('phone')}
-                </p>
-              )}
-            </div>
-
-            {/* Role selection */}
-            <div>
-              <label
-                htmlFor="roleId"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Loại tài khoản *
-              </label>
-              <select
-                id="roleId"
-                name="roleId"
-                value={formData.roleId}
-                onChange={handleInputChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              >
-                <option value={1}>Người dùng</option>
-                <option value={2}>Quản trị viên</option>
-              </select>
-            </div>
-
-            {/* Password field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Mật khẩu *
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    getFieldError('password')
-                      ? 'border-red-300'
-                      : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
-                  placeholder="Nhập mật khẩu"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-
-              {/* Password requirements */}
-              {formData.password && (
-                <div className="mt-2 space-y-1">
-                  {passwordRequirements.map((requirement, index) => {
-                    const isValid = requirement.test(formData.password);
-                    return (
-                      <div key={index} className="flex items-center space-x-2">
-                        {isValid ? (
-                          <CheckCircleIcon className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircleIcon className="h-4 w-4 text-red-400" />
-                        )}
-                        <span
-                          className={`text-xs ${isValid ? 'text-green-600' : 'text-gray-500'}`}
-                        >
-                          {requirement.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {getFieldError('password') && (
-                <p className="mt-1 text-sm text-red-600">
-                  {getFieldError('password')}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password field */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Xác nhận mật khẩu *
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    getFieldError('confirmPassword')
-                      ? 'border-red-300'
-                      : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
-                  placeholder="Nhập lại mật khẩu"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-              {getFieldError('confirmPassword') && (
-                <p className="mt-1 text-sm text-red-600">
-                  {getFieldError('confirmPassword')}
-                </p>
-              )}
-            </div>
+      {/* Centered signup card on the shared background */}
+      <div
+        className="w-full flex items-center justify-center p-6"
+        style={{ position: 'relative', zIndex: 10 }}
+      >
+        <Card
+          style={{
+            width: 'min(640px, 92vw)',
+            borderRadius: 12,
+            padding: 28,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+          }}
+          bodyStyle={{ padding: 24 }}
+        >
+          <div className="text-center mb-6">
+            <Typography.Title level={2} style={{ margin: '8px 0' }}>
+              Tạo tài khoản mới
+            </Typography.Title>
+            <Typography.Text type="secondary">
+              Đăng ký để tiếp tục
+            </Typography.Text>
           </div>
 
-          {/* Error message */}
+          {state?.message && (
+            <Alert type="warning" message={state.message} className="mb-4" />
+          )}
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
+            <Alert type="error" message={String(error)} className="mb-4" />
           )}
 
-          {/* Submit button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading || !isPasswordStrong}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Đang tạo tài khoản...
-                </div>
-              ) : (
-                'Tạo tài khoản'
-              )}
-            </button>
-          </div>
-        </form>
+          <form className="mt-2 space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {/* Name field */}
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Họ và tên *
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
+                    getFieldError('name') ? 'border-red-300' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
+                  placeholder="Nhập họ và tên của bạn"
+                />
+                {getFieldError('name') && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError('name')}
+                  </p>
+                )}
+              </div>
 
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Bằng việc tạo tài khoản, bạn đồng ý với{' '}
-            <Link to="/terms" className="text-indigo-600 hover:text-indigo-500">
-              Điều khoản sử dụng
-            </Link>{' '}
-            và{' '}
-            <Link
-              to="/privacy"
-              className="text-indigo-600 hover:text-indigo-500"
-            >
-              Chính sách bảo mật
-            </Link>{' '}
-            của chúng tôi.
-          </p>
-        </div>
+              {/* Email field */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
+                    getFieldError('email')
+                      ? 'border-red-300'
+                      : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
+                  placeholder="Nhập email của bạn"
+                />
+                {getFieldError('email') && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError('email')}
+                  </p>
+                )}
+              </div>
+
+              {/* Phone field */}
+              <div>
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Số điện thoại *
+                </label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
+                    getFieldError('phone')
+                      ? 'border-red-300'
+                      : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
+                  placeholder="Nhập số điện thoại"
+                />
+                {getFieldError('phone') && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError('phone')}
+                  </p>
+                )}
+              </div>
+
+              {/* Role is fixed (hidden) */}
+              <input
+                type="hidden"
+                name="roleId"
+                value={String(formData.roleId)}
+              />
+
+              {/* Password field */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Mật khẩu *
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
+                      getFieldError('password')
+                        ? 'border-red-300'
+                        : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
+                    placeholder="Nhập mật khẩu"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Password requirements */}
+                {formData.password && (
+                  <div className="mt-2 space-y-1">
+                    {passwordRequirements.map((requirement, index) => {
+                      const isValid = requirement.test(formData.password);
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
+                          {isValid ? (
+                            <CheckCircleIcon className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <XCircleIcon className="h-4 w-4 text-red-400" />
+                          )}
+                          <span
+                            className={`text-xs ${isValid ? 'text-green-600' : 'text-gray-500'}`}
+                          >
+                            {requirement.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {getFieldError('password') && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError('password')}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password field */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Xác nhận mật khẩu *
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
+                      getFieldError('confirmPassword')
+                        ? 'border-red-300'
+                        : 'border-gray-300'
+                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm transition duration-200`}
+                    placeholder="Nhập lại mật khẩu"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
+                {getFieldError('confirmPassword') && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {getFieldError('confirmPassword')}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading || !isPasswordStrong}
+                className="cs-primary-btn group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Đang tạo tài khoản...
+                  </div>
+                ) : (
+                  'Tạo tài khoản'
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div style={{ marginTop: 12, textAlign: 'center' }}>
+            <Typography.Text type="secondary">
+              Đã có tài khoản?{' '}
+            </Typography.Text>
+            <Link to="/login" state={state} className="ml-1">
+              Đăng nhập
+            </Link>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center mt-4">
+            <p className="text-xs text-gray-500">
+              Bằng việc tạo tài khoản, bạn đồng ý với{' '}
+              <Link
+                to="/terms"
+                className="text-indigo-600 hover:text-indigo-500"
+              >
+                Điều khoản sử dụng
+              </Link>{' '}
+              và{' '}
+              <Link
+                to="/privacy"
+                className="text-indigo-600 hover:text-indigo-500"
+              >
+                Chính sách bảo mật
+              </Link>{' '}
+              của chúng tôi.
+            </p>
+          </div>
+        </Card>
       </div>
     </div>
   );
