@@ -25,13 +25,6 @@ const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ onNavigate: _ }) => {
     },
   ]);
 
-  const todayStats = [
-    { label: 'Câu hỏi đã xử lý', value: '1,234', color: 'text-blue-600' },
-    { label: 'Người dùng hài lòng', value: '98%', color: 'text-green-600' },
-    { label: 'Thời gian phản hồi', value: '<1s', color: 'text-purple-600' },
-    { label: 'Độ chính xác', value: '95%', color: 'text-orange-600' },
-  ];
-
   const quickQuestions = [
     'Tôi nên chọn nghề gì phù hợp với bản thân?',
     'Làm thế nào để phát triển kỹ năng lập trình?',
@@ -121,21 +114,6 @@ const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ onNavigate: _ }) => {
               Trợ lý AI thông minh giúp bạn định hướng nghề nghiệp, phát triển
               kỹ năng và đạt được mục tiêu sự nghiệp
             </p>
-          </div>
-
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            {todayStats.map((stat, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 rounded-lg p-4 text-center"
-              >
-                <div className={`text-2xl font-bold ${stat.color}`}>
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

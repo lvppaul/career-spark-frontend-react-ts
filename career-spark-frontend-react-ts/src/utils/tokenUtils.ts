@@ -29,9 +29,16 @@ export const tokenUtils = {
 
   // Clear all tokens and user data
   clearAll: (): void => {
-    localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(TOKEN_KEYS.USER_DATA);
+    // Remove all items from localStorage to ensure complete cleanup on logout
+    // This will remove tokens, user data and any other persisted app data
+    try {
+      localStorage.clear();
+    } catch {
+      // Fallback: remove known token keys if clear fails
+      localStorage.removeItem(TOKEN_KEYS.ACCESS_TOKEN);
+      localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN);
+      localStorage.removeItem(TOKEN_KEYS.USER_DATA);
+    }
   },
 
   // Decode JWT token to get user data
