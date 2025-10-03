@@ -12,8 +12,8 @@ export function useRiasecHistory(sessionId?: number, userId?: number) {
     setIsLoading(true);
     setError(null);
     try {
-      const history = await service.getTestHistory(sessionId, userId);
-      setData(history);
+      const detail = await service.getTestDetail(sessionId, userId);
+      setData(detail);
     } catch (err: unknown) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {

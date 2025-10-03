@@ -81,3 +81,21 @@ export interface SessionSummary {
 }
 
 export type SessionList = SessionSummary[];
+
+// Roadmap types returned by /Test/{sessionId}/roadmap/{userId}
+export interface RoadmapMilestone {
+  title: string;
+  description?: string;
+  suggestedCourseUrl?: string;
+}
+
+export interface RoadmapPath {
+  title: string;
+  description?: string;
+  milestones?: RoadmapMilestone[];
+}
+
+export interface RoadmapResponse {
+  careerField: string;
+  paths: RoadmapPath[];
+}

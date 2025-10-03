@@ -25,7 +25,8 @@ const service = {
   getRiasecQuestions,
   startTest,
   submitTest,
-  getTestHistory,
+  getTestDetail,
+  getRoadmap,
   getSessionsByUser,
 };
 
@@ -58,8 +59,8 @@ export async function startTest(
   }
 }
 
-// Get test history by sessionId and userId
-export async function getTestHistory(
+// Get test detail by sessionId and userId
+export async function getTestDetail(
   sessionId: number,
   userId: number
 ): Promise<import('../types').TestHistory> {
@@ -68,6 +69,31 @@ export async function getTestHistory(
     return response.data as import('../types').TestHistory;
   } catch (error: unknown) {
     console.error('Failed to fetch RIASEC test history', error);
+    throw error;
+  }
+}
+
+// Get roadmap for a session and user
+export async function getRoadmap(
+  sessionId: number,
+  userId: number
+): Promise<{
+  careerField: string;
+  paths: Array<{
+    title: string;
+    description?: string;
+    milestones?: Array<{
+      title: string;
+      description?: string;
+      suggestedCourseUrl?: string;
+    }>;
+  }>;
+}> {
+  try {
+    const response = await api.get(`/Test/${sessionId}/roadmap/${userId}`);
+    return response.data;
+  } catch (error: unknown) {
+    console.error('Failed to fetch roadmap', error);
     throw error;
   }
 }

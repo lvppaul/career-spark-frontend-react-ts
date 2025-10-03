@@ -10,6 +10,7 @@ import { MainLayout, AdminLayout, AdminSidebar } from '@/layout';
 import { HomePage } from '@/features/user/home/pages';
 import { TestPage } from '@/features/user/test-riasec';
 import RiasecResultPage from '@/features/user/test-riasec/pages/RiasecResultPage';
+import RiasecHistoryPage from '@/features/user/test-riasec/pages/RiasecHistoryPage';
 import { LoginPage, SignUpPage } from '@/features/auth/pages';
 import { ForumPage } from '@/features/user/forum/pages';
 import { NewsPage } from '@/features/user/news/pages';
@@ -72,6 +73,7 @@ const AppRouter: React.FC = () => {
           <Route path="ai-assistant" element={<AIAssistantPage />} />
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
+          <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
           {/* Add roadmap route when component is ready */}
           {/* <Route path="roadmap" element={<RoadmapPage />} /> */}
         </Route>
