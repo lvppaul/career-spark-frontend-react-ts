@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Normalize base URL from env (ensure no trailing slash)
+const rawBase = (import.meta.env.VITE_API_URL as string) || '';
+const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL as string, // URL gốc backend
+  baseURL: normalizedBase, // URL gốc backend (no trailing slash)
   timeout: 10000, // Increased timeout for better reliability
   headers: {
     'Content-Type': 'application/json',
