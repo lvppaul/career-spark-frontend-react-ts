@@ -78,19 +78,27 @@ export async function getRoadmap(
   sessionId: number,
   userId: number
 ): Promise<{
-  careerField: string;
+  careerField: { id: number; name: string; description?: string };
   paths: Array<{
+    id: number;
     title: string;
     description?: string;
-    milestones?: Array<{
+    careerFieldId: number;
+    roadmaps: Array<{
+      id: number;
+      stepOrder: number;
       title: string;
       description?: string;
+      skillFocus?: string;
+      difficultyLevel?: string;
+      durationWeeks?: number;
       suggestedCourseUrl?: string;
     }>;
   }>;
 }> {
   try {
     const response = await api.get(`/Test/${sessionId}/roadmap/${userId}`);
+    // Backend now returns careerField object and paths with roadmaps array
     return response.data;
   } catch (error: unknown) {
     console.error('Failed to fetch roadmap', error);
