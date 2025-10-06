@@ -1,25 +1,57 @@
-import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
-import type { RootState } from '@/lib/store';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { getDefaultRouteByRole } from './constants';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'user';
+  requiredRole?: 'User' | 'Admin';
+  redirectTo?: string;
 }
 
-const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
-  const { isAuthenticated, role } = useSelector(
-    (state: RootState) => state.auth
-  );
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRole,
+  redirectTo = '/login',
+}) => {
+  const { isAuthenticated, hasRole, isLoading, getUserRole } = useAuth();
+  const location = useLocation();
 
+  console.log('ProtectedRoute check:', {
+    currentPath: location.pathname,
+    isAuthenticated,
+    requiredRole,
+    isLoading,
+    userRole: getUserRole(),
+  });
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    console.log('ProtectedRoute: showing loading spinner');
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Check if user is authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    console.log('ProtectedRoute: not authenticated, redirecting to login');
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  if (requiredRole && role !== requiredRole) {
-    return <Navigate to="/unauthorized" replace />;
+  // Check if user has required role
+  if (requiredRole && !hasRole(requiredRole)) {
+    // Instead of unauthorized page, redirect to appropriate dashboard based on current role
+    const currentUserRole = getUserRole();
+    const redirectPath = getDefaultRouteByRole(currentUserRole);
+    console.log('ProtectedRoute: role mismatch, redirecting to:', redirectPath);
+    return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
 
+  console.log('ProtectedRoute: access granted, rendering children');
+  // User is authenticated and has required role
   return <>{children}</>;
 };
 

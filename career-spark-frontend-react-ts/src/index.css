@@ -1,1 +1,24 @@
 @import 'tailwindcss';
+
+/* Project primary color overrides for buttons (Career Spark indigo) */
+:root {
+  --cs-primary: #4f46e5; /* indigo-600 */
+  --cs-primary-dark: #4338ca; /* indigo-700 */
+}
+
+/* Apply to Ant Design primary buttons */
+.ant-btn-primary,
+.cs-primary-btn {
+  background-color: var(--cs-primary) !important;
+  border-color: var(--cs-primary) !important;
+  color: #fff !important;
+}
+.ant-btn-primary:hover,
+.cs-primary-btn:hover {
+  background-color: var(--cs-primary-dark) !important;
+  border-color: var(--cs-primary-dark) !important;
+}
+.ant-btn-primary:disabled,
+.cs-primary-btn:disabled {
+  opacity: 0.5;
+}
