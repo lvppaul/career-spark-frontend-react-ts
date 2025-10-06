@@ -62,16 +62,19 @@ const AppRouter: React.FC = () => {
           {/* <Route path="settings" element={<AdminSettingsPage />} /> */}
         </Route>
 
-        {/* Protected User Routes */}
+        {/* Public Home route (accessible without login) */}
+        <Route path="/" element={<UserLayoutWrapper />}>
+          <Route index element={<HomePage />} />
+        </Route>
+
+        {/* Protected User Routes (other pages require authentication) */}
         <Route
-          path="/"
           element={
             <ProtectedRoute requiredRole="User">
               <UserLayoutWrapper />
             </ProtectedRoute>
           }
         >
-          <Route index element={<HomePage />} />
           <Route path="forum" element={<ForumPage />} />
           <Route path="news" element={<NewsPage />} />
           <Route path="ai-assistant" element={<AIAssistantPage />} />
