@@ -1,44 +1,32 @@
-import { Card, Typography, Row, Col, Tag, Button } from 'antd';
-import { useEffect, useMemo, useState } from 'react';
+import {
+  Card,
+  Typography,
+  Row,
+  Col,
+  Tag,
+  Button,
+  Drawer,
+  Divider,
+  Timeline,
+  Empty,
+  Spin,
+} from 'antd';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { SubmitResponse } from '../types';
+import type { SubmitResponse, RoadmapPath } from '../types';
+import { useRiasecRoadmap } from '../hooks/useRiasecRoadmap';
+import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
 
-const JOBS_BY_TYPE: Record<string, Array<{ title: string; company: string }>> = {
-  Realistic: [
-    { title: 'Kỹ sư cơ khí', company: 'Công ty A' },
-    { title: 'Công nhân vận hành máy', company: 'Nhà máy B' },
-  ],
-  Investigative: [
-    { title: 'Kỹ sư dữ liệu', company: 'Startup X' },
-    { title: 'Nhà phân tích nghiên cứu', company: 'Viện Y' },
-  ],
-  Artistic: [
-    { title: 'Thiết kế đồ họa', company: 'Studio C' },
-    { title: 'Nhà thiết kế UX', company: 'Agency D' },
-  ],
-  Social: [
-    { title: 'Nhân viên tư vấn', company: 'Tổ chức E' },
-    { title: 'Giáo viên', company: 'Trường F' },
-  ],
-  Enterprising: [
-    { title: 'Nhân viên bán hàng', company: 'Công ty G' },
-    { title: 'Quản lý sản phẩm', company: 'Công ty H' },
-  ],
-  Conventional: [
-    { title: 'Kế toán', company: 'Công ty I' },
-    { title: 'Nhân viên văn phòng', company: 'Công ty J' },
-  ],
-};
-
 export default function MatchingJobsPage() {
   const location = useLocation();
-  const navigate = useNavigate();
+  useNavigate();
   const state = (location.state as { result?: SubmitResponse } | null) || {};
 
-  const [result, setResult] = useState<SubmitResponse | null>(state.result ?? null);
-
+  const [result, setResult] = useState<SubmitResponse | null>(
+    state.result ?? null
+  );
   useEffect(() => {
     if (!result) {
       try {
@@ -50,63 +38,133 @@ export default function MatchingJobsPage() {
     }
   }, [result]);
 
-  const topType = useMemo(() => {
-    if (!result) return null;
-    // derive top type similarly to result page logic
-    const keys: Array<{ key: string; short: string }> = [
-      { key: 'Realistic', short: 'r' },
-      { key: 'Investigative', short: 'i' },
-      { key: 'Artistic', short: 'a' },
-      { key: 'Social', short: 's' },
-      { key: 'Enterprising', short: 'e' },
-      { key: 'Conventional', short: 'c' },
-    ];
-    const scores = keys.map((k) => ({ key: k.key, value: Number((result as any)[k.short] ?? 0) }));
-    scores.sort((a, b) => b.value - a.value);
-    return scores[0]?.key ?? null;
-  }, [result]);
+  // sessionId saved when starting test
+  const [sessionId, setSessionId] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('riasecSession');
+      if (raw) {
+        const s = JSON.parse(raw) as { sessionId?: number };
+        if (s?.sessionId) setSessionId(Number(s.sessionId));
+      }
+    } catch (e) {
+      console.warn('Failed to load riasecSession', e);
+    }
+  }, []);
 
-  if (!result) {
-    return (
-      <div className="p-6">
-        <Card>
-          <Text>Không có kết quả. Vui lòng hoàn thành bài test trước.</Text>
-          <div style={{ marginTop: 12 }}>
-            <Button type="primary" onClick={() => navigate('/test-riasec')}>
-              Làm bài
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const user = tokenUtils.getUserData();
+  const userId = user?.sub ? Number(user.sub) : undefined;
 
-  const jobs = topType ? JOBS_BY_TYPE[topType] ?? [] : [];
+  const { data, uiData, isLoading, error } = useRiasecRoadmap(
+    sessionId,
+    userId
+  );
+
+  const paths = uiData?.paths ?? [];
+
+  const [selectedPath, setSelectedPath] = useState<RoadmapPath | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <div className="p-6">
-      <Title level={3}>Công việc phù hợp</Title>
-      <Text type="secondary">Dựa trên kết quả bài test của bạn</Text>
+      <Title level={3}>Các ngành nghề / lộ trình gợi ý</Title>
+      <Text type="secondary">Chọn một ngành nghề để xem lộ trình chi tiết</Text>
 
       <div style={{ marginTop: 16 }}>
-        <Tag color="blue">Lĩnh vực gợi ý: {topType}</Tag>
+        <Tag color="blue">Lĩnh vực: {data?.careerField?.name ?? '—'}</Tag>
       </div>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
-        {jobs.map((j, idx) => (
-          <Col xs={24} sm={12} md={8} key={idx}>
-            <Card hoverable>
-              <Title level={5}>{j.title}</Title>
-              <Text type="secondary">{j.company}</Text>
-              <div style={{ marginTop: 12 }}>
-                <Button type="primary" onClick={() => navigate('/test-riasec/result')}>
-                  Xem chi tiết lộ trình
-                </Button>
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      <div style={{ marginTop: 12 }}>
+        {isLoading ? (
+          <Spin />
+        ) : paths.length === 0 ? (
+          <Empty
+            description={error ? 'Không có dữ liệu' : 'Không tìm thấy lộ trình'}
+          />
+        ) : (
+          <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+            {paths.map((p) => (
+              <Col xs={24} sm={12} md={8} key={p.id}>
+                <Card
+                  hoverable
+                  onClick={() => {
+                    setSelectedPath(p);
+                    setDrawerOpen(true);
+                  }}
+                >
+                  <Title level={5}>{p.title}</Title>
+                  <Text type="secondary">{p.description}</Text>
+                  <div style={{ marginTop: 12 }}>
+                    <Button type="link">Xem lộ trình →</Button>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+      </div>
+
+      <Drawer
+        title={selectedPath?.title}
+        placement="right"
+        width={720}
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+      >
+        {selectedPath ? (
+          <div>
+            <Text type="secondary">{selectedPath.description}</Text>
+            <Divider />
+            <div style={{ marginBottom: 12 }}>
+              <Text strong>{selectedPath.roadmaps?.length ?? 0} bước</Text>
+            </div>
+
+            <Timeline mode="left">
+              {selectedPath.roadmaps?.map((step) => (
+                <Timeline.Item
+                  key={step.id}
+                  label={`${step.durationWeeks ?? '-'} tuần`}
+                >
+                  <div
+                    style={{ padding: 12, background: '#fff', borderRadius: 8 }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <Title level={5} style={{ margin: 0 }}>
+                        {step.title}
+                      </Title>
+                      <Tag>{step.difficultyLevel ?? '—'}</Tag>
+                    </div>
+                    <div style={{ marginTop: 8 }}>{step.description}</div>
+                    {step.skillFocus && (
+                      <div style={{ marginTop: 8 }}>
+                        <Tag color="cyan">{step.skillFocus}</Tag>
+                      </div>
+                    )}
+                    {step.suggestedCourseUrl && (
+                      <div style={{ marginTop: 8 }}>
+                        <a
+                          href={step.suggestedCourseUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Khóa học gợi ý
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </div>
+        ) : (
+          <div>Không có chi tiết</div>
+        )}
+      </Drawer>
     </div>
   );
 }

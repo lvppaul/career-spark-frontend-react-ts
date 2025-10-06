@@ -83,19 +83,39 @@ export interface SessionSummary {
 export type SessionList = SessionSummary[];
 
 // Roadmap types returned by /Test/{sessionId}/roadmap/{userId}
-export interface RoadmapMilestone {
+// New roadmap types (backend returned shape)
+export interface RoadmapStep {
+  id: number;
+  stepOrder: number;
   title: string;
   description?: string;
+  skillFocus?: string;
+  difficultyLevel?: string;
+  durationWeeks?: number;
   suggestedCourseUrl?: string;
 }
 
 export interface RoadmapPath {
+  id: number;
   title: string;
   description?: string;
-  milestones?: RoadmapMilestone[];
+  careerFieldId: number;
+  roadmaps: RoadmapStep[];
+}
+
+export interface CareerField {
+  id: number;
+  name: string;
+  description?: string;
 }
 
 export interface RoadmapResponse {
-  careerField: string;
+  careerField: CareerField;
   paths: RoadmapPath[];
+}
+
+// UI-friendly mapped shape (same as response but explicit types)
+export interface RoadmapUI {
+  careerField: CareerField;
+  paths: RoadmapPath[]; // paths already include ordered roadmaps
 }
