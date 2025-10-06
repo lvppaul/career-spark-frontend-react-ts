@@ -78,11 +78,21 @@ const AppRouter: React.FC = () => {
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
           <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
-          <Route path="matching-jobs" element={
-            <Suspense fallback={<div>Đang tải...</div>}>
-              {React.createElement(React.lazy(() => import('@/features/user/test-riasec/pages/MatchingJobsPage')))}
-            </Suspense>
-          } />
+          <Route
+            path="matching-jobs"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                {React.createElement(
+                  React.lazy(
+                    () =>
+                      import(
+                        '@/features/user/test-riasec/pages/MatchingJobsPage'
+                      )
+                  )
+                )}
+              </Suspense>
+            }
+          />
           <Route
             path="purchase"
             element={
