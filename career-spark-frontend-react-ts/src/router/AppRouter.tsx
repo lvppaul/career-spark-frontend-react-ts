@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -31,6 +31,10 @@ const AdminLayoutWrapper: React.FC = () => (
   <AdminLayout sidebar={<AdminSidebar />}>
     <Outlet />
   </AdminLayout>
+);
+
+const PurchasePage = React.lazy(
+  () => import('@/features/user/test-riasec/pages/PurchasePage')
 );
 
 const AppRouter: React.FC = () => {
@@ -74,6 +78,19 @@ const AppRouter: React.FC = () => {
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
           <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
+          <Route path="matching-jobs" element={
+            <Suspense fallback={<div>Đang tải...</div>}>
+              {React.createElement(React.lazy(() => import('@/features/user/test-riasec/pages/MatchingJobsPage')))}
+            </Suspense>
+          } />
+          <Route
+            path="purchase"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <PurchasePage />
+              </Suspense>
+            }
+          />
           {/* Add roadmap route when component is ready */}
           {/* <Route path="roadmap" element={<RoadmapPage />} /> */}
         </Route>

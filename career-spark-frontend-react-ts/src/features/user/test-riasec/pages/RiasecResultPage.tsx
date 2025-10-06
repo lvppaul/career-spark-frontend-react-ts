@@ -4,19 +4,25 @@ import {
   Typography,
   Row,
   Col,
-  Progress,
   Divider,
-  List,
+  // List removed (not used on result page)
   Button,
   Space,
   Empty,
   Tag,
+  Modal,
+  message,
 } from 'antd';
 import type { SubmitResponse } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined, RedoOutlined } from '@ant-design/icons';
-import { Drawer, Spin, Alert } from 'antd';
-import { useRiasecRoadmap } from '../hooks/useRiasecRoadmap';
+import {
+  ArrowLeftOutlined,
+  RedoOutlined,
+  CrownOutlined,
+  RocketOutlined,
+  UnlockOutlined,
+} from '@ant-design/icons';
+// roadmap details removed from result page
 import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
@@ -75,16 +81,18 @@ export default function RiasecResultPage() {
     state?.result ?? null
   );
 
-  const [showRoadmap, setShowRoadmap] = useState(false);
-  const [sessionId, setSessionId] = useState<number | null>(null);
-  const [userId, setUserId] = useState<number | null>(null);
+  // roadmap details removed from result page
+  const [showPackages, setShowPackages] = useState(false);
+  // session/user id state removed (roadmap not shown here)
 
   // Persist result to localStorage so page can be reloaded/bookmarked
   useEffect(() => {
     if (state?.result) {
       try {
         localStorage.setItem('riasecResult', JSON.stringify(state.result));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to persist riasecResult to localStorage', e);
+      }
     } else {
       // try load from storage if no state provided
       try {
@@ -97,28 +105,9 @@ export default function RiasecResultPage() {
     }
   }, [state]);
 
-  // derive sessionId and userId from local storage / token
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('riasecSession');
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (s && s.sessionId) setSessionId(Number(s.sessionId));
-      }
-    } catch (e) {
-      // ignore
-    }
+  // roadmap not displayed on this page so we don't derive session/user here
 
-    const user = tokenUtils.getUserData();
-    if (user && user.sub) setUserId(Number(user.sub));
-  }, []);
-
-  // hook to fetch roadmap (will only fetch when both ids present)
-  const {
-    data: roadmap,
-    isLoading: roadmapLoading,
-    error: roadmapError,
-  } = useRiasecRoadmap(sessionId ?? undefined, userId ?? undefined);
+  // roadmap removed from result page
 
   const scores = useMemo(() => {
     if (!result)
@@ -204,9 +193,6 @@ export default function RiasecResultPage() {
               <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
                 Quay lại
               </Button>
-              <Button onClick={() => setShowRoadmap(true)}>
-                Xem chi tiết lộ trình
-              </Button>
               <Button
                 icon={<RedoOutlined />}
                 onClick={() => {
@@ -224,44 +210,7 @@ export default function RiasecResultPage() {
         <Divider />
 
         <Row gutter={24}>
-          <Col xs={24} md={10}>
-            <Card bordered={false}>
-              <Title level={5}>Xếp hạng chính</Title>
-              <div className="mb-4">
-                {topTypes.map((t) => (
-                  <Tag key={t.key} color="blue" style={{ marginBottom: 8 }}>
-                    {t.label}
-                  </Tag>
-                ))}
-              </div>
-
-              <Title level={5}>Điểm theo nhóm</Title>
-              <div>
-                {scores.map((s) => (
-                  <div key={s.key} className="mb-3">
-                    <Text strong>{s.label}</Text>
-                    <div className="flex items-center">
-                      <div style={{ flex: 1, marginRight: 12 }}>
-                        <Progress
-                          showInfo={false}
-                          percent={Number(s.normalized.toFixed(1))}
-                          status="active"
-                        />
-                      </div>
-                      <div style={{ width: 110, textAlign: 'right' }}>
-                        <Text>{Number(s.normalized.toFixed(1))}%</Text>
-                        <div
-                          style={{ fontSize: 12, color: '#888' }}
-                        >{`(${s.value})`}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={14}>
+          <Col xs={24} md={12}>
             <Card bordered={false} className="mb-4">
               <Title level={5}>Nhận xét tính cách</Title>
               {topTypes.length > 0 ? (
@@ -270,100 +219,197 @@ export default function RiasecResultPage() {
                     {PERSONALITY_DESCRIPTIONS[topTypes[0].key].title}
                   </Text>
                   <p>{PERSONALITY_DESCRIPTIONS[topTypes[0].key].description}</p>
+                  <div className="mt-4">
+                    <Text>Phù hợp với lĩnh vực: </Text>
+                    <Tag color="blue">{topTypes[0].label}</Tag>
+                  </div>
+
+                  <div className="mt-4">
+                    <Button
+                      type="primary"
+                      onClick={() => setShowPackages(true)}
+                    >
+                      Các công việc phù hợp
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Text>Không có dữ liệu để nhận xét.</Text>
               )}
             </Card>
-            <Card bordered={false}>
-              <Title level={5}>Gợi ý ngành nghề</Title>
-              {result.suggestedCareerFields &&
-              result.suggestedCareerFields.length > 0 ? (
-                <List
-                  itemLayout="vertical"
-                  dataSource={result.suggestedCareerFields}
-                  renderItem={(item) => (
-                    <List.Item key={item.id}>
-                      <List.Item.Meta
-                        title={<Text strong>{item.name}</Text>}
-                        description={<div>{item.description}</div>}
-                      />
-                      {/* details field not present in SuggestedCareerField; render description above */}
-                    </List.Item>
-                  )}
-                />
-              ) : (
-                <Text>Không có gợi ý ngành nghề.</Text>
-              )}
-              {/* Button to show detailed roadmap for the strongest field */}
-              <div className="mt-4">
-                <Button type="primary" onClick={() => setShowRoadmap(true)}>
-                  Xem chi tiết lộ trình
-                </Button>
-              </div>
-            </Card>
           </Col>
         </Row>
-      </Card>
-      <Drawer
-        title="Chi tiết lộ trình phát triển"
-        open={showRoadmap}
-        onClose={() => setShowRoadmap(false)}
-        width={720}
-      >
-        {roadmapLoading && (
-          <div className="flex justify-center py-8">
-            <Spin />
-          </div>
-        )}
 
-        {roadmapError && (
-          <Alert
-            type="error"
-            message="Không thể tải lộ trình"
-            description={String(roadmapError.message)}
-          />
-        )}
-
-        {roadmap && (
-          <div>
-            <div className="mb-4">
-              <Text strong>Ngành mạnh: </Text>
-              <Text>{roadmap.careerField}</Text>
-            </div>
-
-            {roadmap.paths.map((p, idx) => (
-              <Card key={idx} size="small" className="mb-4">
-                <Title level={5}>{p.title}</Title>
-                {p.description && <Text>{p.description}</Text>}
-
-                {p.milestones && p.milestones.length > 0 && (
-                  <List
-                    dataSource={p.milestones}
-                    renderItem={(m) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={<Text strong>{m.title}</Text>}
-                          description={<div>{m.description}</div>}
-                        />
-                        {m.suggestedCourseUrl && (
-                          <a
-                            href={m.suggestedCourseUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Khóa học gợi ý
-                          </a>
-                        )}
-                      </List.Item>
-                    )}
-                  />
-                )}
+        <Modal
+          title="Gói công việc phù hợp"
+          open={showPackages}
+          onCancel={() => setShowPackages(false)}
+          footer={null}
+          width={1000}
+        >
+          <Row gutter={[24, 24]}>
+            {/* Monthly */}
+            <Col xs={24} sm={8}>
+              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
+                <div
+                  style={{
+                    borderRadius: 12,
+                    padding: 18,
+                    color: '#fff',
+                    background:
+                      'linear-gradient(135deg,#56ccf2 0%,#2f80ed 100%)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>Tháng</div>
+                  <div style={{ marginTop: 8 }}>
+                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
+                    tiết cho từng công việc
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <RocketOutlined style={{ fontSize: 36 }} />
+                  </div>
+                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
+                    39.000₫ / tháng
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        const user = tokenUtils.getUserData();
+                        if (!user || !user.sub) {
+                          message.warning('Vui lòng đăng nhập để mua gói');
+                          return;
+                        }
+                        setShowPackages(false);
+                        navigate('/purchase', {
+                          state: { billingCycle: 'monthly' },
+                        });
+                      }}
+                    >
+                      Mua
+                    </Button>
+                  </div>
+                </div>
+                <Divider />
+                <ul className="list-disc pl-5">
+                  <li>Xem kết quả chi tiết</li>
+                  <li>Danh sách công việc phù hợp</li>
+                  <li>Lộ trình chi tiết cho từng công việc</li>
+                </ul>
               </Card>
-            ))}
-          </div>
-        )}
-      </Drawer>
+            </Col>
+
+            {/* Quarterly */}
+            <Col xs={24} sm={8}>
+              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
+                <div
+                  style={{
+                    borderRadius: 12,
+                    padding: 18,
+                    color: '#fff',
+                    background:
+                      'linear-gradient(135deg,#8e2de2 0%,#4a00e0 100%)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>Quý</div>
+                  <div style={{ marginTop: 8 }}>
+                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
+                    tiết cho từng công việc
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <CrownOutlined style={{ fontSize: 36 }} />
+                  </div>
+                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
+                    99.000₫ / quý
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        const user = tokenUtils.getUserData();
+                        if (!user || !user.sub) {
+                          message.warning('Vui lòng đăng nhập để mua gói');
+                          return;
+                        }
+                        setShowPackages(false);
+                        navigate('/purchase', {
+                          state: { billingCycle: 'quarterly' },
+                        });
+                      }}
+                    >
+                      Mua
+                    </Button>
+                  </div>
+                </div>
+                <Divider />
+                <ul className="list-disc pl-5">
+                  <li>Xem kết quả chi tiết</li>
+                  <li>Danh sách công việc phù hợp</li>
+                  <li>Lộ trình chi tiết cho từng công việc</li>
+                </ul>
+              </Card>
+            </Col>
+
+            {/* Yearly */}
+            <Col xs={24} sm={8}>
+              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
+                <div
+                  style={{
+                    borderRadius: 12,
+                    padding: 18,
+                    color: '#ffd66b',
+                    background: 'linear-gradient(135deg,#222 0%,#111 100%)',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255,214,107,0.12)',
+                  }}
+                >
+                  <div style={{ fontSize: 22, fontWeight: 700 }}>Năm</div>
+                  <div style={{ marginTop: 8 }}>
+                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
+                    tiết cho từng công việc
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <UnlockOutlined
+                      style={{ fontSize: 36, color: '#ffd66b' }}
+                    />
+                  </div>
+                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
+                    289.000₫ / năm
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      type="primary"
+                      danger
+                      onClick={() => {
+                        const user = tokenUtils.getUserData();
+                        if (!user || !user.sub) {
+                          message.warning('Vui lòng đăng nhập để mua gói');
+                          return;
+                        }
+                        setShowPackages(false);
+                        navigate('/purchase', {
+                          state: { billingCycle: 'yearly' },
+                        });
+                      }}
+                    >
+                      Mua
+                    </Button>
+                  </div>
+                </div>
+                <Divider />
+                <ul className="list-disc pl-5">
+                  <li>Xem kết quả chi tiết</li>
+                  <li>Danh sách công việc phù hợp</li>
+                  <li>Lộ trình chi tiết cho từng công việc</li>
+                </ul>
+              </Card>
+            </Col>
+          </Row>
+        </Modal>
+      </Card>
+      {/* Roadmap removed from this page */}
     </div>
   );
 }

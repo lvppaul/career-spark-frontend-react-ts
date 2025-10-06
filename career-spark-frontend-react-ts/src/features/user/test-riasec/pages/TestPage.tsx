@@ -58,6 +58,8 @@ export default function TestPage() {
   const currentType = TYPE_ORDER[currentTypeIndex];
   const currentQuestions = grouped.get(currentType.key) ?? [];
 
+  const selectedCount = Object.values(selected).filter(Boolean).length;
+
   function toggleQuestion(id: number) {
     setSelected((s) => ({ ...s, [id]: !s[id] }));
   }
@@ -71,6 +73,14 @@ export default function TestPage() {
   }
 
   async function handleSubmit() {
+    // prevent submit when no selections
+    if (Object.values(selected).filter(Boolean).length === 0) {
+      message.warning(
+        'Bạn chưa chọn câu nào. Vui lòng chọn ít nhất một câu trước khi nộp.'
+      );
+      return;
+    }
+
     setSubmitting(true);
     try {
       // Build answers array for all questions: unchecked -> false
@@ -120,6 +130,13 @@ export default function TestPage() {
   function onConfirmSubmit() {
     // Close modal and run submit
     setConfirmOpen(false);
+    // double-check selections just before submitting
+    if (selectedCount === 0) {
+      message.warning(
+        'Bạn chưa chọn câu nào. Vui lòng chọn ít nhất một câu trước khi nộp.'
+      );
+      return;
+    }
     void handleSubmit();
   }
 
@@ -200,8 +217,22 @@ export default function TestPage() {
               <>
                 <Button
                   type="primary"
-                  onClick={() => setConfirmOpen(true)}
+                  onClick={() => {
+                    if (selectedCount === 0) {
+                      message.warning(
+                        'Bạn chưa chọn câu nào. Vui lòng chọn ít nhất một câu trước khi nộp.'
+                      );
+                      return;
+                    }
+                    setConfirmOpen(true);
+                  }}
                   loading={submitting || isStarting || isSubmittingRemote}
+                  disabled={
+                    selectedCount === 0 ||
+                    submitting ||
+                    isStarting ||
+                    isSubmittingRemote
+                  }
                 >
                   Nộp bài
                 </Button>
