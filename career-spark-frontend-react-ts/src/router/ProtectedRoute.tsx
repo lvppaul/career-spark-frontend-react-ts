@@ -37,6 +37,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check if user is authenticated
   if (!isAuthenticated) {
+    // Allow anonymous users to view the public homepage (/) even when the
+    // surrounding route uses ProtectedRoute for user routes. This makes the
+    // app default page accessible without login while keeping other nested
+    // user routes protected.
+    if (requiredRole === 'User' && location.pathname === '/') {
+      console.log(
+        'ProtectedRoute: not authenticated but on /, allowing public Home page'
+      );
+      return <>{children}</>;
+    }
+
     console.log('ProtectedRoute: not authenticated, redirecting to login');
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }

@@ -1,291 +1,297 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import {
+  Row,
+  Col,
+  Card,
+  Avatar,
+  Input,
+  Button,
+  List,
+  Tag,
+  Space,
+  Typography,
+  Divider,
+} from 'antd';
+import {
+  RobotOutlined,
+  UserOutlined,
+  SendOutlined,
+  BulbOutlined,
+} from '@ant-design/icons';
 
-interface ChatMessage {
+const { TextArea } = Input;
+const { Title, Text } = Typography;
+
+type ChatMessage = {
   id: number;
-  type: 'user' | 'ai';
+  role: 'user' | 'ai';
   content: string;
   timestamp: string;
-}
+};
 
-interface AIAssistantPageProps {
-  onNavigate?: (
-    page: 'home' | 'login' | 'forum' | 'news' | 'ai' | 'signup'
-  ) => void;
-}
+const examplePrompts = [
+  'Tôi nên chọn nghề gì dựa trên kỹ năng và sở thích?',
+  'Roadmap để trở thành Data Scientist là gì?',
+  'Lời khuyên để chuẩn bị phỏng vấn vị trí front-end',
+];
 
-const AIAssistantPage: React.FC<AIAssistantPageProps> = ({ onNavigate: _ }) => {
-  const [userInput, setUserInput] = useState('');
+export default function AIAssistantPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
-      type: 'ai',
+      role: 'ai',
       content:
-        'Chào bạn! Tôi là AI Assistant của CareerSpark, chuyên tư vấn về nghề nghiệp và phát triển sự nghiệp. Tôi có thể giúp bạn với:\n\n• Tư vấn lựa chọn nghề nghiệp\n• Hướng dẫn phát triển kỹ năng\n• Tìm kiếm cơ hội việc làm\n• Lập kế hoạch sự nghiệp\n• Chuẩn bị phỏng vấn\n\nBạn có câu hỏi gì về sự nghiệp không?',
-      timestamp: '10:30',
+        'Chào bạn! Mình là AI Assistant của CareerSpark — mình có thể giúp tư vấn nghề nghiệp, lập roadmap học tập và chuẩn bị phỏng vấn. Hãy bắt đầu bằng cách hỏi một câu nhé.',
+      timestamp: new Date().toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     },
   ]);
 
-  const quickQuestions = [
-    'Tôi nên chọn nghề gì phù hợp với bản thân?',
-    'Làm thế nào để phát triển kỹ năng lập trình?',
-    'Cách chuẩn bị cho buổi phỏng vấn xin việc?',
-    'Roadmap để trở thành Data Scientist?',
-    'Tôi có nên chuyển nghề không?',
-    'Kỹ năng soft skill quan trọng nào cần có?',
-  ];
+  const [input, setInput] = useState('');
+  const listRef = useRef<HTMLDivElement | null>(null);
 
-  const handleSendMessage = () => {
-    if (userInput.trim() === '') return;
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
+    }, 100);
+  };
 
-    const newUserMessage: ChatMessage = {
-      id: messages.length + 1,
-      type: 'user',
-      content: userInput,
+  const send = (text?: string) => {
+    const content = text ?? input;
+    if (!content || !content.trim()) return;
+
+    const userMsg: ChatMessage = {
+      id: Date.now(),
+      role: 'user',
+      content,
       timestamp: new Date().toLocaleTimeString('vi-VN', {
         hour: '2-digit',
         minute: '2-digit',
       }),
     };
+    setMessages((m) => [...m, userMsg]);
+    setInput('');
+    scrollToBottom();
 
-    setMessages((prev) => [...prev, newUserMessage]);
-
-    // Simulate AI response
+    // Simulate AI response (placeholder)
     setTimeout(() => {
-      const aiResponse: ChatMessage = {
-        id: messages.length + 2,
-        type: 'ai',
-        content: getAIResponse(userInput),
+      const aiMsg: ChatMessage = {
+        id: Date.now() + 1,
+        role: 'ai',
+        content: generateAiReply(content),
         timestamp: new Date().toLocaleTimeString('vi-VN', {
           hour: '2-digit',
           minute: '2-digit',
         }),
       };
-      setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
-
-    setUserInput('');
+      setMessages((m) => [...m, aiMsg]);
+      scrollToBottom();
+    }, 800);
   };
 
-  const getAIResponse = (input: string): string => {
-    const responses = {
-      nghề: 'Để chọn nghề phù hợp, bạn nên làm bài test RIASEC để hiểu rõ tính cách và sở thích của mình. Sau đó, tham khảo các roadmap nghề nghiệp trên CareerSpark để có định hướng cụ thể.',
-      kỹ: 'Phát triển kỹ năng đòi hỏi sự kiên trì và luyện tập thường xuyên. Tôi khuyên bạn nên:\n\n1. Xác định kỹ năng cần thiết cho mục tiêu nghề nghiệp\n2. Lập kế hoạch học tập cụ thể\n3. Thực hành thông qua dự án thực tế\n4. Tham gia cộng đồng để học hỏi kinh nghiệm',
-      phỏng:
-        'Chuẩn bị phỏng vấn hiệu quả:\n\n• Nghiên cứu kỹ về công ty và vị trí ứng tuyển\n• Chuẩn bị câu trả lời cho các câu hỏi phổ biến\n• Luyện tập trình bày bản thân và kinh nghiệm\n• Chuẩn bị câu hỏi để hỏi lại nhà tuyển dụng\n• Dress code phù hợp và đến đúng giờ',
-      default:
-        'Đây là một câu hỏi rất hay! Tôi khuyên bạn nên làm bài test RIASEC trước để hiểu rõ hơn về bản thân. Sau đó, hãy tham khảo các roadmap nghề nghiệp và tham gia diễn đàn để trao đổi với cộng đồng.',
-    };
-
-    const lowerInput = input.toLowerCase();
-    if (lowerInput.includes('nghề')) return responses.nghề;
-    if (lowerInput.includes('kỹ') || lowerInput.includes('skill'))
-      return responses.kỹ;
-    if (lowerInput.includes('phỏng vấn')) return responses.phỏng;
-    return responses.default;
-  };
-
-  const handleQuickQuestion = (question: string) => {
-    setUserInput(question);
-    handleSendMessage();
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+  const generateAiReply = (text: string) => {
+    const t = text.toLowerCase();
+    if (t.includes('đường') || t.includes('roadmap') || t.includes('lộ trình'))
+      return 'Đây là roadmap gợi ý: bắt đầu từ cơ bản, học công cụ, thực hành qua dự án, rồi xây dựng portfolio.';
+    if (t.includes('phỏng') || t.includes('phỏng vấn'))
+      return 'Chuẩn bị phỏng vấn: luyện câu hỏi hành vi, kỹ thuật và demo project.';
+    if (t.includes('nghề'))
+      return 'Để chọn nghề, bạn nên cân nhắc sở thích, kỹ năng và thị trường lao động. Hãy thử làm test RIASEC.';
+    return 'Mình đang phân tích... (đây là phản hồi demo). Bạn muốn rõ hơn về điểm nào?';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header section */}
-      <div className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-                <span className="text-white text-xl font-bold">AI</span>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                AI Career Assistant
-              </h1>
-            </div>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Trợ lý AI thông minh giúp bạn định hướng nghề nghiệp, phát triển
-              kỹ năng và đạt được mục tiêu sự nghiệp
-            </p>
-          </div>
+    <div style={{ padding: 24, background: '#f6fbff', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <Title level={2} style={{ margin: 0 }}>
+            Chuyên gia nghề nghiệp (AI Assistant)
+          </Title>
+          <Text type="secondary">
+            Hỏi & nhận gợi ý về nghề nghiệp, lộ trình và kỹ năng
+          </Text>
         </div>
-      </div>
 
-      {/* Main Chat Interface */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-            <div className="flex h-96">
-              {/* Chat Area */}
-              <div className="flex-1 flex flex-col">
-                {/* Chat Header */}
-                <div className="bg-gray-50 px-6 py-4 border-b">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">AI</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800">
-                        AI Assistant
-                      </h3>
-                      <p className="text-sm text-green-600">● Online</p>
-                    </div>
-                  </div>
+        <Row gutter={16}>
+          <Col xs={24} md={16}>
+            <Card style={{ borderRadius: 12 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  marginBottom: 12,
+                }}
+              >
+                <Avatar
+                  size={48}
+                  icon={<RobotOutlined />}
+                  style={{ background: '#096dd9' }}
+                />
+                <div>
+                  <Title level={4} style={{ margin: 0 }}>
+                    AI Career Assistant
+                  </Title>
+                  <Text type="success">● Online</Text>
                 </div>
+              </div>
 
-                {/* Messages */}
-                <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.type === 'user'
-                          ? 'justify-end'
-                          : 'justify-start'
-                      }`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.type === 'user'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-line">
-                          {message.content}
-                        </p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            message.type === 'user'
-                              ? 'text-blue-100'
-                              : 'text-gray-500'
-                          }`}
+              {/* Flex column layout: messages (scrollable) + input row + wrapped example prompts */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '60vh',
+                }}
+              >
+                <div
+                  ref={listRef}
+                  style={{ flex: 1, overflowY: 'auto', padding: 8 }}
+                >
+                  <List
+                    dataSource={messages}
+                    renderItem={(msg) => (
+                      <List.Item style={{ display: 'block', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            gap: 12,
+                            alignItems: 'flex-start',
+                            justifyContent:
+                              msg.role === 'user' ? 'flex-end' : 'flex-start',
+                          }}
                         >
-                          {message.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                          {msg.role === 'ai' && (
+                            <Avatar icon={<RobotOutlined />} />
+                          )}
+                          <div style={{ maxWidth: '78%' }}>
+                            <div
+                              style={{
+                                background:
+                                  msg.role === 'user' ? '#096dd9' : '#fff',
+                                color: msg.role === 'user' ? '#fff' : '#111',
+                                padding: 12,
+                                borderRadius: 8,
+                                boxShadow: '0 1px 6px rgba(16,24,40,0.06)',
+                              }}
+                            >
+                              <div style={{ whiteSpace: 'pre-line' }}>
+                                {msg.content}
+                              </div>
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 6,
+                                textAlign:
+                                  msg.role === 'user' ? 'right' : 'left',
+                              }}
+                            >
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {msg.timestamp}
+                              </Text>
+                            </div>
+                          </div>
+                          {msg.role === 'user' && (
+                            <Avatar icon={<UserOutlined />} />
+                          )}
+                        </div>
+                      </List.Item>
+                    )}
+                  />
                 </div>
 
-                {/* Input */}
-                <div className="p-4 border-t bg-gray-50">
-                  <div className="flex gap-2">
-                    <input
+                <Divider style={{ margin: '12px 0' }} />
+
+                <div
+                  style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}
+                >
+                  <TextArea
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        send();
+                      }
+                    }}
+                    placeholder="Nhập câu hỏi hoặc mô tả mục tiêu nghề nghiệp của bạn..."
+                    autoSize={{ minRows: 2, maxRows: 6 }}
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={() => send()}
+                  >
+                    Gửi
+                  </Button>
+                </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {examplePrompts.map((p) => (
+                      <Tag
+                        key={p}
+                        color="blue"
+                        onClick={() => send(p)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <BulbOutlined /> {p}
+                      </Tag>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Card style={{ borderRadius: 12 }}>
+                <Title level={5}>Câu hỏi gợi ý</Title>
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {[
+                    'Tôi nên chọn nghề gì?',
+                    'Roadmap cho Data Scientist?',
+                    'Chuẩn bị phỏng vấn như thế nào?',
+                  ].map((q) => (
+                    <Button
+                      key={q}
                       type="text"
-                      value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Nhập câu hỏi về nghề nghiệp..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      onClick={() => send(q)}
+                      style={{ textAlign: 'left', padding: 8, borderRadius: 8 }}
                     >
-                      Gửi
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Questions Sidebar */}
-              <div className="w-80 bg-gray-50 border-l p-4">
-                <h4 className="font-semibold text-gray-800 mb-4">
-                  Câu hỏi gợi ý
-                </h4>
-                <div className="space-y-2">
-                  {quickQuestions.map((question, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleQuickQuestion(question)}
-                      className="w-full text-left p-3 bg-white rounded-lg hover:bg-blue-50 transition-colors text-sm text-gray-700 hover:text-blue-600"
-                    >
-                      {question}
-                    </button>
+                      {q}
+                    </Button>
                   ))}
-                </div>
+                </Space>
+              </Card>
 
-                {/* Features */}
-                <div className="mt-6">
-                  <h4 className="font-semibold text-gray-800 mb-3">
-                    Tính năng hỗ trợ
-                  </h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      Tư vấn nghề nghiệp 24/7
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      Phân tích RIASEC
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      Roadmap cá nhân hóa
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      Chuẩn bị phỏng vấn
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+              <Card style={{ borderRadius: 12 }}>
+                <Title level={5}>Tính năng</Title>
+                <Space direction="vertical">
+                  <Text>• Tư vấn nghề nghiệp 24/7</Text>
+                  <Text>• Roadmap & khóa học gợi ý</Text>
+                  <Text>• Hướng dẫn CV & phỏng vấn</Text>
+                </Space>
+              </Card>
 
-          {/* Additional Resources */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-blue-600 text-xl">📊</span>
-              </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Test RIASEC</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Khám phá tính cách nghề nghiệp của bạn với bài test khoa học
-              </p>
-              <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                Làm bài test →
-              </button>
+              <Card style={{ borderRadius: 12 }}>
+                <Title level={5}>Tài nguyên</Title>
+                <Space direction="vertical">
+                  <Button type="link">Làm bài test RIASEC</Button>
+                  <Button type="link">Xem Roadmap</Button>
+                  <Button type="link">Tham gia diễn đàn</Button>
+                </Space>
+              </Card>
             </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-green-600 text-xl">🗺️</span>
-              </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Roadmap</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Lộ trình phát triển sự nghiệp chi tiết cho từng ngành
-              </p>
-              <button className="text-green-600 text-sm font-medium hover:text-green-700">
-                Xem roadmap →
-              </button>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-purple-600 text-xl">💬</span>
-              </div>
-              <h3 className="font-semibold text-gray-800 mb-2">Diễn đàn</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                Tham gia cộng đồng để trao đổi kinh nghiệm nghề nghiệp
-              </p>
-              <button className="text-purple-600 text-sm font-medium hover:text-purple-700">
-                Tham gia →
-              </button>
-            </div>
-          </div>
-        </div>
+          </Col>
+        </Row>
       </div>
     </div>
   );
-};
-
-export default AIAssistantPage;
+}
