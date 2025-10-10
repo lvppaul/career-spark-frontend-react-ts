@@ -120,6 +120,7 @@ const Header: React.FC = () => {
           >
             Test RIASEC
           </Link>
+          {/* Profile is available from the user dropdown menu; do not show a separate nav link */}
         </nav>
 
         {/* User Menu */}
@@ -141,13 +142,22 @@ const Header: React.FC = () => {
             </>
           ) : (
             <div className="relative" ref={menuRef}>
+              {/* Profile shortcut intentionally removed; profile available in dropdown */}
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
               >
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
+                {user?.avatarURL ? (
+                  <img
+                    src={user.avatarURL}
+                    alt={user.name ?? 'avatar'}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                )}
                 <span className="hidden md:block">{user?.name || 'User'}</span>
                 <svg
                   className="w-4 h-4"
@@ -181,6 +191,7 @@ const Header: React.FC = () => {
                   >
                     Thông tin cá nhân
                   </Link>
+                  {/* 'Chỉnh sửa hồ sơ' removed as per UX preference - profile editing is accessible elsewhere */}
                   <Link
                     to="/settings"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"

@@ -349,6 +349,16 @@ class AuthService {
     tokenUtils.clearAll();
     this.notifyListeners();
   }
+
+  // Update stored user data and notify subscribers
+  updateLocalUser(user: User): void {
+    try {
+      tokenUtils.setUserData(user);
+      this.notifyListeners();
+    } catch (err) {
+      console.warn('Failed to update local user data', err);
+    }
+  }
 }
 
 // Export singleton instance
