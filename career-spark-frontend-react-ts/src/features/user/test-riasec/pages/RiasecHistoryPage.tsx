@@ -100,7 +100,7 @@ export default function RiasecHistoryPage() {
                   >
                     <List.Item.Meta
                       avatar={<Avatar>{String(s!.sessionId).slice(-1)}</Avatar>}
-                      title={<Text strong>Phiên #{s!.sessionId}</Text>}
+                      title={<Text strong>Lần {s!.sessionId}</Text>}
                       description={new Date(s!.startAt).toLocaleString()}
                     />
                     <div style={{ minWidth: 180, textAlign: 'right' }}>
@@ -116,7 +116,7 @@ export default function RiasecHistoryPage() {
         )}
 
         <Drawer
-          title={detail ? `Phiên ${detail.sessionId}` : 'Chi tiết phiên'}
+          title={detail ? `Lần ${detail.sessionId}` : 'Chi tiết phiên'}
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           width={700}

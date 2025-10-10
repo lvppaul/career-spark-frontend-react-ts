@@ -71,39 +71,63 @@ export default function UserProfileView() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        minHeight: 'calc(100vh - 80px)',
-        paddingTop: 24,
-        paddingBottom: 24,
+        paddingTop: 80, // giảm padding trên
+        paddingBottom: 0, // bỏ padding dưới
+        paddingLeft: 12,
+        paddingRight: 12,
       }}
     >
       <div
         style={{
-          maxWidth: 1100,
-          width: 'min(1100px, 95%)',
+          maxWidth: 1200,
+          width: 'min(1200px, 98%)',
           display: 'flex',
-          gap: 24,
+          gap: 28,
+          margin: 30,
         }}
       >
-        <Card style={{ flex: 1 }}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <Avatar size={96} src={data.avatarURL ?? undefined}>
+        <Card
+          style={{
+            flex: 1,
+            padding: 24,
+            borderRadius: 12,
+            border: '2px solid #d9d9d9', // ✅ viền to hơn, màu xám nhẹ
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)', // thêm bóng nhẹ
+          }}
+        >
+          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+            <Avatar size={140} src={data.avatarURL ?? undefined}>
               {data.name?.[0]}
             </Avatar>
             <div style={{ flex: 1 }}>
-              <Title level={4}>{data.name}</Title>
-              <Text type="secondary">{data.email}</Text>
+              <Title level={3} style={{ margin: 0 }}>
+                {data.name}
+              </Title>
+              <div style={{ marginTop: 8 }}>
+                <Text type="secondary">{data.email}</Text>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <Text strong style={{ color: '#555' }}>
+                  {data.role}
+                </Text>
+                <Text style={{ marginLeft: 12, color: '#888' }}>
+                  {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                </Text>
+              </div>
             </div>
             <div>
               <Button
+                type="primary"
                 icon={<EditOutlined />}
                 onClick={() => navigate(`/profile/edit`)}
+                size="large"
               >
                 Chỉnh sửa
               </Button>
             </div>
           </div>
 
-          <Descriptions column={1} style={{ marginTop: 24 }}>
+          <Descriptions column={1} style={{ marginTop: 28 }}>
             <Descriptions.Item label="Số điện thoại">
               {data.phone ?? 'Chưa có'}
             </Descriptions.Item>
@@ -117,10 +141,25 @@ export default function UserProfileView() {
           </Descriptions>
         </Card>
 
-        <Card style={{ width: 360 }} title="Bài test đã làm">
+        <Card
+          title="Các bài test đã làm gần đây"
+          style={{
+            width: 420,
+            padding: 16,
+            borderRadius: 12,
+            border: '2px solid #d9d9d9',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          }}
+        >
           <List
             loading={loadingSessions}
-            dataSource={sessions || []}
+            dataSource={(sessions || [])
+              .slice()
+              .sort(
+                (a, b) =>
+                  new Date(b.startAt).getTime() - new Date(a.startAt).getTime()
+              )
+              .slice(0, 3)}
             locale={{ emptyText: <Empty description="Chưa có bài test" /> }}
             renderItem={(item: SessionSummary) => (
               <List.Item>
