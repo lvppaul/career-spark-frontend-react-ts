@@ -10,20 +10,12 @@ import {
   Space,
   Empty,
   Tag,
-  Modal,
-  message,
 } from 'antd';
 import type { SubmitResponse } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  ArrowLeftOutlined,
-  RedoOutlined,
-  CrownOutlined,
-  RocketOutlined,
-  UnlockOutlined,
-} from '@ant-design/icons';
+import { ArrowLeftOutlined, RedoOutlined } from '@ant-design/icons';
 // roadmap details removed from result page
-import { tokenUtils } from '@/utils/tokenUtils';
+// tokenUtils removed — not needed in this page now
 
 const { Title, Text } = Typography;
 
@@ -82,7 +74,6 @@ export default function RiasecResultPage() {
   );
 
   // roadmap details removed from result page
-  const [showPackages, setShowPackages] = useState(false);
   // session/user id state removed (roadmap not shown here)
 
   // Persist result to localStorage so page can be reloaded/bookmarked
@@ -227,7 +218,7 @@ export default function RiasecResultPage() {
                   <div className="mt-4">
                     <Button
                       type="primary"
-                      onClick={() => setShowPackages(true)}
+                      onClick={() => navigate('/subscription')}
                     >
                       Các công việc phù hợp
                     </Button>
@@ -240,174 +231,7 @@ export default function RiasecResultPage() {
           </Col>
         </Row>
 
-        <Modal
-          title="Gói công việc phù hợp"
-          open={showPackages}
-          onCancel={() => setShowPackages(false)}
-          footer={null}
-          width={1000}
-        >
-          <Row gutter={[24, 24]}>
-            {/* Monthly */}
-            <Col xs={24} sm={8}>
-              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
-                <div
-                  style={{
-                    borderRadius: 12,
-                    padding: 18,
-                    color: '#fff',
-                    background:
-                      'linear-gradient(135deg,#56ccf2 0%,#2f80ed 100%)',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>Tháng</div>
-                  <div style={{ marginTop: 8 }}>
-                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
-                    tiết cho từng công việc
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <RocketOutlined style={{ fontSize: 36 }} />
-                  </div>
-                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
-                    39.000₫ / tháng
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        const user = tokenUtils.getUserData();
-                        if (!user || !user.sub) {
-                          message.warning('Vui lòng đăng nhập để mua gói');
-                          return;
-                        }
-                        setShowPackages(false);
-                        navigate('/purchase', {
-                          state: { billingCycle: 'monthly' },
-                        });
-                      }}
-                    >
-                      Mua
-                    </Button>
-                  </div>
-                </div>
-                <Divider />
-                <ul className="list-disc pl-5">
-                  <li>Xem kết quả chi tiết</li>
-                  <li>Danh sách công việc phù hợp</li>
-                  <li>Lộ trình chi tiết cho từng công việc</li>
-                </ul>
-              </Card>
-            </Col>
-
-            {/* Quarterly */}
-            <Col xs={24} sm={8}>
-              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
-                <div
-                  style={{
-                    borderRadius: 12,
-                    padding: 18,
-                    color: '#fff',
-                    background:
-                      'linear-gradient(135deg,#8e2de2 0%,#4a00e0 100%)',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>Quý</div>
-                  <div style={{ marginTop: 8 }}>
-                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
-                    tiết cho từng công việc
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <CrownOutlined style={{ fontSize: 36 }} />
-                  </div>
-                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
-                    99.000₫ / quý
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        const user = tokenUtils.getUserData();
-                        if (!user || !user.sub) {
-                          message.warning('Vui lòng đăng nhập để mua gói');
-                          return;
-                        }
-                        setShowPackages(false);
-                        navigate('/purchase', {
-                          state: { billingCycle: 'quarterly' },
-                        });
-                      }}
-                    >
-                      Mua
-                    </Button>
-                  </div>
-                </div>
-                <Divider />
-                <ul className="list-disc pl-5">
-                  <li>Xem kết quả chi tiết</li>
-                  <li>Danh sách công việc phù hợp</li>
-                  <li>Lộ trình chi tiết cho từng công việc</li>
-                </ul>
-              </Card>
-            </Col>
-
-            {/* Yearly */}
-            <Col xs={24} sm={8}>
-              <Card bodyStyle={{ padding: 20 }} style={{ borderRadius: 12 }}>
-                <div
-                  style={{
-                    borderRadius: 12,
-                    padding: 18,
-                    color: '#ffd66b',
-                    background: 'linear-gradient(135deg,#222 0%,#111 100%)',
-                    textAlign: 'center',
-                    border: '1px solid rgba(255,214,107,0.12)',
-                  }}
-                >
-                  <div style={{ fontSize: 22, fontWeight: 700 }}>Năm</div>
-                  <div style={{ marginTop: 8 }}>
-                    Xem kết quả chi tiết, các công việc phù hợp và lộ trình chi
-                    tiết cho từng công việc
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <UnlockOutlined
-                      style={{ fontSize: 36, color: '#ffd66b' }}
-                    />
-                  </div>
-                  <div style={{ marginTop: 12, fontSize: 18, fontWeight: 600 }}>
-                    289.000₫ / năm
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <Button
-                      type="primary"
-                      danger
-                      onClick={() => {
-                        const user = tokenUtils.getUserData();
-                        if (!user || !user.sub) {
-                          message.warning('Vui lòng đăng nhập để mua gói');
-                          return;
-                        }
-                        setShowPackages(false);
-                        navigate('/purchase', {
-                          state: { billingCycle: 'yearly' },
-                        });
-                      }}
-                    >
-                      Mua
-                    </Button>
-                  </div>
-                </div>
-                <Divider />
-                <ul className="list-disc pl-5">
-                  <li>Xem kết quả chi tiết</li>
-                  <li>Danh sách công việc phù hợp</li>
-                  <li>Lộ trình chi tiết cho từng công việc</li>
-                </ul>
-              </Card>
-            </Col>
-          </Row>
-        </Modal>
+        {/* Previously displayed a modal with demo purchase options; now use /subscription page */}
       </Card>
       {/* Roadmap removed from this page */}
     </div>
