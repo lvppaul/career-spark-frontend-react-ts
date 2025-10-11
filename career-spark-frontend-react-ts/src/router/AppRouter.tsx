@@ -35,8 +35,11 @@ const AdminLayoutWrapper: React.FC = () => (
   </AdminLayout>
 );
 
-const PurchasePage = React.lazy(
-  () => import('@/features/user/test-riasec/pages/PurchasePage')
+const SubscriptionPage = React.lazy(
+  () => import('@/features/subscription/pages/SubscriptionPage')
+);
+const PaymentResultPage = React.lazy(
+  () => import('@/features/payment/pages/PaymentResultPage')
 );
 
 const AppRouter: React.FC = () => {
@@ -101,10 +104,18 @@ const AppRouter: React.FC = () => {
             }
           />
           <Route
-            path="purchase"
+            path="subscription"
             element={
               <Suspense fallback={<div>Đang tải...</div>}>
-                <PurchasePage />
+                <SubscriptionPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="payment/result"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <PaymentResultPage />
               </Suspense>
             }
           />
