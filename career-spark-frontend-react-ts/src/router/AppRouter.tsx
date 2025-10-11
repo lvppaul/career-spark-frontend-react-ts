@@ -19,6 +19,8 @@ import { AdminPage } from '@/features/admin/pages';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from './constants';
+import UserProfileView from '@/features/user/user-management/pages/UserProfileView';
+import UserProfileEdit from '@/features/user/user-management/pages/UserProfileEdit';
 
 // Wrapper components for layouts
 const UserLayoutWrapper: React.FC = () => (
@@ -81,6 +83,8 @@ const AppRouter: React.FC = () => {
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
           <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
+          <Route path="profile" element={<UserProfileView />} />
+          <Route path="profile/edit" element={<UserProfileEdit />} />
           <Route
             path="matching-jobs"
             element={

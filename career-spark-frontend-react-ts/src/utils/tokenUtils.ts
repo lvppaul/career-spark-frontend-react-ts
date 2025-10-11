@@ -62,6 +62,11 @@ export const tokenUtils = {
         name: payload.name,
         email: payload.email,
         Role: payload.Role,
+        avatarURL:
+          payload.avatarURL ||
+          payload.avatarUrl ||
+          payload.picture ||
+          undefined,
         aud: payload.aud,
         iss: payload.iss,
         exp: payload.exp,

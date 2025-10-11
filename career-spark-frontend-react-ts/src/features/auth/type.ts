@@ -49,6 +49,8 @@ export interface User {
   name: string;
   email: string;
   Role: string;
+  // Optional avatar URL provided in JWT payload
+  avatarURL?: string;
   aud: string;
   iss: string;
   exp: number;

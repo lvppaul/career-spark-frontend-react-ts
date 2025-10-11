@@ -1,58 +1,82 @@
 import axios from 'axios';
+import { showLoading, hideLoading } from './loadingService';
 
-// Normalize base URL from env (ensure no trailing slash)
+// Normalize base URL
 const rawBase = (import.meta.env.VITE_API_URL as string) || '';
 const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 
 const api = axios.create({
-  baseURL: normalizedBase, // URL gốc backend (no trailing slash)
-  timeout: 10000, // Increased timeout for better reliability
+  baseURL: normalizedBase,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });
 
-// Flag to prevent multiple refresh attempts
+// 🧩 Tự động bỏ Content-Type nếu là FormData
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+  return config;
+});
+
+// ==============================================
+// 🔒 Token Refresh Logic + Global Loading
+// ==============================================
+
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (value: string) => void;
-  reject: (error: unknown) => void;
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
 }> = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else if (token) {
-      resolve(token);
-    }
-  });
-
+  failedQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : token && resolve(token)
+  );
   failedQueue = [];
 };
 
-// Request interceptor
+// Request interceptor (add token + loading)
 api.interceptors.request.use(
   (config) => {
+    try {
+      if (!config.headers['x-skip-loading']) {
+        showLoading();
+        (config as any).__showLoading = true;
+      }
+    } catch {}
+
     const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor with automatic token refresh
+// Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if ((response.config as any).__showLoading) hideLoading();
+    return response;
+  },
   async (error) => {
+    try {
+      if (error.config && (error.config as any).__showLoading) hideLoading();
+    } catch {
+      console.error('Error in hideLoading', error);
+    }
+
     const originalRequest = error.config;
 
+    // 🧠 Nếu accessToken hết hạn (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // Nếu đang refresh thì xếp request này vào hàng đợi
       if (isRefreshing) {
-        // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -60,70 +84,47 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return api(originalRequest);
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
+          .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
-
       const refreshToken = localStorage.getItem('refreshToken');
 
-      if (refreshToken) {
-        try {
-          // Use authService for token refresh
-          const { authService } = await import(
-            '../features/auth/services/authService'
-          );
-          const response = await authService.refreshToken({ refreshToken });
-
-          if (response.success && response.accessToken) {
-            const newToken = response.accessToken;
-
-            api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-            processQueue(null, newToken);
-            return api(originalRequest);
-          } else {
-            throw new Error('Token refresh failed');
-          }
-        } catch (refreshError) {
-          console.warn('Token refresh failed - Redirecting to login');
-          processQueue(refreshError, null);
-
-          // Clear tokens and redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('userData');
-
-          // Redirect to login page
-          window.location.href = '/login';
-
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
-      } else {
-        // No refresh token available
-        console.warn('No refresh token available - Redirecting to login');
-        processQueue(new Error('No refresh token'), null);
-
-        // Clear tokens and redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('userData');
-
-        // Redirect to login page
+      if (!refreshToken) {
+        console.warn('No refresh token found → redirect to login');
+        localStorage.clear();
         window.location.href = '/login';
-
-        isRefreshing = false;
         return Promise.reject(error);
+      }
+
+      try {
+        //  Import động tránh circular import
+        const { authService } = await import(
+          '@/features/auth/services/authService'
+        );
+        const response = await authService.refreshToken({ refreshToken });
+
+        const newAccessToken =
+          response.data?.accessToken || response.accessToken;
+        if (response.success && newAccessToken) {
+          api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          processQueue(null, newAccessToken);
+          return api(originalRequest); //  retry request cũ
+        }
+
+        throw new Error('Refresh failed');
+      } catch (refreshError) {
+        console.warn('Refresh token invalid → redirect login');
+        processQueue(refreshError, null);
+        localStorage.clear();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    // For other errors, just pass them through
     return Promise.reject(error);
   }
 );

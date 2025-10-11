@@ -5,7 +5,7 @@ import { getDefaultRouteByRole } from './constants';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'User' | 'Admin';
+  requiredRole?: 'User' | 'Admin' | 'Moderator';
   redirectTo?: string;
 }
 
