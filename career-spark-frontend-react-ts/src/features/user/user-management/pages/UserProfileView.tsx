@@ -107,11 +107,8 @@ export default function UserProfileView() {
                 <Text type="secondary">{data.email}</Text>
               </div>
               <div style={{ marginTop: 12 }}>
-                <Text strong style={{ color: '#555' }}>
-                  {data.role}
-                </Text>
-                <Text style={{ marginLeft: 12, color: '#888' }}>
-                  {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                <Text style={{ marginLeft: 0, color: '#888' }}>
+                  Trạng thái: {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
                 </Text>
               </div>
             </div>
@@ -131,7 +128,7 @@ export default function UserProfileView() {
             <Descriptions.Item label="Số điện thoại">
               {data.phone ?? 'Chưa có'}
             </Descriptions.Item>
-            <Descriptions.Item label="Vai trò">{data.role}</Descriptions.Item>
+
             <Descriptions.Item label="Trạng thái">
               {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
             </Descriptions.Item>

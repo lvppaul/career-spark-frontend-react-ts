@@ -1,4 +1,5 @@
 import api from '../../../lib/axios';
+import axios from 'axios';
 import { tokenUtils } from '../../../utils/tokenUtils';
 import type {
   AuthResponse,
@@ -223,62 +224,32 @@ class AuthService {
   async refreshToken(
     refreshTokenData?: RefreshTokenRequest
   ): Promise<AuthResponse> {
-    try {
-      const refreshToken =
-        refreshTokenData?.refreshToken || tokenUtils.getRefreshToken();
+    const refreshToken =
+      refreshTokenData?.refreshToken || tokenUtils.getRefreshToken();
+    if (!refreshToken) throw new Error('No refresh token available');
 
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
+    const rawBase = (import.meta.env.VITE_API_URL as string) || '';
+    const base = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+    const url = `${base}/Authentication/refreshToken`;
 
-      const response = await api.post<AuthResponse>(
-        'Authentication/refreshToken',
-        { refreshToken }
-      );
+    //  Dùng axios gốc, không interceptor
+    const response = await axios.post<AuthResponse>(
+      url,
+      { refreshToken },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
 
-      const data = response.data;
+    const data = response.data;
+    const newAccessToken = data.data?.accessToken || data.accessToken;
+    const newRefreshToken = data.data?.refreshToken || data.refreshToken;
 
-      if (data.success && data.accessToken && data.refreshToken) {
-        // Store new tokens
-        tokenUtils.setTokens(data.accessToken, data.refreshToken);
-
-        // Decode and store updated user data
-        const userData = tokenUtils.decodeToken(data.accessToken);
-        if (userData) {
-          tokenUtils.setUserData(userData);
-        }
-
-        // Notify listeners about auth state change
-        this.notifyListeners();
-      }
-
-      return data;
-    } catch (error: unknown) {
-      console.error('Refresh token error:', error);
-
-      // Clear tokens if refresh fails
-      tokenUtils.clearAll();
-      this.notifyListeners();
-
-      // Handle axios error response
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as {
-          response: { data: { message?: string; errors?: string[] } };
-        };
-        if (axiosError.response?.data) {
-          const errorData = axiosError.response.data;
-          const errorMessage =
-            errorData.message ||
-            errorData.errors?.[0] ||
-            'Token refresh failed';
-          throw new Error(errorMessage);
-        }
-      }
-
-      const errorMessage =
-        error instanceof Error ? error.message : 'Token refresh failed';
-      throw new Error(errorMessage);
+    if (data.success && newAccessToken && newRefreshToken) {
+      tokenUtils.setTokens(newAccessToken, newRefreshToken);
+      const userData = tokenUtils.decodeToken(newAccessToken);
+      if (userData) tokenUtils.setUserData(userData);
     }
+
+    return data;
   }
 
   // Logout user

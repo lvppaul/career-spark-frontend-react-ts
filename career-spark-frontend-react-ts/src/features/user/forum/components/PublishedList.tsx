@@ -2,7 +2,7 @@ import { Card, List, Tag, Typography, Pagination, Empty, Spin } from 'antd';
 import { usePublishedBlogs } from '../hooks/usePublishedBlogs';
 import type { BlogItem } from '../type';
 
-const { Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 function stripMarkdown(md = ''): string {
   // Very small utility to remove common markdown tokens for excerpting
@@ -60,9 +60,9 @@ export default function PublishedList({ search = '', tag }: Props) {
             <List.Item key={item.id}>
               <List.Item.Meta
                 title={
-                  <Title level={4} style={{ margin: 0 }}>
+                  <Typography.Text strong style={{ fontSize: 18 }}>
                     {item.title}
-                  </Title>
+                  </Typography.Text>
                 }
                 description={
                   <div style={{ marginTop: 8 }}>
