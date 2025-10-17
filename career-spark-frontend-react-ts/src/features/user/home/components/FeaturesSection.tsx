@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const FeaturesSection: React.FC = () => {
+  const navigate = useNavigate();
   const features = [
     {
       icon: '🧪',
@@ -44,22 +46,39 @@ const FeaturesSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
-            >
+          {features.map((feature, index) => {
+            // map feature title to route
+            const route = feature.title.includes('RIASEC')
+              ? '/test-riasec'
+              : feature.title.includes('Diễn Đàn')
+                ? '/forum'
+                : feature.title.includes('Tin Tức')
+                  ? '/news'
+                  : '/ai-assistant';
+
+            return (
               <div
-                className={`w-16 h-16 ${feature.color} rounded-full flex items-center justify-center mb-4`}
+                key={index}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(route)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') navigate(route);
+                }}
+                className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
               >
-                <span className="text-2xl">{feature.icon}</span>
+                <div
+                  className={`w-16 h-16 ${feature.color} rounded-full flex items-center justify-center mb-4`}
+                >
+                  <span className="text-2xl">{feature.icon}</span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">{feature.description}</p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

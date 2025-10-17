@@ -12,6 +12,7 @@ export const USER_ROUTES = {
   NEWS: '/news',
   AI_ASSISTANT: '/ai-assistant',
   ROADMAP: '/roadmap',
+  TEST_RIASEC: '/test-riasec',
 } as const;
 
 // Admin routes (protected)
@@ -43,7 +44,7 @@ export const NAVIGATION_ITEMS = {
     { label: 'Diễn đàn', path: USER_ROUTES.FORUM },
     { label: 'Tin tức', path: USER_ROUTES.NEWS },
     { label: 'Trợ lý AI', path: USER_ROUTES.AI_ASSISTANT },
-    { label: 'Lộ trình', path: USER_ROUTES.ROADMAP },
+    { label: 'Test RIASEC', path: USER_ROUTES.TEST_RIASEC },
   ],
   ADMIN: [
     { label: 'Dashboard', path: ADMIN_ROUTES.DASHBOARD },
