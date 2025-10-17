@@ -279,15 +279,6 @@ export default function AIAssistantPage() {
                   <Text>• Hướng dẫn CV & phỏng vấn</Text>
                 </Space>
               </Card>
-
-              <Card style={{ borderRadius: 12 }}>
-                <Title level={5}>Tài nguyên</Title>
-                <Space direction="vertical">
-                  <Button type="link">Làm bài test RIASEC</Button>
-                  <Button type="link">Xem Roadmap</Button>
-                  <Button type="link">Tham gia diễn đàn</Button>
-                </Space>
-              </Card>
             </div>
           </Col>
         </Row>

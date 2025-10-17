@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import type { PublishedResponse } from '../type';
+import type { PublishedResponse, CreateBlogResponse } from '../type';
 
 /**
  * Fetch published blogs with pagination
@@ -25,9 +25,20 @@ export async function createBlog(payload: {
   return resp.data;
 }
 
+/**
+ * Fetch a single blog by id
+ * @param id blog id
+ */
+export async function getBlogById(id: number) {
+  const url = `/Blog/${id}`;
+  const resp = await api.get<CreateBlogResponse>(url);
+  return resp.data;
+}
+
 export const forumService = {
   getPublishedBlogs,
   createBlog,
+  getBlogById,
 };
 
 export default forumService;

@@ -106,11 +106,6 @@ export default function UserProfileView() {
               <div style={{ marginTop: 8 }}>
                 <Text type="secondary">{data.email}</Text>
               </div>
-              <div style={{ marginTop: 12 }}>
-                <Text style={{ marginLeft: 0, color: '#888' }}>
-                  Trạng thái: {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                </Text>
-              </div>
             </div>
             <div>
               <Button
@@ -129,9 +124,6 @@ export default function UserProfileView() {
               {data.phone ?? 'Chưa có'}
             </Descriptions.Item>
 
-            <Descriptions.Item label="Trạng thái">
-              {data.isActive ? 'Hoạt động' : 'Không hoạt động'}
-            </Descriptions.Item>
             <Descriptions.Item label="Ngày tạo">
               {new Date(data.createdAt).toLocaleString()}
             </Descriptions.Item>

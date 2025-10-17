@@ -10,8 +10,12 @@ import {
   Tag,
   Drawer,
   Divider,
-  Space,
 } from 'antd';
+import {
+  FileTextOutlined,
+  EyeOutlined,
+  CheckOutlined,
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import useRiasecSessions from '../hooks/useRiasecSessions';
 import { tokenUtils } from '@/utils/tokenUtils';
@@ -89,25 +93,29 @@ export default function RiasecHistoryPage() {
                 renderItem={(s) => (
                   <List.Item
                     key={s!.sessionId}
+                    className="group rounded-md border border-transparent px-10 py-4 mb-4 transition-all hover:shadow-sm hover:border-[#1b61fc] hover:bg-blue-50/20"
                     actions={[
-                      <Button
-                        key="view"
-                        onClick={() => openDetail(s!.sessionId)}
-                      >
-                        Xem chi tiết
-                      </Button>,
+                      <div key="view" className="flex items-center">
+                        <button
+                          onClick={() => openDetail(s!.sessionId)}
+                          className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-transparent transition-colors"
+                          aria-label={`Xem chi tiết lần ${s!.sessionId}`}
+                        >
+                          <EyeOutlined className="text-gray-600 group-hover:text-[#1b61fc] transition-colors" />
+                        </button>
+                      </div>,
                     ]}
                   >
                     <List.Item.Meta
-                      avatar={<Avatar>{String(s!.sessionId).slice(-1)}</Avatar>}
+                      avatar={
+                        <Avatar
+                          icon={<FileTextOutlined />}
+                          style={{ backgroundColor: '#1b61fc', color: '#fff' }}
+                        />
+                      }
                       title={<Text strong>Lần {s!.sessionId}</Text>}
                       description={new Date(s!.startAt).toLocaleString()}
                     />
-                    <div style={{ minWidth: 180, textAlign: 'right' }}>
-                      <Space direction="vertical" align="end">
-                        <Tag color="blue">RIASEC</Tag>
-                      </Space>
-                    </div>
                   </List.Item>
                 )}
               />
@@ -142,15 +150,13 @@ export default function RiasecHistoryPage() {
                       <List.Item.Meta
                         title={
                           <div>
-                            <Tag>{a.questionType}</Tag> {a.questionContent}
+                            {a.questionContent}{' '}
+                            {a.isSelected ? (
+                              <Tag color="green" icon={<CheckOutlined />}></Tag>
+                            ) : (
+                              <div></div>
+                            )}
                           </div>
-                        }
-                        description={
-                          a.isSelected ? (
-                            <Tag color="green">Đã chọn</Tag>
-                          ) : (
-                            <Tag>Không chọn</Tag>
-                          )
                         }
                       />
                     </List.Item>

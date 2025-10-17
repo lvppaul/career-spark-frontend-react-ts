@@ -204,7 +204,7 @@ const Header: React.FC = () => {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setShowUserMenu(false)}
                   >
-                    Lịch sử
+                    Lịch sử bài test
                   </Link>
                   <hr className="my-1" />
                   <button
