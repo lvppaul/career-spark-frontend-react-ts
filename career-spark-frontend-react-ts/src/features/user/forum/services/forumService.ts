@@ -15,8 +15,19 @@ export async function getPublishedBlogs(
   return resp.data;
 }
 
+export async function createBlog(payload: {
+  title: string;
+  tag: string;
+  content: string;
+}) {
+  const url = `/Blog`;
+  const resp = await api.post(url, payload);
+  return resp.data;
+}
+
 export const forumService = {
   getPublishedBlogs,
+  createBlog,
 };
 
 export default forumService;

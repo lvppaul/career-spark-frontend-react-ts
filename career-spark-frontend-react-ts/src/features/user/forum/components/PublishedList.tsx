@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, List, Tag, Typography, Pagination, Empty, Spin } from 'antd';
 import { usePublishedBlogs } from '../hooks/usePublishedBlogs';
 import type { BlogItem } from '../type';
@@ -27,10 +28,21 @@ function excerpt(text = '', max = 240) {
 type Props = {
   search?: string;
   tag?: string;
+  // a numeric signal that when changed will force the list to refresh (e.g., timestamp)
+  reloadSignal?: number;
 };
 
-export default function PublishedList({ search = '', tag }: Props) {
+export default function PublishedList({
+  search = '',
+  tag,
+  reloadSignal,
+}: Props) {
   const { data, pagination, setPage, isLoading } = usePublishedBlogs(1, 5);
+
+  // if parent toggles reloadSignal, reset to first page to re-fetch
+  useEffect(() => {
+    setPage(1);
+  }, [reloadSignal, setPage]);
 
   if (isLoading)
     return (

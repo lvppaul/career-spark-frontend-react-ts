@@ -87,3 +87,17 @@ export interface PublishedResponse {
   pagination: Pagination;
   timestamp?: string;
 }
+
+// Create blog request/response
+export interface CreateBlogRequest {
+  title: string;
+  tag: string;
+  content: string;
+}
+
+export interface CreateBlogResponse {
+  success: boolean;
+  message?: string;
+  data: BlogItem;
+  timestamp?: string;
+}
