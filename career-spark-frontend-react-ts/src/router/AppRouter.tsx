@@ -14,6 +14,9 @@ import RiasecHistoryPage from '@/features/user/test-riasec/pages/RiasecHistoryPa
 import { LoginPage, SignUpPage } from '@/features/auth/pages';
 import { ForumPage } from '@/features/user/forum/pages';
 import { NewsPage } from '@/features/user/news/pages';
+const NewsDetailPage = React.lazy(
+  () => import('@/features/user/news/pages/NewsDetailPage')
+);
 import { AIAssistantPage } from '@/features/user/ai-assistant/pages';
 import { AdminPage } from '@/features/admin/pages';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
@@ -82,6 +85,14 @@ const AppRouter: React.FC = () => {
         >
           <Route path="forum" element={<ForumPage />} />
           <Route path="news" element={<NewsPage />} />
+          <Route
+            path="news/:id"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <NewsDetailPage />
+              </Suspense>
+            }
+          />
           <Route path="ai-assistant" element={<AIAssistantPage />} />
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
