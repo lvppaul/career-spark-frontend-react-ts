@@ -6,6 +6,7 @@ export interface NewsItem {
   content: string;
   createdAt: string;
   isActive: boolean;
+  tag?: string;
   imageUrl?: string;
   avatarPublicId?: string;
 }

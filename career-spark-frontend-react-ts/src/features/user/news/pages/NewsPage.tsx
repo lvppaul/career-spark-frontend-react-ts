@@ -9,9 +9,9 @@ import {
   Pagination,
   Spin,
   Empty,
-  Tag,
 } from 'antd';
 import useActiveNews from '@/features/user/news/hooks/useActiveNews';
+import { useNavigate } from 'react-router-dom';
 
 const { Search } = Input;
 
@@ -19,20 +19,22 @@ export default function NewsPage() {
   const { data, isLoading } = useActiveNews();
 
   const [searchText, setSearchText] = useState('');
-  const [filter, setFilter] = useState<'all' | 'withImage' | 'noImage'>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
   const news = useMemo(() => data ?? [], [data]);
 
-  // Featured: first item
-  const featured = news[0];
+  const tags = useMemo(() => {
+    const set = new Set<string>();
+    news.forEach((n) => set.add(n.tag ?? 'Khác'));
+    return Array.from(set);
+  }, [news]);
 
   const filtered = useMemo(() => {
     const s = searchText.trim().toLowerCase();
     return news.filter((n) => {
-      if (filter === 'withImage' && !n.imageUrl) return false;
-      if (filter === 'noImage' && n.imageUrl) return false;
+      if (tagFilter !== 'all' && (n.tag || 'other') !== tagFilter) return false;
 
       if (!s) return true;
       return (
@@ -40,7 +42,7 @@ export default function NewsPage() {
         (n.content || '').toLowerCase().includes(s)
       );
     });
-  }, [news, searchText, filter]);
+  }, [news, searchText, tagFilter]);
 
   const total = filtered.length;
   const paginated = useMemo(() => {
@@ -48,13 +50,17 @@ export default function NewsPage() {
     return filtered.slice(start, start + pageSize);
   }, [filtered, page, pageSize]);
 
+  const navigate = useNavigate();
+
   return (
     <div style={{ padding: 24 }}>
       <Card>
         <Row gutter={24}>
-          <Col xs={24} lg={16}>
+          <Col xs={24} lg={24}>
             <div style={{ marginBottom: 16 }}>
-              <h2 style={{ margin: 0 }}>Tin Tức Nghề Nghiệp</h2>
+              <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700 }}>
+                Tin Tức Nghề Nghiệp
+              </h1>
               <div style={{ color: '#666' }}>
                 Cập nhật xu hướng và kiến thức nghề nghiệp
               </div>
@@ -73,16 +79,19 @@ export default function NewsPage() {
               />
 
               <Select
-                value={filter}
+                value={tagFilter}
                 onChange={(v) => {
-                  setFilter(v);
+                  setTagFilter(v);
                   setPage(1);
                 }}
                 style={{ width: 180 }}
               >
-                <Select.Option value="all">Tất cả</Select.Option>
-                <Select.Option value="withImage">Có ảnh</Select.Option>
-                <Select.Option value="noImage">Không ảnh</Select.Option>
+                <Select.Option value="all">Tất cả chủ đề</Select.Option>
+                {tags.map((t) => (
+                  <Select.Option key={t} value={t}>
+                    {t}
+                  </Select.Option>
+                ))}
               </Select>
             </div>
 
@@ -94,56 +103,22 @@ export default function NewsPage() {
               <Empty description="Không có bài viết" />
             ) : (
               <>
-                {featured && (
-                  <Card style={{ marginBottom: 16 }} bodyStyle={{ padding: 0 }}>
-                    <div style={{ display: 'flex', gap: 16 }}>
-                      {featured.imageUrl && (
-                        <div
-                          style={{
-                            width: 320,
-                            height: 180,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <img
-                            src={featured.imageUrl}
-                            alt={featured.title}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        </div>
-                      )}
-                      <div style={{ padding: 16, flex: 1 }}>
-                        <h3 style={{ marginTop: 0 }}>{featured.title}</h3>
-                        <div style={{ color: '#666', marginBottom: 12 }}>
-                          {(featured.content || '').slice(0, 250)}
-                          {(featured.content || '').length > 250 ? '...' : ''}
-                        </div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: 12,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <Tag>
-                            {new Date(featured.createdAt).toLocaleDateString()}
-                          </Tag>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                )}
-
                 <List
                   grid={{ gutter: 16, column: 2 }}
                   dataSource={paginated}
                   renderItem={(item) => (
                     <List.Item>
-                      <Card hoverable>
+                      <Card
+                        hoverable
+                        onClick={() => navigate(`/news/${item.id}`)}
+                        style={{ cursor: 'pointer' }}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            navigate(`/news/${item.id}`);
+                          }
+                        }}
+                      >
                         <Row gutter={12}>
                           <Col span={10}>
                             <div
@@ -168,30 +143,15 @@ export default function NewsPage() {
                             </div>
                           </Col>
                           <Col span={14}>
-                            <h4 style={{ marginTop: 0 }}>
+                            <h3
+                              style={{
+                                marginTop: 0,
+                                fontSize: 25,
+                                fontWeight: 700,
+                              }}
+                            >
                               {item.title || 'Không có tiêu đề'}
-                            </h4>
-                            <div
-                              style={{
-                                color: '#666',
-                                fontSize: 13,
-                                marginBottom: 8,
-                              }}
-                            >
-                              {(item.content || '').slice(0, 180)}
-                              {(item.content || '').length > 180 ? '...' : ''}
-                            </div>
-                            <div
-                              style={{
-                                display: 'flex',
-                                gap: 8,
-                                alignItems: 'center',
-                              }}
-                            >
-                              <Tag>
-                                {new Date(item.createdAt).toLocaleString()}
-                              </Tag>
-                            </div>
+                            </h3>
                           </Col>
                         </Row>
                       </Card>
@@ -220,35 +180,6 @@ export default function NewsPage() {
                 </div>
               </>
             )}
-          </Col>
-
-          <Col xs={24} lg={8}>
-            <Card title="Chủ Đề Thịnh Hành" style={{ marginBottom: 16 }}>
-              <div
-                style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-              >
-                {/* derive some topics from recent titles */}
-                {news.slice(0, 6).map((n) => (
-                  <div
-                    key={n.id}
-                    style={{ display: 'flex', justifyContent: 'space-between' }}
-                  >
-                    <div style={{ color: '#333' }}>
-                      {n.title?.slice(0, 60) || '—'}
-                    </div>
-                    <div style={{ color: '#999', fontSize: 12 }}>
-                      {new Date(n.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card title="Thống kê">
-              <div>
-                Hiện có <strong>{news.length}</strong> tin tức
-              </div>
-            </Card>
           </Col>
         </Row>
       </Card>
