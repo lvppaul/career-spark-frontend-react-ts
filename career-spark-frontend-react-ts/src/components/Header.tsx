@@ -59,7 +59,7 @@ const Header: React.FC = () => {
             />
           </div>
           <span className="text-xl font-semibold text-gray-800">
-            CareerSpark
+            <Link to="/">CareerSpark</Link>
           </span>
         </div>
 
@@ -98,17 +98,7 @@ const Header: React.FC = () => {
           >
             Tin tức
           </Link>
-          <Link
-            to="/ai-assistant"
-            onClick={() => setActivePath('/ai-assistant')}
-            className={`transition-colors px-3 py-1 rounded-md ${
-              isActivePath('/ai-assistant')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-            }`}
-          >
-            AI Assistant
-          </Link>
+          {/* AI Assistant link removed */}
           <Link
             to="/test-riasec"
             onClick={() => setActivePath('/test-riasec')}
