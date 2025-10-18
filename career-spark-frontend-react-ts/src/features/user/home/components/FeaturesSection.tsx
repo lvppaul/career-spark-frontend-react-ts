@@ -23,13 +23,6 @@ const FeaturesSection: React.FC = () => {
       description: 'Cập nhật thông tin mới nhất về thị trường việc làm',
       color: 'bg-purple-100 text-purple-600',
     },
-    {
-      icon: '🤖',
-      title: 'Hỗ Trợ AI',
-      description:
-        'Tư vấn tức thì với AI thông minh về mọi thắc mắc nghề nghiệp',
-      color: 'bg-orange-100 text-orange-600',
-    },
   ];
 
   return (
@@ -45,7 +38,7 @@ const FeaturesSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             // map feature title to route
             const route = feature.title.includes('RIASEC')
@@ -54,7 +47,7 @@ const FeaturesSection: React.FC = () => {
                 ? '/forum'
                 : feature.title.includes('Tin Tức')
                   ? '/news'
-                  : '/ai-assistant';
+                  : '';
 
             return (
               <div
