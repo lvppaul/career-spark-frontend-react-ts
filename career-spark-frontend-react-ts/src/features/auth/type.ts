@@ -43,6 +43,41 @@ export interface AuthResponse {
   errors?: string[] | null;
 }
 
+// Register Response — matches the API sample which returns the created user
+// Register Response — matches the API sample which returns the created user
+export interface RegisteredUser {
+  id: number;
+  email: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+  isActive: boolean;
+  avatarURL: string | null;
+  role: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user: RegisteredUser;
+  };
+}
+
+// Normalized result the service/hook will return to the UI
+export type RegisterResult =
+  | {
+      success: true;
+      message: string;
+      data?: RegisterResponse['data'];
+    }
+  | {
+      success: false;
+      message: string;
+      // Optional field hint for rendering field-level error
+      errorField?: 'email' | 'phone' | 'password' | 'name' | 'confirmPassword';
+    };
+
 // User data from JWT token
 export interface User {
   sub: string; // user id
@@ -78,3 +113,9 @@ export const TOKEN_KEYS = {
 // Type aliases for useAuth hook
 export type LoginCredentials = LoginRequest;
 export type RegisterCredentials = RegisterRequest;
+
+// Confirm Email Response
+export interface ConfirmEmailResponse {
+  success: boolean;
+  message: string;
+}

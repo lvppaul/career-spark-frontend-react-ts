@@ -9,6 +9,8 @@ import type {
   RefreshTokenRequest,
   LogoutRequest,
   User,
+  RegisterResponse,
+  RegisterResult,
 } from '../type';
 
 class AuthService {
@@ -50,53 +52,53 @@ class AuthService {
   }
 
   // Register user
-  async register(registerData: RegisterRequest): Promise<AuthResponse> {
+  async register(registerData: RegisterRequest): Promise<RegisterResult> {
     try {
-      const response = await api.post<AuthResponse>(
+      const response = await api.post<RegisterResponse>(
         'Authentication/register',
         registerData
       );
-
       const data = response.data;
-
-      // Handle both response structures: nested data or direct properties
-      const accessToken = data.data?.accessToken || data.accessToken;
-      const refreshToken = data.data?.refreshToken || data.refreshToken;
-
-      if (data.success && accessToken && refreshToken) {
-        // Store tokens
-        tokenUtils.setTokens(accessToken, refreshToken);
-
-        // Decode and store user data
-        const userData = tokenUtils.decodeToken(accessToken);
-        if (userData) {
-          tokenUtils.setUserData(userData);
-        }
-
-        // Notify listeners about auth state change
-        this.notifyListeners();
-      }
-
-      return data;
+      // Normalize to RegisterResult
+      return {
+        success: true,
+        message: data.message,
+        data: data.data,
+      };
     } catch (error: unknown) {
-      console.error('Register error:', error);
+      const axiosErr = error as {
+        response?: { data?: { message?: string; errors?: string[] } };
+        message?: string;
+      };
+      console.log(
+        'Register error ở auth service:',
+        axiosErr?.response?.data?.message || axiosErr?.message || error
+      );
+      const rawMessage: string =
+        axiosErr?.response?.data?.message ||
+        axiosErr?.response?.data?.errors?.[0] ||
+        axiosErr?.message ||
+        'Registration failed';
 
-      // Handle axios error response
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as {
-          response: { data: { message?: string; errors?: string[] } };
-        };
-        if (axiosError.response?.data) {
-          const errorData = axiosError.response.data;
-          const errorMessage =
-            errorData.message || errorData.errors?.[0] || 'Registration failed';
-          throw new Error(errorMessage);
-        }
-      }
+      // Heuristics to map server message to a specific field
+      const lower = rawMessage.toLowerCase();
+      type FieldKey =
+        | 'email'
+        | 'phone'
+        | 'password'
+        | 'name'
+        | 'confirmPassword';
+      let errorField: FieldKey | undefined = undefined;
+      if (lower.includes('email')) errorField = 'email';
+      else if (lower.includes('phone')) errorField = 'phone';
+      else if (lower.includes('password')) errorField = 'password';
+      else if (lower.includes('name')) errorField = 'name';
 
-      const errorMessage =
-        error instanceof Error ? error.message : 'Registration failed';
-      throw new Error(errorMessage);
+      return {
+        success: false,
+        message: rawMessage,
+        errorField,
+      } as RegisterResult;
     }
   }
 
@@ -107,55 +109,38 @@ class AuthService {
         'Authentication/login',
         loginData
       );
-
       const data = response.data;
-      console.log('Login response data:', data);
 
-      // Handle both response structures: nested data or direct properties
+      if (data.success === false) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      //  success
       const accessToken = data.data?.accessToken || data.accessToken;
       const refreshToken = data.data?.refreshToken || data.refreshToken;
 
       if (data.success && accessToken && refreshToken) {
-        console.log('Login successful, storing tokens...');
-        // Store tokens
         tokenUtils.setTokens(accessToken, refreshToken);
-
-        // Decode and store user data
         const userData = tokenUtils.decodeToken(accessToken);
-        console.log('Decoded user data:', userData);
-        if (userData) {
-          tokenUtils.setUserData(userData);
-        }
-
-        // Notify listeners about auth state change
+        if (userData) tokenUtils.setUserData(userData);
         this.notifyListeners();
-        console.log('Auth listeners notified');
-      } else {
-        console.log('Login response indicates failure:', data);
-        console.log('Access token:', accessToken);
-        console.log('Refresh token:', refreshToken);
       }
 
       return data;
     } catch (error: unknown) {
       console.error('Login error:', error);
 
-      // Handle axios error response
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as {
-          response: { data: { message?: string; errors?: string[] } };
-        };
-        if (axiosError.response?.data) {
-          const errorData = axiosError.response.data;
-          const errorMessage =
-            errorData.message || errorData.errors?.[0] || 'Login failed';
-          throw new Error(errorMessage);
-        }
-      }
-
-      const errorMessage =
-        error instanceof Error ? error.message : 'Login failed';
-      throw new Error(errorMessage);
+      // Lấy message từ axios response nếu có
+      const axiosErr = error as {
+        response?: { data?: { message?: string; errors?: string[] } };
+      };
+      const message =
+        axiosErr?.response?.data?.message ||
+        axiosErr?.response?.data?.errors?.[0] ||
+        (error instanceof Error ? error.message : undefined) ||
+        'Login failed';
+      console.log('AuthService login error message:', message);
+      throw new Error(message);
     }
   }
 
@@ -252,6 +237,70 @@ class AuthService {
     return data;
   }
 
+  // Verify email (send verification email)
+  async verifyEmail(
+    email: string
+  ): Promise<{ success: boolean; message: string; timestamp?: string }> {
+    try {
+      const response = await api.post<{
+        success: boolean;
+        message: string;
+        timestamp?: string;
+      }>('Authentication/verify-email', { email });
+
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Verify email error:', error);
+
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response: { data: { message?: string; errors?: string[] } };
+        };
+        if (axiosError.response?.data) {
+          const errorData = axiosError.response.data;
+          const errorMessage =
+            errorData.message || errorData.errors?.[0] || 'Verification failed';
+          throw new Error(errorMessage);
+        }
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Verification failed';
+      throw new Error(errorMessage);
+    }
+  }
+
+  // Confirm email (user clicks the link with token)
+  async confirmEmail(
+    email: string,
+    token: string
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await api.post<{ success: boolean; message: string }>(
+        'Authentication/confirm-email',
+        { email, token }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      console.error('Confirm email error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response: { data: { message?: string; errors?: string[] } };
+        };
+        if (axiosError.response?.data) {
+          const errorData = axiosError.response.data;
+          const errorMessage =
+            errorData.message ||
+            errorData.errors?.[0] ||
+            'Confirm email failed';
+          throw new Error(errorMessage);
+        }
+      }
+      const errorMessage =
+        error instanceof Error ? error.message : 'Confirm email failed';
+      throw new Error(errorMessage);
+    }
+  }
   // Logout user
   async logout(logoutData?: LogoutRequest): Promise<AuthResponse> {
     try {
