@@ -111,7 +111,7 @@ export default function UserProfileView() {
               <Button
                 type="primary"
                 icon={<EditOutlined />}
-                onClick={() => navigate(`/profile/edit`)}
+                onClick={() => navigate(`/profile/edit/${id}`)}
                 size="large"
               >
                 Chỉnh sửa

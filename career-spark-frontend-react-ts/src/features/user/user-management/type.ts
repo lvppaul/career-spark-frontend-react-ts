@@ -19,3 +19,24 @@ export interface GetUserByIdResponse {
 }
 
 export type { UserDTO as User };
+
+// Forgot Password API response
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  timestamp?: string;
+}
+
+// Reset Password API
+export interface ResetPasswordRequest {
+  email: string;
+  token: string; // token from email link
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+  timestamp?: string;
+}

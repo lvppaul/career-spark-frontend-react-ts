@@ -37,14 +37,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     Test RIASEC
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to={USER_ROUTES.AI_ASSISTANT}
-                    className="hover:text-white transition-colors"
-                  >
-                    Tư vấn AI
-                  </Link>
-                </li>
+
                 <li>
                   <Link
                     to={USER_ROUTES.FORUM}

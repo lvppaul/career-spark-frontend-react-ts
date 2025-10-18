@@ -2,6 +2,8 @@
 export const PUBLIC_ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
+  CONFIRM_EMAIL: '/confirm-email',
+  RESET_PASSWORD: '/reset-password',
   UNAUTHORIZED: '/unauthorized',
 } as const;
 
@@ -10,9 +12,9 @@ export const USER_ROUTES = {
   HOME: '/',
   FORUM: '/forum',
   NEWS: '/news',
-  AI_ASSISTANT: '/ai-assistant',
   ROADMAP: '/roadmap',
   TEST_RIASEC: '/test-riasec',
+  SETTINGS: '/settings',
 } as const;
 
 // Admin routes (protected)
@@ -43,7 +45,6 @@ export const NAVIGATION_ITEMS = {
     { label: 'Trang chủ', path: USER_ROUTES.HOME },
     { label: 'Diễn đàn', path: USER_ROUTES.FORUM },
     { label: 'Tin tức', path: USER_ROUTES.NEWS },
-    { label: 'Trợ lý AI', path: USER_ROUTES.AI_ASSISTANT },
     { label: 'Test RIASEC', path: USER_ROUTES.TEST_RIASEC },
   ],
   ADMIN: [

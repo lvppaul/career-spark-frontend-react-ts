@@ -12,18 +12,20 @@ import { TestPage } from '@/features/user/test-riasec';
 import RiasecResultPage from '@/features/user/test-riasec/pages/RiasecResultPage';
 import RiasecHistoryPage from '@/features/user/test-riasec/pages/RiasecHistoryPage';
 import { LoginPage, SignUpPage } from '@/features/auth/pages';
+import ResetPasswordPage from '@/features/auth/pages/ResetPasswordPage';
+import ConfirmEmailPage from '@/features/auth/pages/ConfirmEmailPage';
 import { ForumPage } from '@/features/user/forum/pages';
 import { NewsPage } from '@/features/user/news/pages';
 const NewsDetailPage = React.lazy(
   () => import('@/features/user/news/pages/NewsDetailPage')
 );
-import { AIAssistantPage } from '@/features/user/ai-assistant/pages';
 import { AdminPage } from '@/features/admin/pages';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROUTES } from './constants';
 import UserProfileView from '@/features/user/user-management/pages/UserProfileView';
 import UserProfileEdit from '@/features/user/user-management/pages/UserProfileEdit';
+import UserSettingsPage from '@/features/user/user-management/pages/UserSettingsPage';
 
 // Wrapper components for layouts
 const UserLayoutWrapper: React.FC = () => (
@@ -52,6 +54,8 @@ const AppRouter: React.FC = () => {
         {/* Public Routes */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.SIGNUP} element={<SignUpPage />} />
+        <Route path={ROUTES.CONFIRM_EMAIL} element={<ConfirmEmailPage />} />
+        <Route path={ROUTES.RESET_PASSWORD} element={<ResetPasswordPage />} />
         <Route path={ROUTES.UNAUTHORIZED} element={<UnauthorizedPage />} />
 
         {/* Protected Admin Routes */}
@@ -93,12 +97,13 @@ const AppRouter: React.FC = () => {
               </Suspense>
             }
           />
-          <Route path="ai-assistant" element={<AIAssistantPage />} />
+          {/* AI Assistant route removed */}
           <Route path="test-riasec" element={<TestPage />} />
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
           <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
           <Route path="profile" element={<UserProfileView />} />
-          <Route path="profile/edit" element={<UserProfileEdit />} />
+          <Route path="profile/edit/:id" element={<UserProfileEdit />} />
+          <Route path="settings" element={<UserSettingsPage />} />
           <Route
             path="matching-jobs"
             element={

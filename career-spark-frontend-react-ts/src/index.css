@@ -22,3 +22,15 @@
 .cs-primary-btn:disabled {
   opacity: 0.5;
 }
+
+langflow-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+/* If the widget uses internal popovers that rely on transforms/overflow, ensure body doesn't clip them */
+body,
+#root {
+  overflow: visible !important;
+}
