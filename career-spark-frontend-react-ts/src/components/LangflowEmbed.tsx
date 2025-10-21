@@ -28,7 +28,7 @@ export default function LangflowEmbed() {
           window_title="CareerSpark AI Assistant"
           flow_id="b7fbf703-5ac6-46aa-9fba-ff1a8a02b112"
           host_url="http://careersparklangflowai0910.southeastasia.azurecontainer.io:7860"
-          chat_position="bottom-right"
+          chat_position="top-left"
           height="600"
           width="400">
         </langflow-chat>

@@ -11,19 +11,11 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <script src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+  <!-- Langflow script will be injected dynamically when needed -->
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <langflow-chat
-      window_title="CareerSpark AI Assistant"
-      flow_id="b7fbf703-5ac6-46aa-9fba-ff1a8a02b112"
-      host_url="http://careersparklangflowai0910.southeastasia.azurecontainer.io:7860"
-      chat_position="top-left"
-      height="600"
-      width="400"
-    >
-    </langflow-chat>
+    <!-- Langflow chat will be rendered by React when a logged-in User is present -->
   </body>
 </html>

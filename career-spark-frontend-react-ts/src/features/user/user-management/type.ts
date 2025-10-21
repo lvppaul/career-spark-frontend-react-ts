@@ -40,3 +40,16 @@ export interface ResetPasswordResponse {
   message: string;
   timestamp?: string;
 }
+
+// Update password when authenticated
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface UpdatePasswordResponse {
+  success: boolean;
+  message: string;
+  timestamp?: string;
+}
