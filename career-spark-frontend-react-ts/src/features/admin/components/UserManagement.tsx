@@ -10,7 +10,6 @@ import {
   Form,
   message,
   Popconfirm,
-  Card,
   Row,
   Col,
   Typography,
@@ -513,7 +512,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
 
   return (
     <div>
-      <Card>
+      <div>
         <div style={{ marginBottom: '24px' }}>
           <div
             style={{
@@ -609,7 +608,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
               `${range[0]}-${range[1]} của ${total} người dùng`,
           }}
         />
-      </Card>
+      </div>
 
       {/* Create & Edit modals (separate components) */}
       <CreateUserModal

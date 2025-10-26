@@ -1,6 +1,17 @@
 import React, { useMemo } from 'react';
-import { Table, Button, Space, Modal, message as antdMessage } from 'antd';
+import {
+  Table,
+  Button,
+  Space,
+  Modal,
+  message as antdMessage,
+  Avatar,
+} from 'antd';
 import usePublishBlog from '@/features/user/forum/hooks/usePublishBlog';
+import useUpdateBlog from '@/features/admin/hooks/useUpdateBlog';
+import useDeleteBlog from '@/features/admin/hooks/useDeleteBlog';
+import BlogDetail from '@/features/user/forum/components/BlogDetail';
+import { Form, Input, Select } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import useUnpublishedBlogs from '@/features/admin/hooks/useUnpublishedBlogs';
 import { BLOG_TAG_OPTIONS } from '@/features/user/forum/type';
@@ -19,12 +30,26 @@ const UnpublishedBlogManagement: React.FC = () => {
     setPage,
     setSize,
     refresh,
-  } = useUnpublishedBlogs(1, 10);
+  } = useUnpublishedBlogs();
 
   const { publish } = usePublishBlog();
+  const [detailVisible, setDetailVisible] = React.useState(false);
+  const [selectedBlogId, setSelectedBlogId] = React.useState<number | null>(
+    null
+  );
   const [publishingId, setPublishingId] = React.useState<number | null>(null);
   const [publishModalOpen, setPublishModalOpen] = React.useState(false);
   const [publishTargetId, setPublishTargetId] = React.useState<number | null>(
+    null
+  );
+  const { updateBlog, isLoading: updating } = useUpdateBlog();
+  const { deleteBlog } = useDeleteBlog();
+  const [editModalOpen, setEditModalOpen] = React.useState(false);
+  const [editingId, setEditingId] = React.useState<number | null>(null);
+  const [editForm] = Form.useForm();
+  const [deletingId, setDeletingId] = React.useState<number | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [deleteTargetId, setDeleteTargetId] = React.useState<number | null>(
     null
   );
 
@@ -40,22 +65,22 @@ const UnpublishedBlogManagement: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    Modal.confirm({
-      title: 'Xóa bài viết',
-      content:
-        'Bạn có chắc muốn xóa bài viết này không? Hành động này không thể hoàn tác.',
-      okText: 'Xóa',
-      okType: 'danger',
-      cancelText: 'Hủy',
-      onOk() {
-        // Placeholder: call delete API then refresh
-        antdMessage.success(`Đã xóa bài viết ${id} (API not implemented)`);
-        console.log('delete', id);
-      },
-    });
+    setDeleteTargetId(id);
+    setDeleteModalOpen(true);
   };
 
   const columns: ColumnsType<BlogItem> = [
+    {
+      title: 'Tác giả',
+      dataIndex: 'authorName',
+      key: 'author',
+      render: (_: unknown, record: BlogItem) => (
+        <Space align="center">
+          <Avatar src={record.authorAvatarUrl} alt={record.authorName} />
+          <span>{record.authorName ?? '—'}</span>
+        </Space>
+      ),
+    },
     {
       title: 'Tiêu đề',
       dataIndex: 'title',
@@ -80,15 +105,42 @@ const UnpublishedBlogManagement: React.FC = () => {
         <Space>
           <Button
             type="link"
+            onClick={() => {
+              setSelectedBlogId(record.id);
+              setDetailVisible(true);
+            }}
+          >
+            Xem
+          </Button>
+
+          <Button
+            type="link"
             loading={publishingId === record.id}
             onClick={() => handlePublish(record.id)}
           >
             Đăng
           </Button>
-          <Button type="link" onClick={() => console.log('edit', record.id)}>
+
+          <Button
+            type="link"
+            onClick={() => {
+              setEditingId(record.id);
+              editForm.setFieldsValue({
+                title: record.title,
+                tag: record.tag,
+                content: record.content,
+              });
+              setEditModalOpen(true);
+            }}
+          >
             Sửa
           </Button>
-          <Button type="link" danger onClick={() => handleDelete(record.id)}>
+          <Button
+            type="link"
+            danger
+            loading={deletingId === record.id}
+            onClick={() => handleDelete(record.id)}
+          >
             Xóa
           </Button>
         </Space>
@@ -117,14 +169,13 @@ const UnpublishedBlogManagement: React.FC = () => {
         dataSource={data}
         loading={isLoading}
         pagination={
-          pagination
-            ? {
-                current: pagination.pageNumber,
-                pageSize: pagination.pageSize,
-                total: pagination.totalCount,
-                showSizeChanger: true,
-              }
-            : false
+          // Drive pagination from hook state
+          {
+            current: page,
+            pageSize: size,
+            total: pagination?.totalCount ?? 0,
+            showSizeChanger: true,
+          }
         }
         onChange={onChange}
       />
@@ -156,6 +207,106 @@ const UnpublishedBlogManagement: React.FC = () => {
       >
         <p>Bạn có chắc muốn đăng bài viết này không?</p>
       </Modal>
+
+      {/* Controlled delete confirmation modal for unpublished items */}
+      <Modal
+        open={deleteModalOpen}
+        title="Xóa bài viết"
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setDeleteTargetId(null);
+        }}
+        okText="Xóa"
+        okType="danger"
+        cancelText="Hủy"
+        confirmLoading={deletingId === deleteTargetId}
+        onOk={async () => {
+          if (!deleteTargetId) return setDeleteModalOpen(false);
+          setDeletingId(deleteTargetId);
+          try {
+            await deleteBlog(deleteTargetId);
+            antdMessage.success(`Đã xóa bài viết ${deleteTargetId}`);
+            refresh();
+            setDeleteModalOpen(false);
+            setDeleteTargetId(null);
+          } catch (err) {
+            console.error('Delete failed', err);
+            antdMessage.error('Xóa bài viết thất bại');
+          } finally {
+            setDeletingId(null);
+          }
+        }}
+      >
+        <p>
+          Bạn có chắc muốn xóa bài viết này không? Hành động này không thể hoàn
+          tác.
+        </p>
+      </Modal>
+
+      {/* Edit blog modal for unpublished items */}
+      <Modal
+        title="Sửa bài viết"
+        open={editModalOpen}
+        onCancel={() => {
+          setEditModalOpen(false);
+          editForm.resetFields();
+          setEditingId(null);
+        }}
+        width={900}
+        okText="Lưu"
+        confirmLoading={updating}
+        onOk={async () => {
+          try {
+            const values = await editForm.validateFields();
+            if (!editingId) return;
+            await updateBlog(editingId, {
+              title: values.title,
+              tag: values.tag,
+              content: values.content,
+            });
+            antdMessage.success('Cập nhật bài viết thành công');
+            setEditModalOpen(false);
+            editForm.resetFields();
+            setEditingId(null);
+            refresh();
+          } catch (err) {
+            console.error('Update failed', err);
+            antdMessage.error('Cập nhật thất bại');
+          }
+        }}
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="tag" label="Chủ đề" rules={[{ required: true }]}>
+            <Select>
+              {BLOG_TAG_OPTIONS.map((opt) => (
+                <Select.Option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="content"
+            label="Nội dung"
+            rules={[{ required: true }]}
+          >
+            <Input.TextArea rows={10} />
+          </Form.Item>
+        </Form>
+      </Modal>
+      {detailVisible && (
+        <Modal
+          open
+          onCancel={() => setDetailVisible(false)}
+          footer={null}
+          width={900}
+        >
+          <BlogDetail id={selectedBlogId} showBack={false} />
+        </Modal>
+      )}
     </div>
   );
 };

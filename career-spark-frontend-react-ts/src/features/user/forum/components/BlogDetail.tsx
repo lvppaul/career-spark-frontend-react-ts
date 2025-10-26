@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Spin, Empty, Typography } from 'antd';
+import { Card, Spin, Empty, Typography, Avatar, Space } from 'antd';
 import useBlogById from '@/features/user/forum/hooks/useBlogById';
 
 interface BlogDetailProps {
@@ -56,9 +56,26 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
       </Title>
 
       <div className="mb-4 flex items-center gap-3">
-        <span className="text-gray-500 text-sm">
-          Đăng: {new Date(data.createAt).toLocaleString()}
-        </span>
+        <Space align="center" size={12}>
+          <Avatar src={data.authorAvatarUrl} alt={data.authorName}>
+            {!data.authorAvatarUrl && data.authorName
+              ? data.authorName
+                  .split(' ')
+                  .map((s) => s[0])
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase()
+              : null}
+          </Avatar>
+          <div>
+            <div style={{ fontWeight: 600 }}>
+              {data.authorName || 'Người dùng'}
+            </div>
+            <div className="text-gray-500 text-sm">
+              Đăng: {new Date(data.createAt).toLocaleString()}
+            </div>
+          </div>
+        </Space>
       </div>
 
       <div style={{ whiteSpace: 'pre-wrap', fontSize: 16, lineHeight: '1.7' }}>
