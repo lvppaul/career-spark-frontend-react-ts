@@ -84,6 +84,8 @@ export interface User {
   name: string;
   email: string;
   Role: string;
+  // Optional subscription level claim from JWT (some tokens include this)
+  SubscriptionLevel?: string | number;
   // Optional avatar URL provided in JWT payload
   avatarURL?: string;
   aud: string;

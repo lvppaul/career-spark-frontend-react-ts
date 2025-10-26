@@ -12,6 +12,7 @@ import {
   Spin,
 } from 'antd';
 import { useEffect, useState } from 'react';
+import useLatestSession from '../hooks/useLatestSession';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { SubmitResponse, RoadmapPath } from '../types';
 import { useRiasecRoadmap } from '../hooks/useRiasecRoadmap';
@@ -38,19 +39,16 @@ export default function MatchingJobsPage() {
     }
   }, [result]);
 
-  // sessionId saved when starting test
-  const [sessionId, setSessionId] = useState<number | undefined>(undefined);
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('riasecSession');
-      if (raw) {
-        const s = JSON.parse(raw) as { sessionId?: number };
-        if (s?.sessionId) setSessionId(Number(s.sessionId));
-      }
-    } catch (e) {
-      console.warn('Failed to load riasecSession', e);
-    }
-  }, []);
+  // Use latest session from server instead of localStorage
+  const {
+    data: latestSession,
+    isLoading: loadingLatest,
+    error: latestError,
+  } = useLatestSession();
+
+  const sessionId = latestSession?.sessionId
+    ? Number(latestSession.sessionId)
+    : undefined;
 
   const user = tokenUtils.getUserData();
   const userId = user?.sub ? Number(user.sub) : undefined;
@@ -59,6 +57,8 @@ export default function MatchingJobsPage() {
     sessionId,
     userId
   );
+
+  const combinedError = error ?? latestError;
 
   const paths = uiData?.paths ?? [];
 
@@ -75,11 +75,13 @@ export default function MatchingJobsPage() {
       </div>
 
       <div style={{ marginTop: 12 }}>
-        {isLoading ? (
+        {loadingLatest || isLoading ? (
           <Spin />
         ) : paths.length === 0 ? (
           <Empty
-            description={error ? 'Không có dữ liệu' : 'Không tìm thấy lộ trình'}
+            description={
+              combinedError ? 'Không có dữ liệu' : 'Không tìm thấy lộ trình'
+            }
           />
         ) : (
           <Row gutter={[16, 16]} style={{ marginTop: 12 }}>

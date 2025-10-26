@@ -4,6 +4,8 @@ export interface SubscriptionPlan {
   id: number;
   name: string;
   price: number;
+  // Optional human-readable benefits description returned by API
+  benefits?: string;
   level: number;
   durationDays: number;
   description?: string;

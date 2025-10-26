@@ -22,6 +22,8 @@ export const ADMIN_ROUTES = {
   DASHBOARD: '/admin',
   USER_MANAGEMENT: '/admin/users',
   QUESTION_MANAGEMENT: '/admin/questions',
+  BLOG_MANAGEMENT: '/admin/blogs',
+  BLOG_UNPUBLISHED: '/admin/blogs/unpublished',
   SETTINGS: '/admin/settings',
 } as const;
 
@@ -51,6 +53,7 @@ export const NAVIGATION_ITEMS = {
     { label: 'Dashboard', path: ADMIN_ROUTES.DASHBOARD },
     { label: 'Quản lý người dùng', path: ADMIN_ROUTES.USER_MANAGEMENT },
     { label: 'Quản lý câu hỏi', path: ADMIN_ROUTES.QUESTION_MANAGEMENT },
+    { label: 'Bài viết chưa đăng', path: ADMIN_ROUTES.BLOG_UNPUBLISHED },
     { label: 'Cài đặt', path: ADMIN_ROUTES.SETTINGS },
   ],
 } as const;

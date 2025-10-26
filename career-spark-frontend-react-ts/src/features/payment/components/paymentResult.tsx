@@ -1,5 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Result, Button } from 'antd';
+import { Result, Button, Typography } from 'antd';
+import { tokenUtils } from '@/utils/tokenUtils';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+
+const { Text } = Typography;
 
 export default function PaymentResult() {
   const [params] = useSearchParams();
@@ -10,21 +15,39 @@ export default function PaymentResult() {
 
   const isSuccess = status === 'success';
 
+  const { logout } = useAuth();
+  const timeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // After 3 seconds clear localStorage and perform logout (which redirects to /login)
+    const t = window.setTimeout(() => {
+      try {
+        tokenUtils.clearAll();
+      } catch (e) {
+        console.warn('Failed to clear local storage', e);
+      }
+      // Call logout from hook (it will attempt API logout and redirect)
+      logout().catch((e) => console.warn('Logout failed', e));
+    }, 3000);
+
+    // store timeout id so the immediate button can cancel it
+    timeoutRef.current = t;
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [logout]);
+
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex flex-col justify-center items-center">
       {isSuccess ? (
         <Result
           status="success"
           title="Thanh toán thành công!"
           subTitle={`Đơn hàng #${orderId} (Mã tham chiếu: ${txnRef}) đã được xử lý thành công.`}
-          extra={[
-            <Button type="primary" key="home" href="/">
-              Về trang chủ
-            </Button>,
-            <Button key="orders" href="/orders">
-              Xem lịch sử đơn hàng
-            </Button>,
-          ]}
         />
       ) : (
         <Result
@@ -38,6 +61,36 @@ export default function PaymentResult() {
           ]}
         />
       )}
+
+      <div style={{ marginTop: 12 }}>
+        <Text type="secondary">
+          Bạn sẽ được chuyển về trang đăng nhập trong 3 giây...
+        </Text>
+      </div>
+      <div style={{ marginTop: 12 }}>
+        <Button
+          type="default"
+          onClick={() => {
+            // Cancel the pending timeout and perform immediate logout/redirect
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+              timeoutRef.current = null;
+            }
+
+            try {
+              tokenUtils.clearAll();
+            } catch (e) {
+              console.warn('Failed to clear local storage', e);
+            }
+            logout().catch((e) => {
+              console.warn('Logout failed, fallback to redirect', e);
+              window.location.replace('/login');
+            });
+          }}
+        >
+          Đăng nhập ngay
+        </Button>
+      </div>
     </div>
   );
 }

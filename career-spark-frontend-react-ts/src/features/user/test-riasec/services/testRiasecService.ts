@@ -28,6 +28,7 @@ const service = {
   getTestDetail,
   getRoadmap,
   getSessionsByUser,
+  getLatestSession,
 };
 
 export default service;
@@ -116,5 +117,23 @@ export async function getSessionsByUser(
   } catch (error: unknown) {
     console.error('Failed to fetch RIASEC sessions', error);
     throw error;
+  }
+}
+
+// Get the latest session for the currently authenticated user
+export async function getLatestSession(): Promise<
+  import('../types').SessionSummary | null
+> {
+  try {
+    const response = await api.get('/Test/sessions/latest');
+    // Expecting { sessionId: number, startAt: string }
+    const payload = response.data;
+    if (payload && typeof payload.sessionId === 'number') {
+      return payload as import('../types').SessionSummary;
+    }
+    return null;
+  } catch (error: unknown) {
+    console.error('Failed to fetch latest session', error);
+    return null;
   }
 }

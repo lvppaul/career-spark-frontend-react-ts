@@ -20,7 +20,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <main className="flex-1 pt-16">{children}</main>
 
       {/* Footer */}
-  <footer className="bg-gray-800 text-white py-12">
+      <footer className="bg-gray-800 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="">
@@ -121,7 +121,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
       </footer>
       {/* Langflow chat: render only for authenticated users with role 'User' */}
-  {isAuthenticated && isUser() && <LangflowEmbed />}
+      {isAuthenticated && isUser() && <LangflowEmbed />}
     </div>
   );
 };

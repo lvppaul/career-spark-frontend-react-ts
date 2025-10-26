@@ -62,6 +62,9 @@ export const tokenUtils = {
         name: payload.name,
         email: payload.email,
         Role: payload.Role,
+        // Support SubscriptionLevel claim (may be string or number in token)
+        SubscriptionLevel:
+          payload.SubscriptionLevel ?? payload.subscriptionLevel ?? undefined,
         avatarURL:
           payload.avatarURL ||
           payload.avatarUrl ||
@@ -77,6 +80,24 @@ export const tokenUtils = {
       console.error('Error decoding token:', error);
       return null;
     }
+  },
+
+  // Get numeric subscription level (null if not present or invalid)
+  getSubscriptionLevel: (): number | null => {
+    const user = tokenUtils.getUserData();
+    const raw =
+      (user as User | null)?.SubscriptionLevel ??
+      (user as Record<string, unknown> | null)?.subscriptionLevel;
+    if (raw == null) return null;
+    const num = Number(raw);
+    return Number.isFinite(num) ? num : null;
+  },
+
+  // Check if user's subscription level is at least the provided level
+  hasSubscriptionLevelAtLeast: (level: number): boolean => {
+    const current = tokenUtils.getSubscriptionLevel();
+    if (current == null) return false;
+    return current >= level;
   },
 
   // Check if token is expired

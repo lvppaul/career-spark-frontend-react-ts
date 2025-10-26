@@ -139,20 +139,12 @@ export const useAuth = (): UseAuthReturn => {
       setIsLoading(true);
       setError(null);
 
-      console.log('useAuth: Logout attempt started...');
       await authService.logout();
-      console.log('useAuth: Logout API call completed');
 
       // Force clear local auth state
       setUser(null);
       setIsAuthenticated(false);
 
-      console.log('useAuth: Auth state cleared, attempting navigation...');
-
-      // Force immediate page redirect instead of relying on React Router
-      console.log(
-        'useAuth: Using window.location.replace for immediate redirect'
-      );
       window.location.replace('/login');
 
       console.log('useAuth: Navigation commands executed');

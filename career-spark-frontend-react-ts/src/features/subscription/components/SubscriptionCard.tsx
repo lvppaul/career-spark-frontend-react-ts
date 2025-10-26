@@ -53,6 +53,11 @@ export default function SubscriptionCard({ plan }: Props) {
         <div>
           <div style={{ fontSize: 18, fontWeight: 700 }}>{plan.name}</div>
           <div style={{ color: '#666', marginTop: 6 }}>{plan.description}</div>
+          {plan.benefits ? (
+            <div style={{ color: '#444', marginTop: 8, fontSize: 13 }}>
+              <strong>Lợi ích:</strong> {plan.benefits}
+            </div>
+          ) : null}
         </div>
 
         <div style={{ textAlign: 'right' }}>

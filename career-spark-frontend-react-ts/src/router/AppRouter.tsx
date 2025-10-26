@@ -46,6 +46,12 @@ const SubscriptionPage = React.lazy(
 const PaymentResultPage = React.lazy(
   () => import('@/features/payment/pages/PaymentResultPage')
 );
+const BlogsPageLazy = React.lazy(
+  () => import('@/features/admin/pages/BlogsPage')
+);
+const UnpublishedBlogsPageLazy = React.lazy(
+  () => import('@/features/admin/pages/UnpublishedBlogsPage')
+);
 
 const AppRouter: React.FC = () => {
   return (
@@ -71,6 +77,22 @@ const AppRouter: React.FC = () => {
           {/* Add more admin routes as needed */}
           {/* <Route path="users" element={<UserManagementPage />} /> */}
           {/* <Route path="questions" element={<QuestionManagementPage />} /> */}
+          <Route
+            path="blogs"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <BlogsPageLazy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="blogs/unpublished"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <UnpublishedBlogsPageLazy />
+              </Suspense>
+            }
+          />
           {/* <Route path="settings" element={<AdminSettingsPage />} /> */}
         </Route>
 

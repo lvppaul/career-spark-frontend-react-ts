@@ -190,6 +190,13 @@ const Header: React.FC = () => {
                     Cài đặt
                   </Link>
                   <Link
+                    to="/matching-jobs"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Roadmap cụ thể
+                  </Link>
+                  <Link
                     to="/test-riasec/history"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setShowUserMenu(false)}

@@ -15,7 +15,7 @@ import type { SubmitResponse } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined, RedoOutlined } from '@ant-design/icons';
 // roadmap details removed from result page
-// tokenUtils removed — not needed in this page now
+import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
 
@@ -218,7 +218,16 @@ export default function RiasecResultPage() {
                   <div className="mt-4">
                     <Button
                       type="primary"
-                      onClick={() => navigate('/subscription')}
+                      onClick={() => {
+                        // If user has a subscription level > 0, allow access to matching jobs
+                        const level = tokenUtils.getSubscriptionLevel();
+                        if (level && level > 0) {
+                          navigate('/matching-jobs');
+                        } else {
+                          // Otherwise send them to subscription page
+                          navigate('/subscription');
+                        }
+                      }}
                     >
                       Các công việc phù hợp
                     </Button>
