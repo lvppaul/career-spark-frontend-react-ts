@@ -64,6 +64,8 @@ export const BLOG_TAG_OPTIONS = [
 export interface BlogItem {
   id: number;
   authorId: number;
+  authorName?: string;
+  authorAvatarUrl?: string;
   title: string;
   tag: BlogTag | string;
   content: string;
