@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
-import { Table, Button, Space, Alert } from 'antd';
+import { Table, Button, Space, Modal, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import usePublishedBlogs from '@/features/admin/hooks/usePublishedBlogs';
+import CreateBlogModal from '@/features/user/forum/components/CreateBlogModal';
+import BlogDetail from '@/features/user/forum/components/BlogDetail';
+import useUnpublishBlog from '@/features/user/forum/hooks/useUnpublishBlog';
 import { BLOG_TAG_OPTIONS } from '@/features/user/forum/type';
 import type { BlogItem } from '@/features/user/forum/type';
 
@@ -10,14 +13,27 @@ const BlogManagement: React.FC = () => {
     data,
     pagination,
     isLoading,
-    error,
-    message,
+
     page,
     size,
     setPage,
     setSize,
     refresh,
   } = usePublishedBlogs(1, 10);
+
+  const [createVisible, setCreateVisible] = React.useState(false);
+  const [detailVisible, setDetailVisible] = React.useState(false);
+  const [selectedBlogId, setSelectedBlogId] = React.useState<number | null>(
+    null
+  );
+  const { unpublish } = useUnpublishBlog();
+  const [unpublishingId, setUnpublishingId] = React.useState<number | null>(
+    null
+  );
+  const [unpublishModalOpen, setUnpublishModalOpen] = React.useState(false);
+  const [unpublishTargetId, setUnpublishTargetId] = React.useState<
+    number | null
+  >(null);
 
   const tagMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -49,8 +65,24 @@ const BlogManagement: React.FC = () => {
       key: 'actions',
       render: (_: unknown, record: BlogItem) => (
         <Space>
-          <Button type="link" onClick={() => console.log('view', record.id)}>
+          <Button
+            type="link"
+            onClick={() => {
+              setSelectedBlogId(record.id);
+              setDetailVisible(true);
+            }}
+          >
             Xem
+          </Button>
+          <Button
+            type="link"
+            loading={unpublishingId === record.id}
+            onClick={() => {
+              setUnpublishTargetId(record.id);
+              setUnpublishModalOpen(true);
+            }}
+          >
+            Ẩn
           </Button>
           <Button type="link" onClick={() => console.log('edit', record.id)}>
             Sửa
@@ -79,11 +111,11 @@ const BlogManagement: React.FC = () => {
         <h2 className="text-lg font-semibold">Quản lý bài viết</h2>
         <Space>
           <Button onClick={() => refresh()}>Tải lại</Button>
+          <Button type="primary" onClick={() => setCreateVisible(true)}>
+            Tạo mới
+          </Button>
         </Space>
       </div>
-
-      {error && <Alert type="error" message={error} className="mb-4" />}
-      {message && <Alert type="info" message={message} className="mb-4" />}
 
       <Table
         rowKey={(r) => r.id}
@@ -102,6 +134,52 @@ const BlogManagement: React.FC = () => {
         }
         onChange={onChange}
       />
+      <CreateBlogModal
+        visible={createVisible}
+        onClose={() => setCreateVisible(false)}
+        onCreated={() => {
+          setCreateVisible(false);
+          refresh();
+        }}
+      />
+
+      {/* Controlled unpublish confirmation modal */}
+      <Modal
+        open={!!unpublishModalOpen}
+        title="Ẩn bài viết"
+        onCancel={() => setUnpublishModalOpen(false)}
+        okText="Ẩn"
+        cancelText="Hủy"
+        confirmLoading={unpublishingId === unpublishTargetId}
+        onOk={async () => {
+          if (!unpublishTargetId) return setUnpublishModalOpen(false);
+          setUnpublishingId(unpublishTargetId);
+          try {
+            const resp = await unpublish(unpublishTargetId);
+            message.success(resp?.message || 'Đã ẩn bài viết');
+            refresh();
+            setUnpublishModalOpen(false);
+          } catch (err) {
+            console.error('Unpublish error', err);
+            message.error('Không thể ẩn bài viết');
+          } finally {
+            setUnpublishingId(null);
+          }
+        }}
+      >
+        <p>Bạn có chắc muốn ẩn bài viết này?</p>
+      </Modal>
+
+      {detailVisible && (
+        <Modal
+          open
+          onCancel={() => setDetailVisible(false)}
+          footer={null}
+          width={900}
+        >
+          <BlogDetail id={selectedBlogId} showBack={false} />
+        </Modal>
+      )}
     </div>
   );
 };

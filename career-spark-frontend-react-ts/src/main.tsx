@@ -3,14 +3,18 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from '@/App.tsx';
 import LoadingOverlay from '@/components/LoadingOverlay/LoadingOverlay';
-
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ConfigProvider, App as AntApp } from 'antd';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <App />
-      <LoadingOverlay />
+      <ConfigProvider theme={{}}>
+        <AntApp>
+          <App />
+          <LoadingOverlay />
+        </AntApp>
+      </ConfigProvider>
     </GoogleOAuthProvider>
   </StrictMode>
 );

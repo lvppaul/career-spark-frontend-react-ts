@@ -35,10 +35,37 @@ export async function getBlogById(id: number) {
   return resp.data;
 }
 
+/**
+ * Publish a blog (PATCH /Blog/{id}/publish)
+ * @param id blog id
+ */
+export async function publishBlog(id: number | string) {
+  const url = `/Blog/${id}/publish`;
+  // Debug log to help trace requests during development
+
+  // use patch to match server swagger
+  const resp = await api.patch<{ success: boolean; message: string }>(url);
+  return resp.data;
+}
+
+/**
+ * Unpublish a blog (PATCH /Blog/{id}/unpublish)
+ * @param id blog id
+ */
+export async function unpublishBlog(id: number | string) {
+  const url = `/Blog/${id}/unpublish`;
+  // Debug log to help trace requests during development
+
+  const resp = await api.patch<{ success: boolean; message: string }>(url);
+  return resp.data;
+}
+
 export const forumService = {
   getPublishedBlogs,
   createBlog,
   getBlogById,
+  publishBlog,
+  unpublishBlog,
 };
 
 export default forumService;

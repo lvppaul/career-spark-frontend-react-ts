@@ -1,32 +1,32 @@
 import React, { useMemo } from 'react';
-import {
-  Table,
-  Button,
-  Space,
-  Alert,
-  Modal,
-  message as antdMessage,
-} from 'antd';
+import { Table, Button, Space, Modal, message as antdMessage } from 'antd';
+import usePublishBlog from '@/features/user/forum/hooks/usePublishBlog';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import useUnpublishedBlogs from '@/features/admin/hooks/useUnpublishedBlogs';
 import { BLOG_TAG_OPTIONS } from '@/features/user/forum/type';
 import type { BlogItem } from '@/features/user/forum/type';
 
-const { confirm } = Modal;
+// controlled modal state will be used instead of Modal.confirm
 
 const UnpublishedBlogManagement: React.FC = () => {
   const {
     data,
     pagination,
     isLoading,
-    error,
-    message,
+
     page,
     size,
     setPage,
     setSize,
     refresh,
   } = useUnpublishedBlogs(1, 10);
+
+  const { publish } = usePublishBlog();
+  const [publishingId, setPublishingId] = React.useState<number | null>(null);
+  const [publishModalOpen, setPublishModalOpen] = React.useState(false);
+  const [publishTargetId, setPublishTargetId] = React.useState<number | null>(
+    null
+  );
 
   const tagMap = useMemo(() => {
     const m = new Map<string, string>();
@@ -35,13 +35,12 @@ const UnpublishedBlogManagement: React.FC = () => {
   }, []);
 
   const handlePublish = (id: number) => {
-    // Placeholder: call publish API when available
-    antdMessage.info(`Publish blog ${id} (API not implemented yet)`);
-    console.log('publish', id);
+    setPublishTargetId(id);
+    setPublishModalOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    confirm({
+    Modal.confirm({
       title: 'Xóa bài viết',
       content:
         'Bạn có chắc muốn xóa bài viết này không? Hành động này không thể hoàn tác.',
@@ -79,7 +78,11 @@ const UnpublishedBlogManagement: React.FC = () => {
       key: 'actions',
       render: (_: unknown, record: BlogItem) => (
         <Space>
-          <Button type="link" onClick={() => handlePublish(record.id)}>
+          <Button
+            type="link"
+            loading={publishingId === record.id}
+            onClick={() => handlePublish(record.id)}
+          >
             Đăng
           </Button>
           <Button type="link" onClick={() => console.log('edit', record.id)}>
@@ -108,9 +111,6 @@ const UnpublishedBlogManagement: React.FC = () => {
         </Space>
       </div>
 
-      {error && <Alert type="error" message={error} className="mb-4" />}
-      {message && <Alert type="info" message={message} className="mb-4" />}
-
       <Table
         rowKey={(r) => r.id}
         columns={columns}
@@ -128,6 +128,34 @@ const UnpublishedBlogManagement: React.FC = () => {
         }
         onChange={onChange}
       />
+      {/* Controlled publish confirmation modal */}
+      <Modal
+        open={!!publishModalOpen}
+        title="Đăng bài viết"
+        onCancel={() => setPublishModalOpen(false)}
+        okText="Đăng"
+        cancelText="Hủy"
+        confirmLoading={publishingId === publishTargetId}
+        onOk={async () => {
+          if (!publishTargetId) return setPublishModalOpen(false);
+          setPublishingId(publishTargetId);
+          try {
+            const resp = await publish(publishTargetId);
+            antdMessage.success(
+              resp?.message || `Đã đăng bài ${publishTargetId}`
+            );
+            refresh();
+            setPublishModalOpen(false);
+          } catch (err) {
+            console.error('Publish failed', err);
+            antdMessage.error('Không thể đăng bài viết');
+          } finally {
+            setPublishingId(null);
+          }
+        }}
+      >
+        <p>Bạn có chắc muốn đăng bài viết này không?</p>
+      </Modal>
     </div>
   );
 };

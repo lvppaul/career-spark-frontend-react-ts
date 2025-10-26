@@ -512,13 +512,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
   ];
 
   return (
-    <div
-      style={{
-        padding: '24px',
-        backgroundColor: '#f0f2f5',
-        minHeight: '100vh',
-      }}
-    >
+    <div>
       <Card>
         <div style={{ marginBottom: '24px' }}>
           <div
