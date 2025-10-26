@@ -3,7 +3,6 @@ import { Menu } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
-  QuestionCircleOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -26,12 +25,7 @@ const AdminSidebar: React.FC = () => {
       label: 'Quản lý người dùng',
       onClick: () => navigate(ADMIN_ROUTES.USER_MANAGEMENT),
     },
-    {
-      key: ADMIN_ROUTES.QUESTION_MANAGEMENT,
-      icon: <QuestionCircleOutlined />,
-      label: 'Quản lý câu hỏi',
-      onClick: () => navigate(ADMIN_ROUTES.QUESTION_MANAGEMENT),
-    },
+
     {
       key: ADMIN_ROUTES.BLOG_MANAGEMENT,
       icon: <FileTextOutlined />,

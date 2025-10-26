@@ -54,7 +54,17 @@ async function updateUserProfileFn(
       iat: Number(current?.iat ?? 0),
       nbf: Number(current?.nbf ?? 0),
     };
-    authService.updateLocalUser(mapped);
+    // Only update the local authenticated user if the updated payload belongs
+    // to the currently authenticated user. Otherwise an admin editing other
+    // users would accidentally replace the local session and cause redirects.
+    const currentSub = current?.sub ? String(current.sub) : null;
+    const updatedId = updatedPayload?.id ? String(updatedPayload.id) : null;
+    if (currentSub && updatedId && currentSub === updatedId) {
+      authService.updateLocalUser(mapped);
+    } else {
+      // Do not overwrite local auth user when updating other users
+      // (no-op)
+    }
   } catch (err) {
     // non-fatal: keep update success even if local update fails
     console.warn('Failed to update local auth user after profile update', err);
@@ -153,6 +163,36 @@ export const userService = {
   // Upload avatar via dedicated endpoint: POST /User/{id}/avatar
   uploadUserAvatar: uploadUserAvatarFn,
 
+  // Set active flag for a user (PUT /User/setActive/{id})
+  setActive: async (
+    id: number | string,
+    options?: { skipLoading?: boolean }
+  ) => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+    const resp = await api.put<{ success: boolean; message: string }>(
+      `/User/setActive/${id}`,
+      null,
+      { headers }
+    );
+    return resp.data;
+  },
+
+  // Deactivate user (PUT /User/Deactive/{id})
+  deActive: async (
+    id: number | string,
+    options?: { skipLoading?: boolean }
+  ) => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+    const resp = await api.put<{ success: boolean; message: string }>(
+      `/User/Deactive/${id}`,
+      null,
+      { headers }
+    );
+    return resp.data;
+  },
+
   // Backwards-compatible aliases
   updateUser: async (
     id: number | string,
@@ -177,6 +217,20 @@ export const userService = {
     options?: { skipLoading?: boolean }
   ) => {
     return await uploadUserAvatarFn(id, file, options);
+  },
+  // Fetch paginated user list (admin) - returns wrapper containing payload array and pagination
+  getPaginatedUsers: async (
+    pageNumber = 1,
+    pageSize = 10,
+    options?: { skipLoading?: boolean }
+  ) => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+    const resp = await api.get<import('../type').PaginatedUsersResponse>(
+      `/User/paginated?pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      { headers }
+    );
+    return resp.data;
   },
 };
 

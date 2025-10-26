@@ -1,3 +1,4 @@
+import UserManagement from '@/features/admin/components/UserManagement';
 import React, { Suspense } from 'react';
 import {
   BrowserRouter as Router,
@@ -74,6 +75,10 @@ const AppRouter: React.FC = () => {
           }
         >
           <Route index element={<AdminPage />} />
+          <Route
+            path="users"
+            element={<UserManagement onNavigate={() => {}} />}
+          />
           {/* Add more admin routes as needed */}
           {/* <Route path="users" element={<UserManagementPage />} /> */}
           {/* <Route path="questions" element={<QuestionManagementPage />} /> */}

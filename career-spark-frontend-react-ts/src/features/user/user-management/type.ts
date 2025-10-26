@@ -6,6 +6,7 @@ export interface UserDTO {
   phone: string | null;
   createdAt: string; // ISO datetime
   isActive: boolean;
+  isVerified?: boolean;
   avatarURL?: string | null;
   role?: string;
 }
@@ -18,7 +19,36 @@ export interface GetUserByIdResponse {
   timestamp?: string;
 }
 
+// Pagination info returned by many list endpoints
+export interface PaginationInfo {
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+// Generic paginated response for users
+export interface PaginatedUsersResponse {
+  success: boolean;
+  message?: string;
+  payload: UserDTO[];
+  pagination: PaginationInfo;
+  timestamp?: string;
+}
+
 export type { UserDTO as User };
+
+// Filters used by the admin user management UI
+export interface UserFilters {
+  role?: string;
+  // Whether the user is active (true) or not (false). Undefined means no filter.
+  isActive?: boolean;
+  // Whether the user is verified. Undefined means no filter.
+  isVerified?: boolean;
+  // subscription filter removed per admin UI simplification
+}
 
 // Forgot Password API response
 export interface ForgotPasswordResponse {
