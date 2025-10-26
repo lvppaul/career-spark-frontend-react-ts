@@ -64,6 +64,36 @@ const BlogManagement: React.FC = () => {
     return m;
   }, []);
 
+  // Filters
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [tagFilter, setTagFilter] = React.useState<string>('');
+  const [authorFilter, setAuthorFilter] = React.useState<string>('');
+
+  const authorOptions = useMemo(() => {
+    const setNames = new Set<string>();
+    for (const b of data || []) if (b.authorName) setNames.add(b.authorName);
+    return Array.from(setNames).sort();
+  }, [data]);
+
+  const filtered = useMemo(() => {
+    if (!data) return [] as BlogItem[];
+    return data.filter((d) => {
+      const matchesTag = !tagFilter || String(d.tag) === tagFilter;
+      const hay = (
+        d.title +
+        ' ' +
+        d.content +
+        ' ' +
+        (d.authorName ?? '')
+      ).toLowerCase();
+      const matchesSearch = !searchTerm
+        ? true
+        : hay.includes(searchTerm.toLowerCase());
+      const matchesAuthor = !authorFilter || d.authorName === authorFilter;
+      return matchesTag && matchesSearch && matchesAuthor;
+    });
+  }, [data, searchTerm, tagFilter, authorFilter]);
+
   const columns: ColumnsType<BlogItem> = [
     {
       title: 'Tác giả',
@@ -157,20 +187,65 @@ const BlogManagement: React.FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">Quản lý bài viết</h2>
-        <Space>
-          <Button onClick={() => refresh()}>Tải lại</Button>
-          <Button type="primary" onClick={() => setCreateVisible(true)}>
-            Tạo mới
-          </Button>
-        </Space>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Input.Search
+            placeholder="Tìm theo tiêu đề, nội dung, tác giả..."
+            allowClear
+            onSearch={(v) => setSearchTerm(v)}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ minWidth: 220 }}
+            value={searchTerm}
+          />
+          <Select
+            placeholder="Lọc theo chủ đề"
+            allowClear
+            style={{ width: 180 }}
+            value={tagFilter || undefined}
+            onChange={(v) => setTagFilter(v || '')}
+          >
+            {BLOG_TAG_OPTIONS.map((opt) => (
+              <Select.Option key={opt.value} value={opt.value}>
+                {opt.label}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            placeholder="Lọc theo tác giả"
+            allowClear
+            style={{ width: 180 }}
+            value={authorFilter || undefined}
+            onChange={(v) => setAuthorFilter(v || '')}
+          >
+            {authorOptions.map((a) => (
+              <Select.Option key={a} value={a}>
+                {a}
+              </Select.Option>
+            ))}
+          </Select>
+          <Space>
+            <Button onClick={() => refresh()}>Tải lại</Button>
+            <Button
+              onClick={() => {
+                setSearchTerm('');
+                setTagFilter('');
+                setAuthorFilter('');
+              }}
+            >
+              Reset
+            </Button>
+            <Button type="primary" onClick={() => setCreateVisible(true)}>
+              Tạo mới
+            </Button>
+          </Space>
+        </div>
       </div>
 
       <Table
         rowKey={(r) => r.id}
         columns={columns}
-        dataSource={data}
+        dataSource={filtered}
         loading={isLoading}
         pagination={
           // Always show pagination control and drive current/pageSize from hook state
