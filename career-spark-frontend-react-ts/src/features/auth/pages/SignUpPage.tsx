@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, Alert, Typography } from 'antd';
 import logoXX from '@/assets/images/only-logo-xx.jpg';
@@ -47,14 +47,25 @@ const SignUpPage: React.FC = () => {
   const state = location.state as LocationState;
   const { register, isLoading, error, isAuthenticated, clearError } = useAuth();
 
+  const [registered, setRegistered] = useState(false);
+
   const [formData, setFormData] = useState<SignUpFormData>({
     name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    roleId: 2, // Fixed role (2)
+    roleId: 3,
   });
+
+  const initialFormData: SignUpFormData = {
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    roleId: 3,
+  };
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -64,6 +75,8 @@ const SignUpPage: React.FC = () => {
   const [touched, setTouched] = useState<
     Partial<Record<keyof SignUpFormData, boolean>>
   >({});
+  // Only block submit while an API call is in-flight
+  const verifyEmailCalledRef = useRef(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -73,10 +86,16 @@ const SignUpPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate, state]);
 
-  // Clear errors when component mounts
+  // After successful registration, redirect to login after 7 seconds
   useEffect(() => {
-    clearError();
-  }, [clearError]);
+    if (!registered) return;
+
+    const timer = setTimeout(() => {
+      navigate('/login');
+    }, 6000);
+
+    return () => clearTimeout(timer);
+  }, [registered, navigate]);
 
   // Validation functions
   const validateName = (name: string): string | null => {
@@ -169,33 +188,41 @@ const SignUpPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Mark all fields as touched
+    // Prevent concurrent submissions while API is running
+    if (isLoading || verifyEmailCalledRef.current) return;
     setTouched({
       name: true,
       email: true,
       phone: true,
       password: true,
       confirmPassword: true,
-      roleId: true,
     });
 
     if (!validateForm()) return;
 
+    if (verifyEmailCalledRef.current) return;
+    verifyEmailCalledRef.current = true;
     try {
-      // call hook register which will store tokens and set pending redirect
-      await register({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.replace(/\s/g, ''),
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        roleId: formData.roleId,
-      });
-      // redirect is handled by useAuth when auth state updates
-    } catch (err: unknown) {
-      console.error('Registration failed:', err);
-      // error is set inside useAuth; no local state needed
+      const res = await register(formData);
+      if (res.success) {
+        // Reset form and set registered
+        setFormData(initialFormData);
+        setValidationErrors({});
+        setTouched({});
+        setShowPassword(false);
+        setShowConfirmPassword(false);
+        setRegistered(true);
+      } else {
+        // Map to a specific field if provided; fallback to email commonly
+        const field = res.errorField || ('email' as keyof SignUpFormData);
+        setValidationErrors({
+          ...validationErrors,
+          [field]: res.message,
+        } as Partial<SignUpFormData>);
+      }
+    } finally {
+      // allow retry once API finishes
+      verifyEmailCalledRef.current = false;
     }
   };
 
@@ -262,7 +289,22 @@ const SignUpPage: React.FC = () => {
             <Alert type="warning" message={state.message} className="mb-4" />
           )}
           {error && (
-            <Alert type="error" message={String(error)} className="mb-4" />
+            <Alert
+              type="error"
+              message={String(error)}
+              className="mb-4"
+              showIcon
+              closable
+              onClose={clearError}
+            />
+          )}
+
+          {registered && (
+            <Alert
+              type="success"
+              message="Đăng ký thành công, vui lòng kiểm tra email của bạn"
+              className="mb-4"
+            />
           )}
 
           <form className="mt-2 space-y-6" onSubmit={handleSubmit}>

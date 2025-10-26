@@ -2,6 +2,8 @@
 export const PUBLIC_ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
+  CONFIRM_EMAIL: '/confirm-email',
+  RESET_PASSWORD: '/reset-password',
   UNAUTHORIZED: '/unauthorized',
 } as const;
 
@@ -10,8 +12,9 @@ export const USER_ROUTES = {
   HOME: '/',
   FORUM: '/forum',
   NEWS: '/news',
-  AI_ASSISTANT: '/ai-assistant',
   ROADMAP: '/roadmap',
+  TEST_RIASEC: '/test-riasec',
+  SETTINGS: '/settings',
 } as const;
 
 // Admin routes (protected)
@@ -19,6 +22,8 @@ export const ADMIN_ROUTES = {
   DASHBOARD: '/admin',
   USER_MANAGEMENT: '/admin/users',
   QUESTION_MANAGEMENT: '/admin/questions',
+  BLOG_MANAGEMENT: '/admin/blogs',
+  BLOG_UNPUBLISHED: '/admin/blogs/unpublished',
   SETTINGS: '/admin/settings',
 } as const;
 
@@ -42,13 +47,13 @@ export const NAVIGATION_ITEMS = {
     { label: 'Trang chủ', path: USER_ROUTES.HOME },
     { label: 'Diễn đàn', path: USER_ROUTES.FORUM },
     { label: 'Tin tức', path: USER_ROUTES.NEWS },
-    { label: 'Trợ lý AI', path: USER_ROUTES.AI_ASSISTANT },
-    { label: 'Lộ trình', path: USER_ROUTES.ROADMAP },
+    { label: 'Test RIASEC', path: USER_ROUTES.TEST_RIASEC },
   ],
   ADMIN: [
     { label: 'Dashboard', path: ADMIN_ROUTES.DASHBOARD },
     { label: 'Quản lý người dùng', path: ADMIN_ROUTES.USER_MANAGEMENT },
     { label: 'Quản lý câu hỏi', path: ADMIN_ROUTES.QUESTION_MANAGEMENT },
+    { label: 'Bài viết chưa đăng', path: ADMIN_ROUTES.BLOG_UNPUBLISHED },
     { label: 'Cài đặt', path: ADMIN_ROUTES.SETTINGS },
   ],
 } as const;

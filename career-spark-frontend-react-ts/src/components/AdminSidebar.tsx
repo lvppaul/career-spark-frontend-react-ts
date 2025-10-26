@@ -3,10 +3,7 @@ import { Menu } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
-  QuestionCircleOutlined,
-  SettingOutlined,
   FileTextOutlined,
-  BarChartOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ADMIN_ROUTES } from '@/router/constants';
@@ -28,29 +25,18 @@ const AdminSidebar: React.FC = () => {
       label: 'Quản lý người dùng',
       onClick: () => navigate(ADMIN_ROUTES.USER_MANAGEMENT),
     },
+
     {
-      key: ADMIN_ROUTES.QUESTION_MANAGEMENT,
-      icon: <QuestionCircleOutlined />,
-      label: 'Quản lý câu hỏi',
-      onClick: () => navigate(ADMIN_ROUTES.QUESTION_MANAGEMENT),
-    },
-    {
-      key: '/admin/reports',
-      icon: <BarChartOutlined />,
-      label: 'Báo cáo thống kê',
-      onClick: () => console.log('Navigate to reports'),
-    },
-    {
-      key: '/admin/content',
+      key: ADMIN_ROUTES.BLOG_MANAGEMENT,
       icon: <FileTextOutlined />,
-      label: 'Quản lý nội dung',
-      onClick: () => console.log('Navigate to content management'),
+      label: 'Quản lý bài viết',
+      onClick: () => navigate(ADMIN_ROUTES.BLOG_MANAGEMENT),
     },
     {
-      key: ADMIN_ROUTES.SETTINGS,
-      icon: <SettingOutlined />,
-      label: 'Cài đặt hệ thống',
-      onClick: () => navigate(ADMIN_ROUTES.SETTINGS),
+      key: ADMIN_ROUTES.BLOG_UNPUBLISHED,
+      icon: <FileTextOutlined />,
+      label: 'Bài viết chờ duyệt',
+      onClick: () => navigate(ADMIN_ROUTES.BLOG_UNPUBLISHED),
     },
   ];
 

@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { Typography, Button, Space, Dropdown, Avatar } from 'antd';
-import {
-  HomeOutlined,
-  UserOutlined,
-  LogoutOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/router/constants';
 
 const { Title } = Typography;
 
@@ -19,57 +12,22 @@ interface AdminHeaderProps {
 
 const AdminHeader: React.FC<AdminHeaderProps> = () => {
   const { user, forceLogout } = useAuth();
-  const navigate = useNavigate();
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    console.log('AdminHeader: handleLogout function called!');
-    console.log('AdminHeader: Starting direct logout (no confirmation)...');
-
     setIsLoggingOut(true);
-
     try {
       console.log('AdminHeader: Calling forceLogout...');
       await forceLogout();
     } catch (error) {
-      console.error('AdminHeader logout error:', error);
       // Fallback if something goes wrong
+      console.error('Logout failed:', error);
       window.location.replace('/login');
     }
   };
 
-  const handleGoToUserSite = () => {
-    navigate(ROUTES.HOME);
-  };
-
   const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: 'Thông tin cá nhân',
-      onClick: () => {
-        // Navigate to admin profile page
-        console.log('Navigate to admin profile');
-      },
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: 'Cài đặt',
-      onClick: () => {
-        // Navigate to admin settings page
-        console.log('Navigate to admin settings');
-      },
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'user-site',
-      icon: <HomeOutlined />,
-      label: 'Chuyển sang giao diện User',
-      onClick: handleGoToUserSite,
-    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -101,10 +59,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = () => {
       </Title>
 
       <Space size={16}>
-        <span style={{ color: '#666', fontSize: '14px' }}>
-          Xin chào, <strong>{user?.name || 'Admin'}</strong>
-        </span>
-
         <Dropdown
           menu={{ items: userMenuItems }}
           placement="bottomRight"

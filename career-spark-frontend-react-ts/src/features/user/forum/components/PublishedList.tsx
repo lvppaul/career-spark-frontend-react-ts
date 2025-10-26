@@ -1,5 +1,7 @@
-import { Card, List, Tag, Typography, Pagination, Empty, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+import { Card, List, Typography, Pagination, Empty, Spin, Modal } from 'antd';
 import { usePublishedBlogs } from '../hooks/usePublishedBlogs';
+import BlogDetail from './BlogDetail';
 import type { BlogItem } from '../type';
 
 const { Paragraph } = Typography;
@@ -18,7 +20,7 @@ function stripMarkdown(md = ''): string {
     .trim();
 }
 
-function excerpt(text = '', max = 240) {
+function excerpt(text = '', max = 167) {
   const stripped = stripMarkdown(text);
   if (stripped.length <= max) return stripped;
   return stripped.slice(0, max).trim() + '...';
@@ -27,10 +29,23 @@ function excerpt(text = '', max = 240) {
 type Props = {
   search?: string;
   tag?: string;
+  // a numeric signal that when changed will force the list to refresh (e.g., timestamp)
+  reloadSignal?: number;
 };
 
-export default function PublishedList({ search = '', tag }: Props) {
+export default function PublishedList({
+  search = '',
+  tag,
+  reloadSignal,
+}: Props) {
   const { data, pagination, setPage, isLoading } = usePublishedBlogs(1, 5);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+
+  // if parent toggles reloadSignal, reset to first page to re-fetch
+  useEffect(() => {
+    setPage(1);
+  }, [reloadSignal, setPage]);
 
   if (isLoading)
     return (
@@ -60,15 +75,31 @@ export default function PublishedList({ search = '', tag }: Props) {
             <List.Item key={item.id}>
               <List.Item.Meta
                 title={
-                  <Typography.Text strong style={{ fontSize: 18 }}>
-                    {item.title}
+                  <Typography.Text
+                    strong
+                    style={{ fontSize: 18, cursor: 'pointer' }}
+                  >
+                    <a
+                      onClick={() => {
+                        setSelectedId(item.id);
+                        setDetailVisible(true);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          setSelectedId(item.id);
+                          setDetailVisible(true);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className="no-underline"
+                    >
+                      {item.title}
+                    </a>
                   </Typography.Text>
                 }
                 description={
                   <div style={{ marginTop: 8 }}>
-                    <div style={{ marginBottom: 8 }}>
-                      <Tag color="blue">{item.tag}</Tag>
-                    </div>
                     <Paragraph type="secondary">
                       {excerpt(item.content)}
                     </Paragraph>
@@ -78,6 +109,15 @@ export default function PublishedList({ search = '', tag }: Props) {
             </List.Item>
           )}
         />
+        <Modal
+          open={detailVisible}
+          onCancel={() => setDetailVisible(false)}
+          footer={null}
+          width={900}
+          bodyStyle={{ padding: 0 }}
+        >
+          <BlogDetail id={selectedId} onBack={() => setDetailVisible(false)} />
+        </Modal>
         {pagination ? (
           <div style={{ textAlign: 'center', marginTop: 16 }}>
             <Pagination

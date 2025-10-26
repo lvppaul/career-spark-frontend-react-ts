@@ -8,6 +8,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   GoogleLoginRequest,
+  RegisterResult,
 } from '../type';
 
 interface UseAuthReturn {
@@ -17,7 +18,7 @@ interface UseAuthReturn {
   error: string | null;
   login: (data: LoginRequest) => Promise<void>;
   loginWithGoogle: (googleData: GoogleLoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<RegisterResult>;
   logout: () => Promise<void>;
   clearError: () => void;
   forceLogout: () => void;
@@ -62,9 +63,7 @@ export const useAuth = (): UseAuthReturn => {
       setIsLoading(true);
       setError(null);
 
-      console.log('Login attempt started...');
       await authService.login(loginData);
-      console.log('Auth service login completed');
 
       // Get user role and prepare redirect path
       const userRole = tokenUtils.getUserRole();
@@ -76,10 +75,10 @@ export const useAuth = (): UseAuthReturn => {
       // Set pending redirect - the useEffect will handle navigation when auth state is updated
       setPendingRedirect(redirectPath);
     } catch (err) {
-      console.error('Login error in useAuth:', err);
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
+
       setError(errorMessage);
-      throw err;
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -114,23 +113,22 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
-  const register = async (registerData: RegisterRequest): Promise<void> => {
+  const register = async (
+    registerData: RegisterRequest
+  ): Promise<RegisterResult> => {
     try {
       setIsLoading(true);
       setError(null);
-      await authService.register(registerData);
-
-      // Get user role and prepare redirect path
-      const userRole = tokenUtils.getUserRole();
-      const redirectPath = getDefaultRouteByRole(userRole);
-
-      // Set pending redirect - the useEffect will handle navigation when auth state is updated
-      setPendingRedirect(redirectPath);
+      const res = await authService.register(registerData);
+      if (!res.success) {
+        // store error string for top-level Alert
+        setError(res.message);
+      }
+      return res;
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Registration failed';
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
-      throw err;
+      return { success: false, message: errorMessage };
     } finally {
       setIsLoading(false);
     }
@@ -141,20 +139,12 @@ export const useAuth = (): UseAuthReturn => {
       setIsLoading(true);
       setError(null);
 
-      console.log('useAuth: Logout attempt started...');
       await authService.logout();
-      console.log('useAuth: Logout API call completed');
 
       // Force clear local auth state
       setUser(null);
       setIsAuthenticated(false);
 
-      console.log('useAuth: Auth state cleared, attempting navigation...');
-
-      // Force immediate page redirect instead of relying on React Router
-      console.log(
-        'useAuth: Using window.location.replace for immediate redirect'
-      );
       window.location.replace('/login');
 
       console.log('useAuth: Navigation commands executed');

@@ -14,7 +14,7 @@ const api = axios.create({
   },
 });
 
-// 🧩 Tự động bỏ Content-Type nếu là FormData
+//  Tự động bỏ Content-Type nếu là FormData
 api.interceptors.request.use((config) => {
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
@@ -23,7 +23,7 @@ api.interceptors.request.use((config) => {
 });
 
 // ==============================================
-// 🔒 Token Refresh Logic + Global Loading
+// Token Refresh Logic + Global Loading
 // ==============================================
 
 let isRefreshing = false;
@@ -71,7 +71,7 @@ api.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    // 🧠 Nếu accessToken hết hạn (401)
+    //  Nếu accessToken hết hạn (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 

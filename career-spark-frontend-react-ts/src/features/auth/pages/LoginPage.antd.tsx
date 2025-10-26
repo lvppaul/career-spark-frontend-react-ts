@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, Form, Input, Button, Alert, Typography } from 'antd';
 import {
   EyeInvisibleOutlined,
@@ -6,7 +6,7 @@ import {
   LockOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
 import logoXX from '@/assets/images/only-logo-xx.jpg';
@@ -16,7 +16,6 @@ const { Title, Text } = Typography;
 
 const LoginPageAntd: React.FC = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as unknown as {
     from?: { pathname?: string };
@@ -27,26 +26,16 @@ const LoginPageAntd: React.FC = () => {
     loginWithGoogle,
     isLoading,
     error,
-    isAuthenticated,
+    // isAuthenticated is managed internally for redirects; not needed here
     clearError,
   } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const redirectTo = state?.from?.pathname || '/';
-      navigate(redirectTo, { replace: true });
-    }
-  }, [isAuthenticated, navigate, state]);
-
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
+  // Let useAuth handle redirect after successful login.
+  // We do not navigate here to avoid accidental redirects on error.
 
   const onFinish = async (values: { email: string; password: string }) => {
     try {
       await login({ email: values.email, password: values.password });
-      const redirectTo = state?.from?.pathname || '/';
-      navigate(redirectTo, { replace: true });
     } catch (err) {
       // Log unexpected errors
       console.error('Login form submit error', err);
@@ -109,10 +98,22 @@ const LoginPageAntd: React.FC = () => {
           </div>
 
           {state?.message && (
-            <Alert type="warning" message={state.message} className="mb-4" />
+            <Alert
+              type="warning"
+              message={state.message}
+              className="mb-4"
+              showIcon
+            />
           )}
           {error && (
-            <Alert type="error" message={String(error)} className="mb-4" />
+            <Alert
+              type="error"
+              message={error}
+              className="mb-4"
+              showIcon
+              closable
+              onClose={clearError}
+            />
           )}
 
           <Form form={form} layout="vertical" onFinish={onFinish} size="large">

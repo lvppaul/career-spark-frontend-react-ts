@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   Button,
@@ -16,84 +16,338 @@ import {
   Typography,
   Divider,
 } from 'antd';
+import { Switch } from 'antd';
 import {
   SearchOutlined,
   EditOutlined,
-  DeleteOutlined,
   UserAddOutlined,
   StopOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
-import type { User, UserFilters } from '../../../types/admin';
-import { demoUsers } from '../../../data/demoData';
+import { Avatar } from 'antd';
 
+import useUsersPaginated from '@/features/user/user-management/hooks/useUsersPaginated';
+import type {
+  UserDTO,
+  UserFilters,
+} from '@/features/user/user-management/type';
+import type { RegisterRequest } from '@/features/auth/type';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import useUpdateUser from '@/features/user/user-management/hooks/useUpdateUser';
+import useToggleActiveUser from '@/features/user/user-management/hooks/useToggleActiveUser';
 const { Search } = Input;
 const { Option } = Select;
 const { Title } = Typography;
+
+// Create User Modal component
+function CreateUserModal({
+  visible,
+  onCancel,
+  onCreated,
+}: {
+  visible: boolean;
+  onCancel: () => void;
+  onCreated: () => void;
+}) {
+  const [form] = Form.useForm();
+  const { register } = useAuth();
+
+  const handleFinish = async (values: unknown) => {
+    const vals = values as Record<string, unknown>;
+    try {
+      const payload: RegisterRequest = {
+        email: (vals.email as string) ?? '',
+        password:
+          (vals.password as string) ?? Math.random().toString(36).slice(-10),
+        confirmPassword:
+          (vals.confirmPassword as string) ?? (vals.password as string),
+        name: (vals.name as string) ?? '',
+        phone: (vals.phone as string) ?? '',
+        roleId: (vals.roleId as string) ?? 'User',
+      } as unknown as RegisterRequest;
+
+      const res = await register(payload);
+      console.log('register response:', res);
+      if (res.success) {
+        message.success('Tạo người dùng thành công');
+        form.resetFields();
+        onCreated();
+      } else {
+        message.error(res.message || 'Tạo người dùng thất bại');
+      }
+    } catch (err) {
+      console.error('register error:', err);
+      message.error('Lỗi khi tạo người dùng');
+    }
+  };
+
+  return (
+    <Modal
+      title="Thêm người dùng mới"
+      open={visible}
+      onCancel={() => {
+        form.resetFields();
+        onCancel();
+      }}
+      footer={null}
+      width={600}
+    >
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Row gutter={[16, 0]}>
+          <Col span={24}>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[{ required: true, type: 'email' }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item name="name" label="Họ tên" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="phone" label="Số điện thoại">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="roleId"
+              label="Vai trò"
+              rules={[{ required: true }]}
+            >
+              <Select>
+                <Option value={'Admin'}>Admin</Option>
+                <Option value={'Moderator'}>Moderator</Option>
+                <Option value={'User'}>User</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="password" label="Mật khẩu">
+              <Input.Password />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="confirmPassword" label="Xác nhận mật khẩu">
+              <Input.Password />
+            </Form.Item>
+          </Col>
+        </Row>
+        <div style={{ textAlign: 'right', marginTop: 24 }}>
+          <Space>
+            <Button
+              onClick={() => {
+                form.resetFields();
+                onCancel();
+              }}
+            >
+              Hủy
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Tạo mới
+            </Button>
+          </Space>
+        </div>
+      </Form>
+    </Modal>
+  );
+}
+
+// Edit User Modal component
+function EditUserModal({
+  visible,
+  onCancel,
+  user,
+  onUpdated,
+}: {
+  visible: boolean;
+  onCancel: () => void;
+  user: UserDTO | null;
+  onUpdated: () => void;
+}) {
+  const [form] = Form.useForm();
+  const { updateUser } = useUpdateUser();
+
+  React.useEffect(() => {
+    if (user) {
+      const roleLabel =
+        typeof user.role === 'string' && user.role.length
+          ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+          : user.role;
+      form.setFieldsValue({
+        email: user.email,
+        name: user.name,
+        phone: user.phone ?? '',
+        roleId: roleLabel ?? 'User',
+        isActive: user.isActive,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [user, form]);
+
+  const handleFinish = async (values: unknown) => {
+    if (!user) return;
+    const vals = values as Record<string, unknown>;
+    const payload = {
+      email: vals.email as string,
+      name: vals.name as string,
+      phone: (vals.phone as string) ?? '',
+      roleId: vals.roleId as string | number,
+      isActive: !!vals.isActive,
+    };
+    try {
+      const resp = await updateUser(user.id, payload);
+      // debug: log response to help diagnose unexpected server replies
+      // (if server returns a redirect/html like '/', it will show here)
+      console.log('updateUser response:', resp);
+      message.success('Cập nhật người dùng thành công');
+      onUpdated();
+    } catch (err) {
+      console.error('updateUser error:', err);
+      message.error('Không thể cập nhật người dùng');
+    }
+  };
+
+  return (
+    <Modal
+      title="Chỉnh sửa người dùng"
+      open={visible}
+      onCancel={() => {
+        form.resetFields();
+        onCancel();
+      }}
+      footer={null}
+      width={600}
+    >
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Row gutter={[16, 0]}>
+          <Col span={24}>
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[{ required: true, type: 'email' }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item name="name" label="Họ tên" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="phone" label="Số điện thoại">
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="roleId"
+              label="Vai trò"
+              rules={[{ required: true }]}
+            >
+              <Select>
+                <Option value={'Admin'}>Admin</Option>
+                <Option value={'Moderator'}>Moderator</Option>
+                <Option value={'User'}>User</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="isActive"
+              label="Hoạt động"
+              valuePropName="checked"
+            >
+              <Switch />
+            </Form.Item>
+          </Col>
+        </Row>
+        <div style={{ textAlign: 'right', marginTop: 24 }}>
+          <Space>
+            <Button
+              onClick={() => {
+                form.resetFields();
+                onCancel();
+              }}
+            >
+              Hủy
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Cập nhật
+            </Button>
+          </Space>
+        </div>
+      </Form>
+    </Modal>
+  );
+}
+
+// FormValues type removed; Create/Edit handled by separate modal components
+
+// helpers moved above to allow use inside modal components
 
 interface UserManagementProps {
   onNavigate: (page: string) => void;
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Use server-side paginated users from user-management module
+  const {
+    data: serverUsers,
+    pagination,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    isLoading: loading,
+
+    refresh,
+  } = useUsersPaginated(1, 10);
+  const toggleActiveHook = useToggleActiveUser();
+  const [users, setUsers] = useState<UserDTO[]>([]);
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState<UserFilters>({});
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [form] = Form.useForm();
+  const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Simulate API call with demo data
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      let filteredUsers = [...demoUsers];
-
-      // Apply search filter
-      if (searchText) {
-        filteredUsers = filteredUsers.filter(
-          (user) =>
-            user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-            user.fullName.toLowerCase().includes(searchText.toLowerCase())
-        );
-      }
-
-      // Apply role filter
-      if (filters.role) {
-        filteredUsers = filteredUsers.filter(
-          (user) => user.role === filters.role
-        );
-      }
-
-      // Apply status filter
-      if (filters.status) {
-        filteredUsers = filteredUsers.filter(
-          (user) => user.status === filters.status
-        );
-      }
-
-      // Apply subscription filter
-      if (filters.subscription) {
-        filteredUsers = filteredUsers.filter(
-          (user) => user.subscription?.type === filters.subscription
-        );
-      }
-
-      setUsers(filteredUsers);
-    } catch (error) {
-      message.error('Không thể tải danh sách người dùng');
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [searchText, filters]);
-
+  // Keep a local filtered view (search/filters) over serverUsers
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    const list: UserDTO[] = serverUsers ?? [];
+    let filtered: UserDTO[] = [...list];
+    if (searchText) {
+      filtered = filtered.filter((u) => {
+        const email = String(u.email ?? '').toLowerCase();
+        const name = String(u.name ?? '').toLowerCase();
+        return (
+          email.includes(searchText.toLowerCase()) ||
+          name.includes(searchText.toLowerCase())
+        );
+      });
+    }
+    if (filters.role) {
+      filtered = filtered.filter(
+        (u) => (u.role ?? '').toLowerCase() === filters.role!.toLowerCase()
+      );
+    }
+    if (typeof filters.isActive === 'boolean') {
+      filtered = filtered.filter((u) => u.isActive === filters.isActive);
+    }
+    if (typeof filters.isVerified === 'boolean') {
+      filtered = filtered.filter(
+        (u) => (u.isVerified ?? false) === filters.isVerified
+      );
+    }
+    setUsers(filtered);
+  }, [serverUsers, searchText, filters]);
+
+  // initial load handled by useUsersPaginated hook
 
   const handleSearch = (value: string) => {
     setSearchText(value);
@@ -101,125 +355,66 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
 
   const handleFilterChange = (
     key: keyof UserFilters,
-    value: string | undefined
+    value: string | boolean | undefined
   ) => {
-    setFilters({ ...filters, [key]: value });
+    setFilters((prev) => ({ ...prev, [key]: value }) as UserFilters);
   };
 
   const applyFilters = () => {
-    fetchUsers();
+    // Reset to first page to apply filters on server if implemented
+    setPage(1);
   };
 
   const handleStatusChange = async (
-    userId: string,
+    userId: number | string,
     newStatus: 'active' | 'inactive' | 'banned'
   ) => {
+    const { setActive, deActive } = toggleActiveHook;
     try {
-      // Simulate API call
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId ? { ...user, status: newStatus } : user
-        )
-      );
-      message.success('Cập nhật trạng thái thành công');
+      if (newStatus === 'active') {
+        const resp = await setActive(userId);
+        console.log('setActive resp:', resp);
+        message.success('Kích hoạt thành công');
+      } else {
+        const resp = await deActive(userId);
+        console.log('deActive resp:', resp);
+        message.success('Hủy kích hoạt thành công');
+      }
+      refresh();
     } catch (error) {
+      console.error('Error toggling active state:', error);
       message.error('Không thể cập nhật trạng thái');
-      console.error('Error updating user status:', error);
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    try {
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-      message.success('Xóa người dùng thành công');
-    } catch (error) {
-      message.error('Không thể xóa người dùng');
-      console.error('Error deleting user:', error);
-    }
-  };
-
-  const openEditModal = (user: User) => {
+  const openEditModal = (user: UserDTO) => {
     setSelectedUser(user);
-    setIsEditMode(true);
-    form.setFieldsValue(user);
-    setIsModalVisible(true);
+    setEditModalVisible(true);
   };
 
   const openCreateModal = () => {
     setSelectedUser(null);
-    setIsEditMode(false);
-    form.resetFields();
-    setIsModalVisible(true);
+    setCreateModalVisible(true);
   };
 
-  const closeModal = () => {
-    setIsModalVisible(false);
+  const closeCreateModal = () => {
+    setCreateModalVisible(false);
     setSelectedUser(null);
-    form.resetFields();
+  };
+  const closeEditModal = () => {
+    setEditModalVisible(false);
+    setSelectedUser(null);
   };
 
-  const handleSubmit = async (values: Partial<User>) => {
-    try {
-      if (isEditMode && selectedUser) {
-        // Update user
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === selectedUser.id ? { ...user, ...values } : user
-          )
-        );
-        message.success('Cập nhật người dùng thành công');
-      } else {
-        // Create new user
-        const newUser: User = {
-          id: Date.now().toString(),
-          email: values.email!,
-          fullName: values.fullName!,
-          phone: values.phone,
-          role: values.role!,
-          status: values.status!,
-          createdAt: new Date().toISOString(),
-          subscription: { type: 'free' },
-        };
-        setUsers((prevUsers) => [newUser, ...prevUsers]);
-        message.success('Tạo người dùng thành công');
-      }
-      closeModal();
-    } catch (error) {
-      message.error('Không thể lưu người dùng');
-      console.error('Error saving user:', error);
-    }
-  };
+  // Create / Edit handled by separate modals
 
   const getStatusTag = (status: string) => {
     const statusConfig = {
       active: { color: 'green', text: 'Hoạt động' },
       inactive: { color: 'orange', text: 'Không hoạt động' },
-      banned: { color: 'red', text: 'Bị cấm' },
     };
     const config = statusConfig[status as keyof typeof statusConfig];
     return <Tag color={config.color}>{config.text}</Tag>;
-  };
-
-  const getRoleTag = (role: string) => {
-    return (
-      <Tag color={role === 'admin' ? 'purple' : 'blue'}>
-        {role === 'admin' ? 'Admin' : 'User'}
-      </Tag>
-    );
-  };
-
-  const getSubscriptionTag = (subscription?: { type: string }) => {
-    if (!subscription) return <Tag>Free</Tag>;
-    const colors = {
-      free: 'default',
-      premium: 'gold',
-      pro: 'purple',
-    };
-    return (
-      <Tag color={colors[subscription.type as keyof typeof colors]}>
-        {subscription.type.toUpperCase()}
-      </Tag>
-    );
   };
 
   const columns = [
@@ -227,36 +422,48 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
       title: 'Người dùng',
       dataIndex: 'email',
       key: 'email',
-      render: (_: string, record: User) => (
-        <div>
-          <div style={{ fontWeight: 'bold' }}>{record.fullName}</div>
-          <div style={{ color: '#666', fontSize: '12px' }}>{record.email}</div>
-          {record.phone && (
+      render: (_: string, record: UserDTO) => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar
+            src={record.avatarURL ?? undefined}
+            size={40}
+            style={{ marginRight: 12, backgroundColor: '#87d068' }}
+          >
+            {!record.avatarURL &&
+              (record.name ? record.name.charAt(0).toUpperCase() : '?')}
+          </Avatar>
+          <div>
+            <div style={{ fontWeight: 'bold' }}>{record.name}</div>
             <div style={{ color: '#666', fontSize: '12px' }}>
-              {record.phone}
+              {record.email}
             </div>
-          )}
+            {record.phone && (
+              <div style={{ color: '#666', fontSize: '12px' }}>
+                {record.phone}
+              </div>
+            )}
+          </div>
         </div>
       ),
     },
-    {
-      title: 'Vai trò',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role: string) => getRoleTag(role),
-    },
+
     {
       title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => getStatusTag(status),
+      dataIndex: 'isActive',
+      key: 'isActive',
+      render: (_: unknown, record: UserDTO) =>
+        getStatusTag(record.isActive ? 'active' : 'inactive'),
     },
+
     {
-      title: 'Gói dịch vụ',
-      dataIndex: 'subscription',
-      key: 'subscription',
-      render: (subscription: User['subscription']) =>
-        getSubscriptionTag(subscription),
+      title: 'Xác thực',
+      dataIndex: 'isVerified',
+      key: 'isVerified',
+      render: (_: unknown, record: UserDTO) => (
+        <Tag color={record.isVerified ? 'green' : 'default'}>
+          {record.isVerified ? 'Verified' : 'Unverified'}
+        </Tag>
+      ),
     },
     {
       title: 'Ngày tạo',
@@ -267,7 +474,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
     {
       title: 'Thao tác',
       key: 'actions',
-      render: (_: string, record: User) => (
+      render: (_: string, record: UserDTO) => (
         <Space>
           <Button
             icon={<EditOutlined />}
@@ -275,7 +482,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
             size="small"
             type="primary"
           />
-          {record.status === 'active' ? (
+          {record.isActive ? (
             <Popconfirm
               title="Bạn có chắc muốn cấm người dùng này?"
               onConfirm={() => handleStatusChange(record.id, 'banned')}
@@ -299,27 +506,13 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
               />
             </Popconfirm>
           )}
-          <Popconfirm
-            title="Bạn có chắc muốn xóa người dùng này?"
-            onConfirm={() => handleDeleteUser(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button icon={<DeleteOutlined />} size="small" danger />
-          </Popconfirm>
         </Space>
       ),
     },
   ];
 
   return (
-    <div
-      style={{
-        padding: '24px',
-        backgroundColor: '#f0f2f5',
-        minHeight: '100vh',
-      }}
-    >
+    <div>
       <Card>
         <div style={{ marginBottom: '24px' }}>
           <div
@@ -355,41 +548,40 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
                 onSearch={handleSearch}
               />
             </Col>
+
             <Col xs={24} sm={12} md={4}>
               <Select
-                placeholder="Vai trò"
+                placeholder="Hoạt động"
                 allowClear
                 style={{ width: '100%' }}
-                onChange={(value) => handleFilterChange('role', value)}
+                onChange={(value) =>
+                  handleFilterChange(
+                    'isActive',
+                    value === undefined ? undefined : value === 'true'
+                  )
+                }
               >
-                <Option value="admin">Admin</Option>
-                <Option value="user">User</Option>
+                <Option value="true">Hoạt động</Option>
+                <Option value="false">Không hoạt động</Option>
               </Select>
             </Col>
             <Col xs={24} sm={12} md={4}>
               <Select
-                placeholder="Trạng thái"
+                placeholder="Xác thực"
                 allowClear
                 style={{ width: '100%' }}
-                onChange={(value) => handleFilterChange('status', value)}
+                onChange={(value) =>
+                  handleFilterChange(
+                    'isVerified',
+                    value === undefined ? undefined : value === 'true'
+                  )
+                }
               >
-                <Option value="active">Hoạt động</Option>
-                <Option value="inactive">Không hoạt động</Option>
-                <Option value="banned">Bị cấm</Option>
+                <Option value="true">Đã xác thực</Option>
+                <Option value="false">Chưa xác thực</Option>
               </Select>
             </Col>
-            <Col xs={24} sm={12} md={4}>
-              <Select
-                placeholder="Gói dịch vụ"
-                allowClear
-                style={{ width: '100%' }}
-                onChange={(value) => handleFilterChange('subscription', value)}
-              >
-                <Option value="free">Free</Option>
-                <Option value="premium">Premium</Option>
-                <Option value="pro">Pro</Option>
-              </Select>
-            </Col>
+            {/* Removed subscription filter as requested */}
             <Col xs={24} sm={12} md={4}>
               <Button type="primary" onClick={applyFilters} block>
                 Áp dụng
@@ -404,94 +596,40 @@ const UserManagement: React.FC<UserManagementProps> = ({ onNavigate: _ }) => {
           loading={loading}
           rowKey="id"
           pagination={{
-            pageSize: 10,
+            current: pagination?.pageNumber ?? page,
+            pageSize: pagination?.pageSize ?? pageSize,
+            total: pagination?.totalCount ?? 0,
             showSizeChanger: true,
             showQuickJumper: true,
+            onChange: (p, ps) => {
+              setPage(p);
+              setPageSize(ps ?? pageSize);
+            },
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} của ${total} người dùng`,
           }}
         />
       </Card>
 
-      {/* Modal */}
-      <Modal
-        title={isEditMode ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
-        open={isModalVisible}
-        onCancel={closeModal}
-        footer={null}
-        width={600}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          style={{ marginTop: '16px' }}
-        >
-          <Row gutter={[16, 0]}>
-            <Col span={24}>
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập email' },
-                  { type: 'email', message: 'Email không hợp lệ' },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                label="Họ tên"
-                name="fullName"
-                rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Số điện thoại" name="phone">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Vai trò"
-                name="role"
-                rules={[{ required: true, message: 'Vui lòng chọn vai trò' }]}
-              >
-                <Select>
-                  <Option value="user">User</Option>
-                  <Option value="admin">Admin</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={24}>
-              <Form.Item
-                label="Trạng thái"
-                name="status"
-                rules={[
-                  { required: true, message: 'Vui lòng chọn trạng thái' },
-                ]}
-              >
-                <Select>
-                  <Option value="active">Hoạt động</Option>
-                  <Option value="inactive">Không hoạt động</Option>
-                  <Option value="banned">Bị cấm</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <div style={{ textAlign: 'right', marginTop: '24px' }}>
-            <Space>
-              <Button onClick={closeModal}>Hủy</Button>
-              <Button type="primary" htmlType="submit">
-                {isEditMode ? 'Cập nhật' : 'Tạo mới'}
-              </Button>
-            </Space>
-          </div>
-        </Form>
-      </Modal>
+      {/* Create & Edit modals (separate components) */}
+      <CreateUserModal
+        visible={createModalVisible}
+        onCancel={closeCreateModal}
+        onCreated={() => {
+          closeCreateModal();
+          refresh();
+        }}
+      />
+
+      <EditUserModal
+        visible={editModalVisible}
+        user={selectedUser}
+        onCancel={closeEditModal}
+        onUpdated={() => {
+          closeEditModal();
+          refresh();
+        }}
+      />
     </div>
   );
 };

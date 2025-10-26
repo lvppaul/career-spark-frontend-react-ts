@@ -59,7 +59,7 @@ const Header: React.FC = () => {
             />
           </div>
           <span className="text-xl font-semibold text-gray-800">
-            CareerSpark
+            <Link to="/">CareerSpark</Link>
           </span>
         </div>
 
@@ -98,17 +98,7 @@ const Header: React.FC = () => {
           >
             Tin tức
           </Link>
-          <Link
-            to="/ai-assistant"
-            onClick={() => setActivePath('/ai-assistant')}
-            className={`transition-colors px-3 py-1 rounded-md ${
-              isActivePath('/ai-assistant')
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-            }`}
-          >
-            AI Assistant
-          </Link>
+          {/* AI Assistant link removed */}
           <Link
             to="/test-riasec"
             onClick={() => setActivePath('/test-riasec')}
@@ -200,11 +190,18 @@ const Header: React.FC = () => {
                     Cài đặt
                   </Link>
                   <Link
+                    to="/matching-jobs"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    Roadmap cụ thể
+                  </Link>
+                  <Link
                     to="/test-riasec/history"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setShowUserMenu(false)}
                   >
-                    Lịch sử
+                    Lịch sử bài test
                   </Link>
                   <hr className="my-1" />
                   <button

@@ -4,10 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import useUpdateUser from '../hooks/useUpdateUser';
 import useUploadAvatar from '../hooks/useUploadAvatar';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function UserProfileEdit() {
   const params = useParams();
-  const id = params.id ?? '1';
+  const { user: authUser } = useAuth();
+  // Use the id from URL params, or fall back to authenticated user's id
+  const id = params.id ?? authUser?.sub ?? '1';
   const { data } = useUser(id);
   const [form] = Form.useForm();
   const navigate = useNavigate();
