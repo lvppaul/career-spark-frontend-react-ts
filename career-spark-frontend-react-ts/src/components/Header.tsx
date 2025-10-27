@@ -70,7 +70,7 @@ const Header: React.FC = () => {
             onClick={() => setActivePath('/')}
             className={`transition-colors px-3 py-1 rounded-md ${
               isActivePath('/')
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#1855ea] text-white font-bold'
                 : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
             }`}
           >
@@ -81,7 +81,7 @@ const Header: React.FC = () => {
             onClick={() => setActivePath('/forum')}
             className={`transition-colors px-3 py-1 rounded-md ${
               isActivePath('/forum')
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#1855ea] text-white font-bold'
                 : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
             }`}
           >
@@ -92,7 +92,7 @@ const Header: React.FC = () => {
             onClick={() => setActivePath('/news')}
             className={`transition-colors px-3 py-1 rounded-md ${
               isActivePath('/news')
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#1855ea] text-white font-bold'
                 : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
             }`}
           >
@@ -104,7 +104,7 @@ const Header: React.FC = () => {
             onClick={() => setActivePath('/test-riasec')}
             className={`transition-colors px-3 py-1 rounded-md ${
               isActivePath('/test-riasec')
-                ? 'bg-blue-600 text-white'
+                ? 'bg-[#1855ea] text-white font-bold'
                 : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
             }`}
           >
@@ -176,7 +176,11 @@ const Header: React.FC = () => {
                   </div>
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className={`block px-4 py-2 text-sm transition-colors ${
+                      isActivePath('/profile')
+                        ? 'bg-[#1855ea] text-white font-bold'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                     onClick={() => setShowUserMenu(false)}
                   >
                     Thông tin cá nhân
@@ -184,21 +188,33 @@ const Header: React.FC = () => {
                   {/* 'Chỉnh sửa hồ sơ' removed as per UX preference - profile editing is accessible elsewhere */}
                   <Link
                     to="/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className={`block px-4 py-2 text-sm transition-colors ${
+                      isActivePath('/settings')
+                        ? 'bg-[#1855ea] text-white font-bold'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                     onClick={() => setShowUserMenu(false)}
                   >
                     Cài đặt
                   </Link>
                   <Link
                     to="/matching-jobs"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className={`block px-4 py-2 text-sm transition-colors ${
+                      isActivePath('/matching-jobs')
+                        ? 'bg-[#1855ea] text-white font-bold'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                     onClick={() => setShowUserMenu(false)}
                   >
                     Roadmap cụ thể
                   </Link>
                   <Link
                     to="/test-riasec/history"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    className={`block px-4 py-2 text-sm transition-colors ${
+                      isActivePath('/test-riasec/history')
+                        ? 'bg-[#1855ea] text-white font-bold'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                     onClick={() => setShowUserMenu(false)}
                   >
                     Lịch sử bài test

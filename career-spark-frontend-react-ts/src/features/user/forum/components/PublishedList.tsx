@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Card, List, Typography, Pagination, Empty, Spin, Modal } from 'antd';
+import {
+  Card,
+  List,
+  Typography,
+  Pagination,
+  Empty,
+  Spin,
+  Modal,
+  Avatar,
+  Space,
+} from 'antd';
 import { usePublishedBlogs } from '../hooks/usePublishedBlogs';
 import BlogDetail from './BlogDetail';
 import type { BlogItem } from '../type';
@@ -74,35 +84,84 @@ export default function PublishedList({
           renderItem={(item) => (
             <List.Item key={item.id}>
               <List.Item.Meta
-                title={
-                  <Typography.Text
-                    strong
-                    style={{ fontSize: 18, cursor: 'pointer' }}
+                avatar={
+                  <Avatar
+                    src={item.authorAvatarUrl}
+                    alt={item.authorName}
+                    style={{ backgroundColor: '#87d068' }}
                   >
-                    <a
-                      onClick={() => {
-                        setSelectedId(item.id);
-                        setDetailVisible(true);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          setSelectedId(item.id);
-                          setDetailVisible(true);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      className="no-underline"
-                    >
-                      {item.title}
-                    </a>
-                  </Typography.Text>
+                    {!item.authorAvatarUrl && item.authorName
+                      ? item.authorName
+                          .split(' ')
+                          .map((s) => s[0])
+                          .slice(0, 2)
+                          .join('')
+                          .toUpperCase()
+                      : null}
+                  </Avatar>
+                }
+                title={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div>
+                      <Typography.Text
+                        strong
+                        style={{ fontSize: 18, cursor: 'pointer' }}
+                      >
+                        <a
+                          onClick={() => {
+                            setSelectedId(item.id);
+                            setDetailVisible(true);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              setSelectedId(item.id);
+                              setDetailVisible(true);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          className="no-underline"
+                        >
+                          {item.title}
+                        </a>
+                      </Typography.Text>
+                    </div>
+                  </div>
                 }
                 description={
                   <div style={{ marginTop: 8 }}>
-                    <Paragraph type="secondary">
-                      {excerpt(item.content)}
-                    </Paragraph>
+                    <Space
+                      direction="vertical"
+                      size={4}
+                      style={{ width: '100%' }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}
+                      >
+                        <span style={{ fontWeight: 600 }}>
+                          {item.authorName || 'Người dùng'}
+                        </span>
+                        <span
+                          style={{ color: 'rgba(0,0,0,0.45)', fontSize: 12 }}
+                        >
+                          • {new Date(item.createAt).toLocaleString()}
+                        </span>
+                      </div>
+
+                      <Paragraph type="secondary" style={{ margin: 0 }}>
+                        {excerpt(item.content)}
+                      </Paragraph>
+                    </Space>
                   </div>
                 }
               />

@@ -24,6 +24,7 @@ export const ADMIN_ROUTES = {
   QUESTION_MANAGEMENT: '/admin/questions',
   BLOG_MANAGEMENT: '/admin/blogs',
   BLOG_UNPUBLISHED: '/admin/blogs/unpublished',
+  NEWS_MANAGEMENT: '/admin/news',
   SETTINGS: '/admin/settings',
 } as const;
 

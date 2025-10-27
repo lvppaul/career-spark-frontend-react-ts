@@ -38,6 +38,12 @@ const AdminSidebar: React.FC = () => {
       label: 'Bài viết chờ duyệt',
       onClick: () => navigate(ADMIN_ROUTES.BLOG_UNPUBLISHED),
     },
+    {
+      key: ADMIN_ROUTES.NEWS_MANAGEMENT,
+      icon: <FileTextOutlined />,
+      label: 'Quản lý tin tức',
+      onClick: () => navigate(ADMIN_ROUTES.NEWS_MANAGEMENT),
+    },
   ];
 
   return (

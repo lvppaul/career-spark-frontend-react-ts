@@ -53,6 +53,9 @@ const BlogsPageLazy = React.lazy(
 const UnpublishedBlogsPageLazy = React.lazy(
   () => import('@/features/admin/pages/UnpublishedBlogsPage')
 );
+const NewsManagementPageLazy = React.lazy(
+  () => import('@/features/admin/pages/NewsManagementPage')
+);
 
 const AppRouter: React.FC = () => {
   return (
@@ -95,6 +98,14 @@ const AppRouter: React.FC = () => {
             element={
               <Suspense fallback={<div>Đang tải...</div>}>
                 <UnpublishedBlogsPageLazy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="news"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <NewsManagementPageLazy />
               </Suspense>
             }
           />
