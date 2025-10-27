@@ -11,34 +11,15 @@ import {
   Empty,
   Spin,
 } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useLatestSession from '../hooks/useLatestSession';
-import { useLocation, useNavigate } from 'react-router-dom';
-import type { SubmitResponse, RoadmapPath } from '../types';
+
 import { useRiasecRoadmap } from '../hooks/useRiasecRoadmap';
 import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
 
 export default function MatchingJobsPage() {
-  const location = useLocation();
-  useNavigate();
-  const state = (location.state as { result?: SubmitResponse } | null) || {};
-
-  const [result, setResult] = useState<SubmitResponse | null>(
-    state.result ?? null
-  );
-  useEffect(() => {
-    if (!result) {
-      try {
-        const raw = localStorage.getItem('riasecResult');
-        if (raw) setResult(JSON.parse(raw));
-      } catch (e) {
-        console.warn('Failed to load riasecResult', e);
-      }
-    }
-  }, [result]);
-
   // Use latest session from server instead of localStorage
   const {
     data: latestSession,
@@ -62,7 +43,7 @@ export default function MatchingJobsPage() {
 
   const paths = uiData?.paths ?? [];
 
-  const [selectedPath, setSelectedPath] = useState<RoadmapPath | null>(null);
+  const [selectedPath, setSelectedPath] = useState<any | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
