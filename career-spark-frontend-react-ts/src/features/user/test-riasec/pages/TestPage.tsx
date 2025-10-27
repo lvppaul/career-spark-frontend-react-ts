@@ -171,7 +171,25 @@ export default function TestPage() {
           ) : (
             <Space direction="vertical" style={{ width: '100%' }}>
               {currentQuestions.map((q, index) => (
-                <Card key={q.id} size="small">
+                <Card
+                  key={q.id}
+                  size="small"
+                  hoverable
+                  onClick={() => toggleQuestion(q.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleQuestion(q.id);
+                    }
+                  }}
+                  aria-pressed={Boolean(selected[q.id])}
+                  style={{
+                    cursor: 'pointer',
+                    backgroundColor: selected[q.id] ? '#e6f7ff' : undefined,
+                  }}
+                >
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">
@@ -179,10 +197,11 @@ export default function TestPage() {
                         {q.content}
                       </div>
                     </div>
-                    <div>
+                    <div onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={Boolean(selected[q.id])}
                         onChange={() => toggleQuestion(q.id)}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                   </div>
