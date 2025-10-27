@@ -113,6 +113,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                   </svg>
                 </a>
               </div>
+              <div className="mt-4 text-sm text-gray-300 space-y-2">
+                <div>
+                  <strong>Địa chỉ:</strong>
+                  <div>
+                    7 Đ. D1, Long Thạnh Mỹ, Thủ Đức, Thành phố Hồ Chí Minh
+                    700000, Vietnam
+                  </div>
+                </div>
+                <div>
+                  <strong>SĐT:</strong>{' '}
+                  <a
+                    href="tel:02189995394"
+                    className="hover:text-white transition-colors"
+                  >
+                    02189995394
+                  </a>
+                </div>
+                <div>
+                  <strong>Email:</strong>{' '}
+                  <a
+                    href="mailto:minquan141104@gmail.com"
+                    className="hover:text-white transition-colors"
+                  >
+                    minquan141104@gmail.com
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-300">
