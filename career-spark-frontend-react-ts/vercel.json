@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/langflow/:path*",
+      "destination": "http://careersparklangflowai0910.southeastasia.azurecontainer.io:7860/:path*"
+    }
+  ]
+}
