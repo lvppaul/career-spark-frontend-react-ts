@@ -4,7 +4,6 @@ export default function LangflowEmbed() {
   useEffect(() => {
     const scriptId = 'langflow-embed-script';
 
-    // Chỉ thêm script nếu chưa có
     if (!document.getElementById(scriptId)) {
       const script = document.createElement('script');
       script.id = scriptId;
@@ -14,11 +13,11 @@ export default function LangflowEmbed() {
       document.body.appendChild(script);
     }
 
-    // Cleanup nếu component unmount
-    return () => {
-      // không xóa script để tránh load lại mỗi lần
-    };
+    return () => {};
   }, []);
+
+  // 🔹 Trỏ về domain FE (proxy qua Vercel)
+  const hostUrl = 'https://career-spark-frontend-react-ts.vercel.app/langflow';
 
   return (
     <div
@@ -27,7 +26,7 @@ export default function LangflowEmbed() {
         <langflow-chat
           window_title="CareerSpark AI Assistant"
           flow_id="b7fbf703-5ac6-46aa-9fba-ff1a8a02b112"
-          host_url="http://careersparklangflowai0910.southeastasia.azurecontainer.io:7860"
+          host_url="${hostUrl}"
           chat_position="top-left"
           height="600"
           width="400">
