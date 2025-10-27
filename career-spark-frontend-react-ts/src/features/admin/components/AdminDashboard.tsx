@@ -20,7 +20,7 @@ import {
   UsergroupAddOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import type { AdminStats } from '../../../types/admin';
+
 import { demoStats, demoActivities } from '../../../data/demoData';
 
 const { Title, Paragraph } = Typography;
