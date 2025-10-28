@@ -10,7 +10,11 @@ import {
   Timeline,
   Empty,
   Spin,
+  Space,
+  Avatar,
+  Progress,
 } from 'antd';
+import { CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import useLatestSession from '../hooks/useLatestSession';
 
@@ -45,6 +49,12 @@ export default function MatchingJobsPage() {
 
   const [selectedPath, setSelectedPath] = useState<any | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // compute aggregate info for the selected path (total weeks)
+  const totalWeeks = (selectedPath?.roadmaps ?? []).reduce(
+    (acc: number, r: any) => acc + (r.durationWeeks ?? 0),
+    0
+  );
 
   return (
     <div className="p-6">
@@ -88,64 +98,126 @@ export default function MatchingJobsPage() {
       </div>
 
       <Drawer
-        title={selectedPath?.title}
+        title={null}
         placement="right"
-        width={720}
+        width={760}
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
+        bodyStyle={{ padding: 0 }}
       >
         {selectedPath ? (
           <div>
-            <Text type="secondary">{selectedPath.description}</Text>
-            <Divider />
-            <div style={{ marginBottom: 12 }}>
-              <Text strong>{selectedPath.roadmaps?.length ?? 0} bước</Text>
+            {/* Header with gradient and meta */}
+            <div
+              style={{
+                padding: 20,
+                background:
+                  'linear-gradient(135deg, rgba(58,123,213,0.12), rgba(0,210,255,0.08))',
+                borderBottom: '1px solid #f0f0f0',
+              }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Avatar size={56} style={{ background: '#1890ff' }}>
+                    {selectedPath.title?.charAt(0) ?? 'R'}
+                  </Avatar>
+                  <div style={{ flex: 1 }}>
+                    <Title level={4} style={{ margin: 0 }}>
+                      {selectedPath.title}
+                    </Title>
+                    <Text type="secondary">{selectedPath.description}</Text>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <Tag color="blue">
+                      {selectedPath.difficultyLevel ?? '—'}
+                    </Tag>
+                    <div style={{ marginTop: 6 }}>
+                      <Text type="secondary">
+                        <ClockCircleOutlined />{' '}
+                        {totalWeeks > 0
+                          ? `${totalWeeks} tuần`
+                          : 'Thời lượng: —'}
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              </Space>
             </div>
 
-            <Timeline mode="left">
-              {selectedPath.roadmaps?.map((step) => (
-                <Timeline.Item
-                  key={step.id}
-                  label={`${step.durationWeeks ?? '-'} tuần`}
-                >
-                  <div
-                    style={{ padding: 12, background: '#fff', borderRadius: 8 }}
+            <div style={{ padding: '12px 20px 20px 0' }}>
+              <Divider />
+
+              <Timeline
+                mode="left"
+                style={{ paddingTop: 12, marginLeft: -300, paddingLeft: 0 }}
+              >
+                {selectedPath.roadmaps?.map((step: any, idx: number) => (
+                  <Timeline.Item
+                    key={step.id}
+                    label={`${step.durationWeeks ?? '-'} tuần`}
+                    dot={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
                   >
                     <div
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
+                        padding: 14,
+                        background: '#ffffff',
+                        borderRadius: 8,
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                        borderLeft: '4px solid rgba(24,144,255,0.08)',
                       }}
                     >
-                      <Title level={5} style={{ margin: 0 }}>
-                        {step.title}
-                      </Title>
-                      <Tag>{step.difficultyLevel ?? '—'}</Tag>
-                    </div>
-                    <div style={{ marginTop: 8 }}>{step.description}</div>
-                    {step.skillFocus && (
-                      <div style={{ marginTop: 8 }}>
-                        <Tag color="cyan">{step.skillFocus}</Tag>
-                      </div>
-                    )}
-                    {step.suggestedCourseUrl && (
-                      <div style={{ marginTop: 8 }}>
-                        <a
-                          href={step.suggestedCourseUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: 12,
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <Title level={5} style={{ margin: 0 }}>
+                            {idx + 1}. {step.title}
+                          </Title>
+                          <div
+                            style={{ marginTop: 8, color: 'rgba(0,0,0,0.65)' }}
+                          >
+                            {step.description}
+                          </div>
+                          {step.skillFocus && (
+                            <div style={{ marginTop: 10 }}>
+                              <Tag color="geekblue">{step.skillFocus}</Tag>
+                            </div>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 8,
+                          }}
                         >
-                          Khóa học gợi ý
-                        </a>
+                          <Tag>{step.difficultyLevel ?? '—'}</Tag>
+                          {step.suggestedCourseUrl && (
+                            <Button
+                              type="link"
+                              href={step.suggestedCourseUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Khóa học gợi ý →
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+                    </div>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            </div>
           </div>
         ) : (
-          <div>Không có chi tiết</div>
+          <div style={{ padding: 20 }}>Không có chi tiết</div>
         )}
       </Drawer>
     </div>
