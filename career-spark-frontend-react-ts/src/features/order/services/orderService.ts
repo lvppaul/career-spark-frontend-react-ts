@@ -13,7 +13,7 @@ export interface OrderData {
   subscriptionPlanName: string;
   amount: number;
   status: string;
-  vnPayOrderInfo?: string;
+  payOSOrderInfo?: string;
   createdAt: string;
   expiredAt?: string;
 }
