@@ -12,8 +12,9 @@ export default function PaymentResult() {
   const message = params.get('message');
   const orderId = params.get('orderId');
   const txnRef = params.get('txnRef');
+  const code = params.get('code');
 
-  const isSuccess = status === 'success';
+  const isSuccess = status === 'success' && code === '00';
 
   const { logout } = useAuth();
   const timeoutRef = useRef<number | null>(null);
