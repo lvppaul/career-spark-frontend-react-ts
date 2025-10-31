@@ -21,8 +21,7 @@ import useCreateNews from '@/features/user/news/hooks/useCreateNews';
 import useUpdateNews from '@/features/user/news/hooks/useUpdateNews';
 import useDeleteNews from '@/features/user/news/hooks/useDeleteNews';
 import type { NewsItem } from '@/features/user/news/services/newsService';
-import { BLOG_TAG_OPTIONS } from '@/features/user/forum/type';
-import { Link } from 'react-router-dom';
+import { NEWS_TAG_OPTIONS } from '@/features/user/news/type';
 
 const AdminNewsManagement: React.FC = () => {
   const { data, isLoading, refetch } = useActiveNews();
@@ -66,7 +65,7 @@ const AdminNewsManagement: React.FC = () => {
 
   const tagMap = useMemo(() => {
     const m = new Map<string, string>();
-    for (const t of BLOG_TAG_OPTIONS) m.set(t.value as string, t.label);
+    for (const t of NEWS_TAG_OPTIONS) m.set(t.value as string, t.label);
     return m;
   }, []);
 
@@ -187,7 +186,7 @@ const AdminNewsManagement: React.FC = () => {
             value={tagFilter || undefined}
             onChange={(v) => setTagFilter(v || '')}
           >
-            {BLOG_TAG_OPTIONS.map((opt) => (
+            {NEWS_TAG_OPTIONS.map((opt) => (
               <Select.Option key={opt.value} value={opt.value}>
                 {opt.label}
               </Select.Option>
@@ -318,7 +317,7 @@ const AdminNewsManagement: React.FC = () => {
           </Form.Item>
           <Form.Item name="tag" label="Chủ đề">
             <Select allowClear>
-              {BLOG_TAG_OPTIONS.map((opt) => (
+              {NEWS_TAG_OPTIONS.map((opt) => (
                 <Select.Option key={opt.value} value={opt.value}>
                   {opt.label}
                 </Select.Option>
@@ -410,7 +409,7 @@ const AdminNewsManagement: React.FC = () => {
             </Form.Item>
             <Form.Item name="tag" label="Chủ đề">
               <Select allowClear>
-                {BLOG_TAG_OPTIONS.map((opt) => (
+                {NEWS_TAG_OPTIONS.map((opt) => (
                   <Select.Option key={opt.value} value={opt.value}>
                     {opt.label}
                   </Select.Option>
