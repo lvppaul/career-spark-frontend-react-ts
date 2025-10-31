@@ -5,16 +5,25 @@ import {
   Row,
   Col,
   Divider,
-  // List removed (not used on result page)
   Button,
   Space,
   Empty,
   Tag,
+  Progress,
 } from 'antd';
+import {
+  ArrowLeftOutlined,
+  RedoOutlined,
+  TrophyOutlined,
+  ExperimentOutlined,
+  BulbOutlined,
+  TeamOutlined,
+  RocketOutlined,
+  FileTextOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
 import type { SubmitResponse } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined, RedoOutlined } from '@ant-design/icons';
-// roadmap details removed from result page
 import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
@@ -30,37 +39,61 @@ const TYPE_ORDER = [
 
 const PERSONALITY_DESCRIPTIONS: Record<
   string,
-  { title: string; description: string }
+  {
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+    bgColor: string;
+  }
 > = {
   Realistic: {
     title: 'Người thực tế (Realistic)',
     description:
       'Thường thích hoạt động tay chân, kỹ thuật, máy móc, xây dựng. Thực tế, kiên trì và hành động hơn là nói.',
+    icon: <TrophyOutlined />,
+    color: '#1890ff',
+    bgColor: '#e6f7ff',
   },
   Investigative: {
     title: 'Người nghiên cứu (Investigative)',
     description:
       'Thích tìm tòi, phân tích, quan sát. Có tư duy logic, tò mò, thường hứng thú với khoa học và công nghệ.',
+    icon: <ExperimentOutlined />,
+    color: '#722ed1',
+    bgColor: '#f9f0ff',
   },
   Artistic: {
     title: 'Người sáng tạo (Artistic)',
     description:
       'Yêu cái đẹp, tự do, sáng tạo. Thường thích nghệ thuật, viết lách, thiết kế, âm nhạc, hội họa.',
+    icon: <BulbOutlined />,
+    color: '#fa8c16',
+    bgColor: '#fff7e6',
   },
   Social: {
     title: 'Người xã hội (Social)',
     description:
       'Thân thiện, thích giúp đỡ, giao tiếp, làm việc nhóm. Hợp với giáo dục, chăm sóc, y tế, cộng đồng.',
+    icon: <TeamOutlined />,
+    color: '#52c41a',
+    bgColor: '#f6ffed',
   },
   Enterprising: {
     title: 'Người quản lý (Enterprising)',
     description:
       'Tự tin, thích lãnh đạo, thuyết phục, kinh doanh. Có khả năng điều hành và hướng tới thành công.',
+    icon: <RocketOutlined />,
+    color: '#eb2f96',
+    bgColor: '#fff0f6',
   },
   Conventional: {
     title: 'Người quy củ (Conventional)',
     description:
       'Ngăn nắp, tỉ mỉ, thích sắp xếp, quản lý dữ liệu, tài chính. Giỏi tổ chức và tuân thủ quy trình.',
+    icon: <FileTextOutlined />,
+    color: '#13c2c2',
+    bgColor: '#e6fffb',
   },
 };
 
@@ -157,11 +190,29 @@ export default function RiasecResultPage() {
 
   if (!result) {
     return (
-      <div className="p-6">
-        <Card>
-          <Empty description={<span>Không có kết quả để hiển thị</span>}>
-            <Button type="primary" onClick={() => navigate('/test-riasec')}>
-              Làm bài ngay
+      <div
+        style={{
+          padding: 48,
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, #f0f2f5 0%, #ffffff 100%)',
+        }}
+      >
+        <Card style={{ maxWidth: 500, textAlign: 'center', borderRadius: 16 }}>
+          <Empty
+            description={
+              <span style={{ fontSize: 16 }}>Không có kết quả để hiển thị</span>
+            }
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => navigate('/test-riasec')}
+            >
+              Làm bài test ngay
             </Button>
           </Empty>
         </Card>
@@ -169,80 +220,273 @@ export default function RiasecResultPage() {
     );
   }
 
+  const topPersonality = PERSONALITY_DESCRIPTIONS[topTypes[0]?.key];
+
   return (
-    <div className="p-6">
-      <Card>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={3} style={{ margin: 0 }}>
-              Kết quả bài test RIASEC
-            </Title>
-            <Text type="secondary">Ngày: {new Date().toLocaleString()}</Text>
-          </Col>
-          <Col>
-            <Space>
-              <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
-                Quay lại
-              </Button>
-              <Button
-                icon={<RedoOutlined />}
-                onClick={() => {
-                  // clear persisted result and retake
-                  localStorage.removeItem('riasecResult');
-                  navigate('/test-riasec');
-                }}
-              >
-                Làm lại
-              </Button>
-            </Space>
-          </Col>
-        </Row>
+    <div
+      style={{
+        background: 'linear-gradient(180deg, #f0f5ff 0%, #ffffff 100%)',
+        minHeight: 'calc(100vh - 64px)',
+        padding: '48px 24px',
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        {/* Header Section */}
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: 16,
+            marginBottom: 24,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#fff',
+          }}
+        >
+          <Row justify="space-between" align="middle">
+            <Col xs={24} md={16}>
+              <Space direction="vertical" size={4}>
+                <Title level={2} style={{ color: '#fff', margin: 0 }}>
+                  🎉 Kết quả bài test RIASEC của bạn
+                </Title>
+                <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
+                  Ngày thực hiện: {new Date().toLocaleDateString('vi-VN')}
+                </Text>
+              </Space>
+            </Col>
+            <Col xs={24} md={8} style={{ textAlign: 'right', marginTop: 16 }}>
+              <Space wrap>
+                <Button
+                  icon={<ArrowLeftOutlined />}
+                  onClick={() => navigate(-1)}
+                  size="large"
+                >
+                  Quay lại
+                </Button>
+                <Button
+                  icon={<RedoOutlined />}
+                  onClick={() => {
+                    localStorage.removeItem('riasecResult');
+                    navigate('/test-riasec');
+                  }}
+                  size="large"
+                >
+                  Làm lại
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        </Card>
 
-        <Divider />
+        <Row gutter={[24, 24]}>
+          {/* Top Result Card */}
+          <Col xs={24} lg={12}>
+            <Card
+              bordered={false}
+              style={{
+                borderRadius: 16,
+                height: '100%',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              }}
+            >
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div
+                  style={{
+                    width: 80,
+                    height: 80,
+                    margin: '0 auto 16px',
+                    background: topPersonality?.bgColor || '#f0f0f0',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 40,
+                    color: topPersonality?.color || '#666',
+                  }}
+                >
+                  {topPersonality?.icon}
+                </div>
+                <Tag
+                  color={topPersonality?.color}
+                  style={{ fontSize: 14, padding: '4px 12px' }}
+                >
+                  Tính cách nổi bật
+                </Tag>
+                <Title level={3} style={{ marginTop: 16, marginBottom: 8 }}>
+                  {topPersonality?.title}
+                </Title>
+                <Text style={{ fontSize: 16, color: '#595959' }}>
+                  {topPersonality?.description}
+                </Text>
+              </div>
 
-        <Row gutter={24}>
-          <Col xs={24} md={12}>
-            <Card bordered={false} className="mb-4">
-              <Title level={5}>Nhận xét tính cách</Title>
-              {topTypes.length > 0 ? (
-                <div>
-                  <Text strong>
-                    {PERSONALITY_DESCRIPTIONS[topTypes[0].key].title}
-                  </Text>
-                  <p>{PERSONALITY_DESCRIPTIONS[topTypes[0].key].description}</p>
-                  <div className="mt-4">
-                    <Text>Phù hợp với lĩnh vực: </Text>
-                    <Tag color="blue">{topTypes[0].label}</Tag>
-                  </div>
+              <Divider />
 
-                  <div className="mt-4">
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        // If user has a subscription level > 0, allow access to matching jobs
-                        const level = tokenUtils.getSubscriptionLevel();
-                        if (level && level > 0) {
-                          navigate('/matching-jobs');
-                        } else {
-                          // Otherwise send them to subscription page
-                          navigate('/subscription');
-                        }
+              {/* Top 3 Types */}
+              <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                <Title level={5} style={{ marginBottom: 16 }}>
+                  <CheckCircleOutlined
+                    style={{ color: '#52c41a', marginRight: 8 }}
+                  />
+                  Top 3 tính cách của bạn
+                </Title>
+                {topTypes.map((type, index) => {
+                  const desc = PERSONALITY_DESCRIPTIONS[type.key];
+                  return (
+                    <div
+                      key={type.key}
+                      style={{
+                        padding: 16,
+                        background: desc.bgColor,
+                        borderRadius: 12,
+                        borderLeft: `4px solid ${desc.color}`,
                       }}
                     >
-                      Các công việc phù hợp
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <Text>Không có dữ liệu để nhận xét.</Text>
-              )}
+                      <Row justify="space-between" align="middle">
+                        <Col>
+                          <Space>
+                            <div
+                              style={{
+                                fontSize: 20,
+                                color: desc.color,
+                              }}
+                            >
+                              {desc.icon}
+                            </div>
+                            <div>
+                              <Text strong style={{ fontSize: 16 }}>
+                                {index + 1}. {type.label}
+                              </Text>
+                              <br />
+                              <Text type="secondary" style={{ fontSize: 14 }}>
+                                Điểm số: {type.value}
+                              </Text>
+                            </div>
+                          </Space>
+                        </Col>
+                        <Col>
+                          <Text
+                            strong
+                            style={{
+                              fontSize: 20,
+                              color: desc.color,
+                            }}
+                          >
+                            {type.normalized.toFixed(1)}%
+                          </Text>
+                        </Col>
+                      </Row>
+                    </div>
+                  );
+                })}
+              </Space>
+
+              <Divider />
+
+              <Button
+                type="primary"
+                size="large"
+                block
+                style={{
+                  height: 48,
+                  fontSize: 16,
+                  borderRadius: 8,
+                }}
+                onClick={() => {
+                  const level = tokenUtils.getSubscriptionLevel();
+                  if (level && level > 0) {
+                    navigate('/matching-jobs');
+                  } else {
+                    navigate('/subscription');
+                  }
+                }}
+              >
+                🎯 Khám phá các công việc phù hợp
+              </Button>
+            </Card>
+          </Col>
+
+          {/* All Scores Card */}
+          <Col xs={24} lg={12}>
+            <Card
+              bordered={false}
+              style={{
+                borderRadius: 16,
+                height: '100%',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              }}
+            >
+              <Title level={4} style={{ marginBottom: 24 }}>
+                📊 Chi tiết tất cả các nhóm tính cách
+              </Title>
+
+              <Space direction="vertical" size={20} style={{ width: '100%' }}>
+                {scores.map((score) => {
+                  const desc = PERSONALITY_DESCRIPTIONS[score.key];
+                  return (
+                    <div key={score.key}>
+                      <Row
+                        justify="space-between"
+                        align="middle"
+                        style={{ marginBottom: 8 }}
+                      >
+                        <Col>
+                          <Space>
+                            <div style={{ fontSize: 18, color: desc.color }}>
+                              {desc.icon}
+                            </div>
+                            <Text strong style={{ fontSize: 15 }}>
+                              {score.label}
+                            </Text>
+                          </Space>
+                        </Col>
+                        <Col>
+                          <Space size={4}>
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              {score.value} điểm
+                            </Text>
+                            <Text
+                              strong
+                              style={{ color: desc.color, fontSize: 15 }}
+                            >
+                              {score.normalized.toFixed(1)}%
+                            </Text>
+                          </Space>
+                        </Col>
+                      </Row>
+                      <Progress
+                        percent={score.normalized}
+                        strokeColor={{
+                          '0%': desc.color,
+                          '100%': desc.color,
+                        }}
+                        showInfo={false}
+                        strokeWidth={12}
+                        trailColor="#f0f0f0"
+                      />
+                    </div>
+                  );
+                })}
+              </Space>
+
+              <Divider />
+
+              <div
+                style={{
+                  background: '#f6ffed',
+                  padding: 16,
+                  borderRadius: 12,
+                  border: '1px solid #b7eb8f',
+                }}
+              >
+                <Text style={{ color: '#52c41a' }}>
+                  💡 <strong>Gợi ý:</strong> Kết quả test giúp bạn hiểu rõ hơn
+                  về bản thân và định hướng nghề nghiệp phù hợp. Hãy tham khảo
+                  thêm các bài viết và tư vấn để phát triển sự nghiệp!
+                </Text>
+              </div>
             </Card>
           </Col>
         </Row>
-
-        {/* Previously displayed a modal with demo purchase options; now use /subscription page */}
-      </Card>
-      {/* Roadmap removed from this page */}
+      </div>
     </div>
   );
 }
