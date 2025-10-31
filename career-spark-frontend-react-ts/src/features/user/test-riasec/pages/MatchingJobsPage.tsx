@@ -148,7 +148,7 @@ export default function MatchingJobsPage() {
                 </Text>
               </div>
             </div>
-            
+
             {data?.careerField?.name && (
               <div style={{ marginTop: 12 }}>
                 <Tag
@@ -179,7 +179,11 @@ export default function MatchingJobsPage() {
               minHeight: 400,
             }}
           >
-            <Space direction="vertical" size={16} style={{ textAlign: 'center' }}>
+            <Space
+              direction="vertical"
+              size={16}
+              style={{ textAlign: 'center' }}
+            >
               <Spin size="large" />
               <Text type="secondary" style={{ fontSize: 16 }}>
                 Đang tải dữ liệu...
@@ -199,10 +203,13 @@ export default function MatchingJobsPage() {
               description={
                 <Space direction="vertical" size={8}>
                   <Text strong style={{ fontSize: 16 }}>
-                    {combinedError ? 'Không có dữ liệu' : 'Chưa có lộ trình phù hợp'}
+                    {combinedError
+                      ? 'Không có dữ liệu'
+                      : 'Chưa có lộ trình phù hợp'}
                   </Text>
                   <Text type="secondary">
-                    Vui lòng hoàn thành bài test RIASEC để nhận gợi ý nghề nghiệp
+                    Vui lòng hoàn thành bài test RIASEC để nhận gợi ý nghề
+                    nghiệp
                   </Text>
                 </Space>
               }
@@ -223,8 +230,9 @@ export default function MatchingJobsPage() {
               <Space>
                 <BulbOutlined style={{ fontSize: 20, color: '#1890ff' }} />
                 <Text style={{ color: '#0050b3' }}>
-                  💡 Chúng tôi đã tìm thấy <strong>{paths.length}</strong> lộ trình nghề nghiệp phù hợp với bạn. 
-                  Nhấn vào từng thẻ để xem chi tiết roadmap!
+                  💡 Chúng tôi đã tìm thấy <strong>{paths.length}</strong> lộ
+                  trình nghề nghiệp phù hợp với bạn. Nhấn vào từng thẻ để xem
+                  chi tiết roadmap!
                 </Text>
               </Space>
             </div>
@@ -232,12 +240,14 @@ export default function MatchingJobsPage() {
             {/* Career Cards Grid */}
             <Row gutter={[24, 24]}>
               {paths.map((p) => {
-                const difficultyColor = getDifficultyColor((p as any).difficultyLevel);
+                const difficultyColor = getDifficultyColor(
+                  (p as any).difficultyLevel
+                );
                 const totalWeeks = (p.roadmaps ?? []).reduce(
                   (acc: number, r: any) => acc + (r.durationWeeks ?? 0),
                   0
                 );
-                
+
                 return (
                   <Col xs={24} sm={24} md={12} lg={8} key={p.id}>
                     <Card
@@ -271,13 +281,15 @@ export default function MatchingJobsPage() {
                             marginBottom: 12,
                           }}
                         >
-                          {getDifficultyIcon(p.difficultyLevel)}
+                          {getDifficultyIcon(
+                            (p as { difficultyLevel?: string }).difficultyLevel
+                          )}
                         </div>
-                        
+
                         <Title level={4} style={{ marginBottom: 8 }}>
                           {p.title}
                         </Title>
-                        
+
                         <Paragraph
                           ellipsis={{ rows: 2 }}
                           type="secondary"
@@ -290,13 +302,21 @@ export default function MatchingJobsPage() {
                       <Divider style={{ margin: '16px 0' }} />
 
                       {/* Card Footer */}
-                      <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                      <Space
+                        direction="vertical"
+                        size={12}
+                        style={{ width: '100%' }}
+                      >
                         <Row justify="space-between" align="middle">
                           <Col>
                             <Space size={4}>
-                              <ClockCircleOutlined style={{ color: '#8c8c8c' }} />
+                              <ClockCircleOutlined
+                                style={{ color: '#8c8c8c' }}
+                              />
                               <Text type="secondary" style={{ fontSize: 13 }}>
-                                {totalWeeks > 0 ? `${totalWeeks} tuần` : 'Chưa xác định'}
+                                {totalWeeks > 0
+                                  ? `${totalWeeks} tuần`
+                                  : 'Chưa xác định'}
                               </Text>
                             </Space>
                           </Col>
@@ -309,7 +329,8 @@ export default function MatchingJobsPage() {
                                 border: 'none',
                               }}
                             >
-                              {p.difficultyLevel ?? 'Medium'}
+                              {(p as { difficultyLevel?: string })
+                                .difficultyLevel ?? 'Medium'}
                             </Tag>
                           </Col>
                         </Row>
@@ -369,7 +390,9 @@ export default function MatchingJobsPage() {
               }}
             >
               <Space direction="vertical" style={{ width: '100%' }} size={12}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}
+                >
                   <div
                     style={{
                       width: 64,
@@ -431,7 +454,8 @@ export default function MatchingJobsPage() {
                       <Space size={8}>
                         <BookOutlined />
                         <Text style={{ color: '#fff' }}>
-                          <strong>{selectedPath.roadmaps?.length ?? 0}</strong> bước
+                          <strong>{selectedPath.roadmaps?.length ?? 0}</strong>{' '}
+                          bước
                         </Text>
                       </Space>
                     </div>
@@ -459,7 +483,9 @@ export default function MatchingJobsPage() {
             {/* Progress Overview */}
             <div style={{ padding: '24px 32px', background: '#fafafa' }}>
               <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between' }}
+                >
                   <Text strong>Tiến độ hoàn thành</Text>
                   <Text type="secondary">0%</Text>
                 </div>
@@ -489,7 +515,7 @@ export default function MatchingJobsPage() {
               <Timeline>
                 {selectedPath.roadmaps?.map((step: any, idx: number) => {
                   const stepColor = getDifficultyColor(step.difficultyLevel);
-                  
+
                   return (
                     <Timeline.Item
                       key={step.id}
@@ -521,9 +547,19 @@ export default function MatchingJobsPage() {
                           borderLeft: `4px solid ${stepColor}`,
                         }}
                       >
-                        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                        <Space
+                          direction="vertical"
+                          size={12}
+                          style={{ width: '100%' }}
+                        >
                           {/* Step Header */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'flex-start',
+                            }}
+                          >
                             <div style={{ flex: 1 }}>
                               <Title level={5} style={{ marginBottom: 4 }}>
                                 {step.title}
@@ -559,7 +595,9 @@ export default function MatchingJobsPage() {
                             {step.skillFocus && (
                               <Col>
                                 <Tag color="purple" style={{ borderRadius: 8 }}>
-                                  <CheckCircleOutlined style={{ marginRight: 4 }} />
+                                  <CheckCircleOutlined
+                                    style={{ marginRight: 4 }}
+                                  />
                                   {step.skillFocus}
                                 </Tag>
                               </Col>
@@ -600,17 +638,23 @@ export default function MatchingJobsPage() {
                 style={{
                   marginTop: 24,
                   borderRadius: 12,
-                  background: 'linear-gradient(135deg, #f6ffed 0%, #e6fffb 100%)',
+                  background:
+                    'linear-gradient(135deg, #f6ffed 0%, #e6fffb 100%)',
                   border: '1px solid #b7eb8f',
                 }}
               >
-                <Space direction="vertical" size={8} style={{ width: '100%', textAlign: 'center' }}>
+                <Space
+                  direction="vertical"
+                  size={8}
+                  style={{ width: '100%', textAlign: 'center' }}
+                >
                   <div style={{ fontSize: 24 }}>🚀</div>
                   <Title level={5} style={{ margin: 0 }}>
                     Sẵn sàng bắt đầu?
                   </Title>
                   <Text type="secondary">
-                    Hãy kiên trì học tập và thực hành để đạt được mục tiêu nghề nghiệp của bạn!
+                    Hãy kiên trì học tập và thực hành để đạt được mục tiêu nghề
+                    nghiệp của bạn!
                   </Text>
                 </Space>
               </Card>
