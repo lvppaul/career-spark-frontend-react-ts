@@ -3,32 +3,84 @@ import {
   Card,
   Button,
   Checkbox,
-  Steps,
   Space,
   Typography,
   message,
   Modal,
+  Progress,
+  Row,
+  Col,
 } from 'antd';
+import {
+  CheckCircleOutlined,
+  TrophyOutlined,
+  ExperimentOutlined,
+  BulbOutlined,
+  TeamOutlined,
+  RocketOutlined,
+  FileTextOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+  SendOutlined,
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useRiasecTest } from '../hooks/useRiasecTest';
 import { useStartRiasecTest } from '../hooks/useStartRiasecTest';
 import { useSubmitRiasecTest } from '../hooks/useSubmitRiasecTest';
 import { tokenUtils } from '@/utils/tokenUtils';
-import type { RiasecQuestion, SubmitResponse } from '../types';
+import type { RiasecQuestion } from '../types';
 
 const { Title, Text } = Typography;
-const { Step } = Steps;
 
 const TYPE_ORDER: Array<{
   key: string;
   label: string;
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
 }> = [
-  { key: 'Realistic', label: 'Realistic (R)' },
-  { key: 'Investigative', label: 'Investigative (I)' },
-  { key: 'Artistic', label: 'Artistic (A)' },
-  { key: 'Social', label: 'Social (S)' },
-  { key: 'Enterprising', label: 'Enterprising (E)' },
-  { key: 'Conventional', label: 'Conventional (C)' },
+  {
+    key: 'Realistic',
+    label: 'Realistic (R)',
+    icon: <TrophyOutlined />,
+    color: '#1890ff',
+    bgColor: '#e6f7ff',
+  },
+  {
+    key: 'Investigative',
+    label: 'Investigative (I)',
+    icon: <ExperimentOutlined />,
+    color: '#722ed1',
+    bgColor: '#f9f0ff',
+  },
+  {
+    key: 'Artistic',
+    label: 'Artistic (A)',
+    icon: <BulbOutlined />,
+    color: '#fa8c16',
+    bgColor: '#fff7e6',
+  },
+  {
+    key: 'Social',
+    label: 'Social (S)',
+    icon: <TeamOutlined />,
+    color: '#52c41a',
+    bgColor: '#f6ffed',
+  },
+  {
+    key: 'Enterprising',
+    label: 'Enterprising (E)',
+    icon: <RocketOutlined />,
+    color: '#eb2f96',
+    bgColor: '#fff0f6',
+  },
+  {
+    key: 'Conventional',
+    label: 'Conventional (C)',
+    icon: <FileTextOutlined />,
+    color: '#13c2c2',
+    bgColor: '#e6fffb',
+  },
 ];
 
 export default function TestPage() {
@@ -38,7 +90,6 @@ export default function TestPage() {
   // selected ids set
   const [selected, setSelected] = useState<Record<number, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState<SubmitResponse | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { start, isLoading: isStarting } = useStartRiasecTest();
@@ -111,7 +162,6 @@ export default function TestPage() {
       };
 
       const result = await submit(payload);
-      setSubmitResult(result);
       message.success('Nộp bài thành công');
       // store session locally for history access
       localStorage.setItem('riasecSession', JSON.stringify(session));
@@ -140,102 +190,357 @@ export default function TestPage() {
     void handleSubmit();
   }
 
-  if (isLoading) return <div>Đang tải câu hỏi...</div>;
-  if (error)
+  if (isLoading) {
     return (
-      <div>
-        <div>Không thể tải câu hỏi: {String(error.message)}</div>
-        <Button onClick={refresh}>Thử lại</Button>
+      <div
+        style={{
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, #f0f2f5 0%, #ffffff 100%)',
+        }}
+      >
+        <Card style={{ textAlign: 'center', borderRadius: 16, minWidth: 300 }}>
+          <Space direction="vertical" size={16}>
+            <div style={{ fontSize: 40 }}>📝</div>
+            <Text style={{ fontSize: 16 }}>Đang tải câu hỏi...</Text>
+          </Space>
+        </Card>
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(180deg, #f0f2f5 0%, #ffffff 100%)',
+          padding: 24,
+        }}
+      >
+        <Card style={{ textAlign: 'center', borderRadius: 16, maxWidth: 500 }}>
+          <Space direction="vertical" size={16}>
+            <div style={{ fontSize: 40 }}>❌</div>
+            <Title level={4}>Không thể tải câu hỏi</Title>
+            <Text type="secondary">{String(error.message)}</Text>
+            <Button type="primary" size="large" onClick={refresh}>
+              Thử lại
+            </Button>
+          </Space>
+        </Card>
+      </div>
+    );
+  }
+
+  const progressPercent = ((currentTypeIndex + 1) / TYPE_ORDER.length) * 100;
 
   return (
-    <div className="p-6">
-      <Card>
-        <Title level={3}>Bài test RIASEC</Title>
+    <div
+      style={{
+        background: 'linear-gradient(180deg, #f0f5ff 0%, #ffffff 100%)',
+        minHeight: 'calc(100vh - 64px)',
+        padding: '24px',
+      }}
+    >
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        {/* Header Card */}
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: 16,
+            marginBottom: 24,
+            background: `linear-gradient(135deg, ${currentType.color} 0%, ${currentType.color}dd 100%)`,
+            color: '#fff',
+          }}
+        >
+          <Row justify="space-between" align="middle">
+            <Col xs={24} md={16}>
+              <Space direction="vertical" size={4}>
+                <Title level={2} style={{ color: '#fff', margin: 0 }}>
+                  Bài test RIASEC
+                </Title>
+                <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 16 }}>
+                  Khám phá tính cách và định hướng nghề nghiệp của bạn
+                </Text>
+              </Space>
+            </Col>
+            <Col xs={24} md={8} style={{ textAlign: 'right', marginTop: 16 }}>
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  padding: '12px 20px',
+                  borderRadius: 12,
+                  display: 'inline-block',
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: 14 }}>Tiến độ</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Progress
+                    percent={progressPercent}
+                    strokeColor="#fff"
+                    trailColor="rgba(255,255,255,0.3)"
+                    showInfo={false}
+                    strokeWidth={8}
+                  />
+                </div>
+                <Text style={{ color: '#fff', fontSize: 12 }}>
+                  {currentTypeIndex + 1} / {TYPE_ORDER.length} phần
+                </Text>
+              </div>
+            </Col>
+          </Row>
+        </Card>
 
-        <Steps current={currentTypeIndex} size="small" className="mb-6">
-          {TYPE_ORDER.map((t) => (
-            <Step key={t.key} title={t.label} />
-          ))}
-        </Steps>
-
-        <div className="mb-4">
-          <Text strong>Loại: </Text>
-          <Text>{currentType.label}</Text>
-        </div>
-
-        <div>
-          {currentQuestions.length === 0 ? (
-            <div>Không có câu hỏi cho loại này.</div>
-          ) : (
-            <Space direction="vertical" style={{ width: '100%' }}>
-              {currentQuestions.map((q, index) => (
-                <Card
-                  key={q.id}
-                  size="small"
-                  hoverable
-                  onClick={() => toggleQuestion(q.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      toggleQuestion(q.id);
-                    }
-                  }}
-                  aria-pressed={Boolean(selected[q.id])}
-                  style={{
-                    cursor: 'pointer',
-                    backgroundColor: selected[q.id] ? '#e6f7ff' : undefined,
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">
-                        <span className="font-semibold mr-2">{index + 1}.</span>
-                        {q.content}
-                      </div>
+        {/* Steps Navigation */}
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: 16,
+            marginBottom: 24,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          }}
+        >
+          <Row gutter={[8, 8]}>
+            {TYPE_ORDER.map((t, index) => {
+              const isActive = index === currentTypeIndex;
+              const isDone = index < currentTypeIndex;
+              return (
+                <Col xs={12} sm={8} md={4} key={t.key}>
+                  <div
+                    style={{
+                      padding: '12px 8px',
+                      borderRadius: 8,
+                      textAlign: 'center',
+                      background: isActive
+                        ? t.bgColor
+                        : isDone
+                          ? '#f0f0f0'
+                          : '#fafafa',
+                      border: `2px solid ${isActive ? t.color : isDone ? '#d9d9d9' : '#f0f0f0'}`,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                    }}
+                    onClick={() => setCurrentTypeIndex(index)}
+                  >
+                    <div
+                      style={{
+                        fontSize: 20,
+                        color: isActive
+                          ? t.color
+                          : isDone
+                            ? '#52c41a'
+                            : '#bfbfbf',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {isDone ? <CheckCircleOutlined /> : t.icon}
                     </div>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={Boolean(selected[q.id])}
-                        onChange={() => toggleQuestion(q.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: isActive ? 600 : 400,
+                        color: isActive ? t.color : '#595959',
+                      }}
+                    >
+                      {t.label}
+                    </Text>
                   </div>
-                </Card>
-              ))}
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+
+        {/* Current Type Card */}
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: 16,
+            marginBottom: 24,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          }}
+        >
+          {/* Type Header */}
+          <div
+            style={{
+              padding: 16,
+              borderRadius: 12,
+              background: currentType.bgColor,
+              marginBottom: 24,
+              borderLeft: `4px solid ${currentType.color}`,
+            }}
+          >
+            <Space size={12}>
+              <div
+                style={{
+                  fontSize: 32,
+                  color: currentType.color,
+                }}
+              >
+                {currentType.icon}
+              </div>
+              <div>
+                <Title
+                  level={4}
+                  style={{ margin: 0, color: currentType.color }}
+                >
+                  {currentType.label}
+                </Title>
+                <Text type="secondary">Chọn các câu hỏi phù hợp với bạn</Text>
+              </div>
+            </Space>
+          </div>
+
+          {/* Questions List */}
+          {currentQuestions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 48 }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
+              <Text type="secondary">Không có câu hỏi cho loại này</Text>
+            </div>
+          ) : (
+            <Space direction="vertical" style={{ width: '100%' }} size={12}>
+              {currentQuestions.map((q, index) => {
+                const isSelected = Boolean(selected[q.id]);
+                return (
+                  <Card
+                    key={q.id}
+                    size="small"
+                    hoverable
+                    onClick={() => toggleQuestion(q.id)}
+                    style={{
+                      cursor: 'pointer',
+                      borderColor: isSelected ? currentType.color : '#f0f0f0',
+                      background: isSelected ? currentType.bgColor : '#fff',
+                      borderWidth: 2,
+                      transition: 'all 0.3s',
+                    }}
+                    bodyStyle={{ padding: '16px 20px' }}
+                  >
+                    <Row justify="space-between" align="middle">
+                      <Col flex="auto">
+                        <Space size={12}>
+                          <div
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: '50%',
+                              background: isSelected
+                                ? currentType.color
+                                : '#f0f0f0',
+                              color: isSelected ? '#fff' : '#595959',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontWeight: 600,
+                              fontSize: 14,
+                            }}
+                          >
+                            {index + 1}
+                          </div>
+                          <Text
+                            style={{
+                              fontSize: 15,
+                              fontWeight: isSelected ? 500 : 400,
+                              color: isSelected ? currentType.color : '#262626',
+                            }}
+                          >
+                            {q.content}
+                          </Text>
+                        </Space>
+                      </Col>
+                      <Col>
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => toggleQuestion(q.id)}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            transform: 'scale(1.2)',
+                          }}
+                        />
+                      </Col>
+                    </Row>
+                  </Card>
+                );
+              })}
             </Space>
           )}
-        </div>
 
-        <div className="mt-6">
-          <div className="mb-4">
-            <Text>Đã chọn: </Text>
-            <Text strong>
-              {Object.values(selected).filter(Boolean).length} mục
-            </Text>
+          {/* Selected Count */}
+          <div
+            style={{
+              marginTop: 24,
+              padding: 16,
+              background: '#f6ffed',
+              borderRadius: 8,
+              border: '1px solid #b7eb8f',
+            }}
+          >
+            <Row justify="space-between" align="middle">
+              <Col>
+                <Space>
+                  <CheckCircleOutlined
+                    style={{ color: '#52c41a', fontSize: 18 }}
+                  />
+                  <Text strong>Đã chọn:</Text>
+                  <Text
+                    style={{ fontSize: 18, fontWeight: 700, color: '#52c41a' }}
+                  >
+                    {selectedCount}
+                  </Text>
+                  <Text type="secondary">/ {questions?.length || 0} câu</Text>
+                </Space>
+              </Col>
+            </Row>
           </div>
-        </div>
+        </Card>
 
-        <div className="mt-2 flex justify-between">
-          <div>
-            <Button onClick={goPrev} disabled={currentTypeIndex === 0}>
-              Quay lại
-            </Button>
-          </div>
-
-          <div>
-            {currentTypeIndex < TYPE_ORDER.length - 1 ? (
-              <Button type="primary" onClick={goNext}>
-                Tiếp theo
+        {/* Navigation Buttons */}
+        <Card
+          bordered={false}
+          style={{
+            borderRadius: 16,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          }}
+        >
+          <Row justify="space-between" align="middle">
+            <Col>
+              <Button
+                size="large"
+                onClick={goPrev}
+                disabled={currentTypeIndex === 0}
+                icon={<ArrowLeftOutlined />}
+                style={{ height: 48, minWidth: 120 }}
+              >
+                Quay lại
               </Button>
-            ) : (
-              <>
+            </Col>
+
+            <Col>
+              {currentTypeIndex < TYPE_ORDER.length - 1 ? (
                 <Button
                   type="primary"
+                  size="large"
+                  onClick={goNext}
+                  icon={<ArrowRightOutlined />}
+                  iconPosition="end"
+                  style={{
+                    height: 48,
+                    minWidth: 120,
+                    background: currentType.color,
+                    borderColor: currentType.color,
+                  }}
+                >
+                  Tiếp theo
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  size="large"
                   onClick={() => {
                     if (selectedCount === 0) {
                       message.warning(
@@ -252,83 +557,68 @@ export default function TestPage() {
                     isStarting ||
                     isSubmittingRemote
                   }
+                  icon={<SendOutlined />}
+                  style={{
+                    height: 48,
+                    minWidth: 140,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    background:
+                      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderColor: 'transparent',
+                  }}
                 >
                   Nộp bài
                 </Button>
+              )}
+            </Col>
+          </Row>
+        </Card>
 
-                <Modal
-                  title="Xác nhận nộp bài"
-                  open={confirmOpen}
-                  onOk={onConfirmSubmit}
-                  onCancel={() => setConfirmOpen(false)}
-                  okText="Nộp"
-                  cancelText="Hủy"
-                >
-                  <p>
-                    Bạn có chắc chắn muốn nộp bài không? Sau khi nộp bạn sẽ xem
-                    kết quả.
-                  </p>
-                </Modal>
-              </>
-            )}
-          </div>
-        </div>
-        {submitResult && (
-          <div className="mt-6">
-            <Card title="Kết quả bài test">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div>
-                    R: {submitResult.r} ({submitResult.r_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                  <div>
-                    I: {submitResult.i} ({submitResult.i_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                  <div>
-                    A: {submitResult.a} ({submitResult.a_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                </div>
-                <div>
-                  <div>
-                    S: {submitResult.s} ({submitResult.s_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                  <div>
-                    E: {submitResult.e} ({submitResult.e_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                  <div>
-                    C: {submitResult.c} ({submitResult.c_Normalized.toFixed(1)}
-                    %)
-                  </div>
-                </div>
+        {/* Confirm Modal */}
+        <Modal
+          title={
+            <Space>
+              <SendOutlined style={{ color: '#1890ff' }} />
+              <span>Xác nhận nộp bài</span>
+            </Space>
+          }
+          open={confirmOpen}
+          onOk={onConfirmSubmit}
+          onCancel={() => setConfirmOpen(false)}
+          okText="Nộp bài"
+          cancelText="Kiểm tra lại"
+          okButtonProps={{
+            size: 'large',
+            style: {
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderColor: 'transparent',
+            },
+          }}
+          cancelButtonProps={{ size: 'large' }}
+        >
+          <div style={{ padding: '16px 0' }}>
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <div
+                style={{
+                  padding: 16,
+                  background: '#e6f7ff',
+                  borderRadius: 8,
+                  border: '1px solid #91d5ff',
+                }}
+              >
+                <Text>
+                  ℹ️ Bạn đã chọn <strong>{selectedCount}</strong> câu hỏi.
+                </Text>
               </div>
-
-              {submitResult.suggestedCareerFields &&
-                submitResult.suggestedCareerFields.length > 0 && (
-                  <div className="mt-4">
-                    <div className="font-semibold">Gợi ý ngành nghề:</div>
-                    <ul className="list-disc pl-5">
-                      {submitResult.suggestedCareerFields.map((f) => (
-                        <li key={f.id}>
-                          <div className="font-medium">{f.name}</div>
-                          {f.description && (
-                            <div className="text-sm text-gray-600">
-                              {f.description}
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-            </Card>
+              <Text>
+                Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ nhận
+                được kết quả phân tích tính cách và gợi ý nghề nghiệp phù hợp.
+              </Text>
+            </Space>
           </div>
-        )}
-      </Card>
+        </Modal>
+      </div>
     </div>
   );
 }
