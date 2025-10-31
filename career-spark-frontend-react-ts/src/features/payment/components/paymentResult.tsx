@@ -1,21 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Result, Button, Typography } from 'antd';
+import { Button, Typography, Card } from 'antd';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { tokenUtils } from '@/utils/tokenUtils';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 export default function PaymentResult() {
-  const [params] = useSearchParams();
-  const status = params.get('status');
-  const message = params.get('message');
-  const orderId = params.get('orderId');
-  const txnRef = params.get('txnRef');
-  const code = params.get('code');
-
-  const isSuccess = status === 'success' && code === '00';
-
   const { logout } = useAuth();
   const timeoutRef = useRef<number | null>(null);
 
@@ -43,34 +34,106 @@ export default function PaymentResult() {
   }, [logout]);
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      {isSuccess ? (
-        <Result
-          status="success"
-          title="Thanh toán thành công!"
-          subTitle={`Đơn hàng #${orderId} (Mã tham chiếu: ${txnRef}) đã được xử lý thành công.`}
-        />
-      ) : (
-        <Result
-          status="error"
-          title="Thanh toán thất bại!"
-          subTitle={`Lỗi: ${decodeURIComponent(message ?? 'Giao dịch không hợp lệ.')}`}
-          extra={[
-            <Button type="primary" key="retry" href="/">
-              Thử lại
-            </Button>,
-          ]}
-        />
-      )}
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: 24,
+      }}
+    >
+      <Card
+        style={{
+          maxWidth: 600,
+          width: '100%',
+          borderRadius: 16,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          textAlign: 'center',
+        }}
+        bodyStyle={{ padding: '48px 32px' }}
+      >
+        {/* Success Icon */}
+        <div
+          style={{
+            width: 100,
+            height: 100,
+            margin: '0 auto 24px',
+            background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(82, 196, 26, 0.3)',
+          }}
+        >
+          <CheckCircleOutlined
+            style={{
+              fontSize: 56,
+              color: '#fff',
+            }}
+          />
+        </div>
 
-      <div style={{ marginTop: 12 }}>
-        <Text type="secondary">
-          Bạn sẽ được chuyển về trang đăng nhập trong 3 giây...
-        </Text>
-      </div>
-      <div style={{ marginTop: 12 }}>
+        {/* Success Title */}
+        <Title
+          level={2}
+          style={{
+            margin: '0 0 16px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          🎉 Chúc mừng!
+        </Title>
+
+        {/* Success Message */}
+        <div style={{ marginBottom: 32 }}>
+          <Text
+            style={{
+              fontSize: 18,
+              color: '#262626',
+              display: 'block',
+              marginBottom: 12,
+              fontWeight: 500,
+            }}
+          >
+            Bạn đã thanh toán thành công!
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              color: '#595959',
+              display: 'block',
+            }}
+          >
+            Tiếp theo bạn hãy đăng nhập lại để sử dụng dịch vụ.
+          </Text>
+        </div>
+
+        {/* Countdown Notice */}
+        <div
+          style={{
+            padding: 16,
+            background: '#f0f5ff',
+            borderRadius: 8,
+            marginBottom: 24,
+          }}
+        >
+          <Text type="secondary" style={{ fontSize: 14 }}>
+            ⏱️ Bạn sẽ được chuyển về trang đăng nhập trong{' '}
+            <strong>3 giây</strong>...
+          </Text>
+        </div>
+
+        {/* Login Button */}
         <Button
-          type="default"
+          type="primary"
+          size="large"
+          block
           onClick={() => {
             // Cancel the pending timeout and perform immediate logout/redirect
             if (timeoutRef.current) {
@@ -88,10 +151,18 @@ export default function PaymentResult() {
               window.location.replace('/login');
             });
           }}
+          style={{
+            height: 48,
+            fontSize: 16,
+            fontWeight: 600,
+            borderRadius: 8,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            border: 'none',
+          }}
         >
           Đăng nhập ngay
         </Button>
-      </div>
+      </Card>
     </div>
   );
 }
