@@ -127,13 +127,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     href="tel:02189995394"
                     className="hover:text-white transition-colors"
                   >
-                    02189995394
+                    096 234 90 26
                   </a>
                 </div>
                 <div>
                   <strong>Email:</strong>{' '}
                   <a
-                    href="mailto:minquan141104@gmail.com"
+                    href="mailto:careerspark86@gmail.com"
                     className="hover:text-white transition-colors"
                   >
                     minquan141104@gmail.com
