@@ -480,7 +480,7 @@ export default function MatchingJobsPage() {
               </Space>
             </div>
 
-            {/* Progress Overview */}
+            {/* Progress Overview
             <div style={{ padding: '24px 32px', background: '#fafafa' }}>
               <Space direction="vertical" size={8} style={{ width: '100%' }}>
                 <div
@@ -501,7 +501,7 @@ export default function MatchingJobsPage() {
                   Bắt đầu học ngay để theo dõi tiến độ của bạn!
                 </Text>
               </Space>
-            </div>
+            </div> */}
 
             <Divider style={{ margin: 0 }} />
 
