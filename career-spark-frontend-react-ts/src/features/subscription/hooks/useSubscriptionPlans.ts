@@ -11,7 +11,7 @@ export function useSubscriptionPlans() {
     setIsLoading(true);
     setError(null);
     try {
-      const resp = await subscriptionPlanService.getSubscriptionPlans();
+      const resp = await subscriptionPlanService.getActiveSubscriptionPlans();
       setData(resp.data || []);
     } catch (err) {
       console.error('Failed to fetch subscription plans', err);

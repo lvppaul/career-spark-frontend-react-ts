@@ -27,8 +27,19 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlansResponse>
   return resp.data;
 }
 
+/**
+ * Fetch active subscription plans
+ */
+export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlansResponse> {
+  const resp = await api.get<SubscriptionPlansResponse>(
+    '/SubscriptionPlan/active'
+  );
+  return resp.data;
+}
+
 export const subscriptionPlanService = {
   getSubscriptionPlans,
+  getActiveSubscriptionPlans,
 };
 
 export default subscriptionPlanService;

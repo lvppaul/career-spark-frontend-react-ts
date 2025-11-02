@@ -59,6 +59,9 @@ const NewsManagementPageLazy = React.lazy(
 const SubscriptionPlansPageLazy = React.lazy(
   () => import('@/features/admin/pages/SubscriptionPlansPage')
 );
+const OrdersPageLazy = React.lazy(
+  () => import('@/features/admin/pages/OrdersPage')
+);
 
 const AppRouter: React.FC = () => {
   return (
@@ -117,6 +120,14 @@ const AppRouter: React.FC = () => {
             element={
               <Suspense fallback={<div>Đang tải...</div>}>
                 <SubscriptionPlansPageLazy />
+              </Suspense>
+            }
+          />
+          <Route
+            path="orders"
+            element={
+              <Suspense fallback={<div>Đang tải...</div>}>
+                <OrdersPageLazy />
               </Suspense>
             }
           />

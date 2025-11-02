@@ -6,3 +6,4 @@ export { default as UnpublishedBlogManagement } from './UnpublishedBlogManagemen
 export { default as AdminNewsManagement } from './AdminNewsManagement';
 
 export { default as SubscriptionPlanManagement } from './SubscriptionPlanManagement';
+export { default as OrderManagement } from './OrderManagement';
