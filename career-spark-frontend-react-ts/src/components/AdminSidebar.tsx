@@ -4,6 +4,7 @@ import {
   DashboardOutlined,
   UserOutlined,
   FileTextOutlined,
+  CreditCardOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ADMIN_ROUTES } from '@/router/constants';
@@ -43,6 +44,12 @@ const AdminSidebar: React.FC = () => {
       icon: <FileTextOutlined />,
       label: 'Quản lý tin tức',
       onClick: () => navigate(ADMIN_ROUTES.NEWS_MANAGEMENT),
+    },
+    {
+      key: ADMIN_ROUTES.SUBSCRIPTION_PLANS,
+      icon: <CreditCardOutlined />,
+      label: 'Quản lý gói đăng ký',
+      onClick: () => navigate(ADMIN_ROUTES.SUBSCRIPTION_PLANS),
     },
   ];
 
