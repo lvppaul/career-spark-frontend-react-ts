@@ -5,6 +5,7 @@ import {
   UserOutlined,
   FileTextOutlined,
   CreditCardOutlined,
+  ShoppingOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ADMIN_ROUTES } from '@/router/constants';
@@ -50,6 +51,12 @@ const AdminSidebar: React.FC = () => {
       icon: <CreditCardOutlined />,
       label: 'Quản lý gói đăng ký',
       onClick: () => navigate(ADMIN_ROUTES.SUBSCRIPTION_PLANS),
+    },
+    {
+      key: ADMIN_ROUTES.ORDERS,
+      icon: <ShoppingOutlined />,
+      label: 'Quản lý đơn hàng',
+      onClick: () => navigate(ADMIN_ROUTES.ORDERS),
     },
   ];
 

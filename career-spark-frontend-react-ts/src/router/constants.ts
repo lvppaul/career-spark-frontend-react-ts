@@ -26,6 +26,7 @@ export const ADMIN_ROUTES = {
   BLOG_UNPUBLISHED: '/admin/blogs/unpublished',
   NEWS_MANAGEMENT: '/admin/news',
   SUBSCRIPTION_PLANS: '/admin/subscription-plans',
+  ORDERS: '/admin/orders',
   SETTINGS: '/admin/settings',
 } as const;
 
@@ -57,6 +58,7 @@ export const NAVIGATION_ITEMS = {
     { label: 'Quản lý câu hỏi', path: ADMIN_ROUTES.QUESTION_MANAGEMENT },
     { label: 'Bài viết chưa đăng', path: ADMIN_ROUTES.BLOG_UNPUBLISHED },
     { label: 'Quản lý gói đăng ký', path: ADMIN_ROUTES.SUBSCRIPTION_PLANS },
+    { label: 'Quản lý đơn hàng', path: ADMIN_ROUTES.ORDERS },
     { label: 'Cài đặt', path: ADMIN_ROUTES.SETTINGS },
   ],
 } as const;
