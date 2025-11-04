@@ -53,6 +53,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     data: revenueByDay,
     isLoading: loadingDay,
     refetch: refetchDay,
+    updateParams: updateDayParams,
   } = useRevenueByDay({
     year: selectedYear,
     month: selectedMonth,
@@ -62,6 +63,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     data: revenueByMonth,
     isLoading: loadingMonth,
     refetch: refetchMonth,
+    updateParams: updateMonthParams,
   } = useRevenueByMonth({
     year: selectedYear,
   });
@@ -71,6 +73,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     isLoading: loadingYear,
     refetch: refetchYear,
   } = useRevenueByYear();
+
+  // Update hooks params when selectedYear or selectedMonth changes
+  React.useEffect(() => {
+    updateDayParams({ year: selectedYear, month: selectedMonth });
+  }, [selectedYear, selectedMonth, updateDayParams]);
+
+  React.useEffect(() => {
+    updateMonthParams({ year: selectedYear });
+  }, [selectedYear, updateMonthParams]);
 
   // Calculate today's revenue
   const todayRevenue = useMemo(() => {
