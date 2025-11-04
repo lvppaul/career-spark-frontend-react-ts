@@ -1,237 +1,457 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   Card,
   Statistic,
   Row,
   Col,
   Spin,
-  Button,
-  List,
-  Avatar,
   Typography,
+  DatePicker,
   Space,
+  Empty,
 } from 'antd';
 import {
-  UserOutlined,
-  CheckCircleOutlined,
-  QuestionCircleOutlined,
-  BarChartOutlined,
-  TrophyOutlined,
-  UsergroupAddOutlined,
-  ExclamationCircleOutlined,
+  DollarOutlined,
+  RiseOutlined,
+  CalendarOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import dayjs from 'dayjs';
+import { useRevenueByDay } from '../hooks/useRevenueByDay';
+import { useRevenueByMonth } from '../hooks/useRevenueByMonth';
+import { useRevenueByYear } from '../hooks/useRevenueByYear';
 
-import { demoStats, demoActivities } from '../../../data/demoData';
-
-const { Title, Paragraph } = Typography;
-
-interface Activity {
-  id: string;
-  description: string;
-  timestamp: string;
-  type: string;
-}
+const { Title } = Typography;
 
 interface AdminDashboardProps {
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activities, setActivities] = useState<Activity[]>([]);
+const AdminDashboard: React.FC<AdminDashboardProps> = () => {
+  const currentDate = dayjs();
+  const [selectedYear, setSelectedYear] = React.useState(currentDate.year());
+  const [selectedMonth, setSelectedMonth] = React.useState(
+    currentDate.month() + 1
+  );
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  // Fetch revenue data
+  const {
+    data: revenueByDay,
+    isLoading: loadingDay,
+    refetch: refetchDay,
+  } = useRevenueByDay({
+    year: selectedYear,
+    month: selectedMonth,
+  });
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      // Simulate API call with demo data
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setStats(demoStats);
-      setActivities(demoActivities);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      // Fallback to demo data
-      setStats(demoStats);
-      setActivities(demoActivities);
-    } finally {
-      setLoading(false);
-    }
+  const {
+    data: revenueByMonth,
+    isLoading: loadingMonth,
+    refetch: refetchMonth,
+  } = useRevenueByMonth({
+    year: selectedYear,
+  });
+
+  const {
+    data: revenueByYear,
+    isLoading: loadingYear,
+    refetch: refetchYear,
+  } = useRevenueByYear();
+
+  // Calculate today's revenue
+  const todayRevenue = useMemo(() => {
+    if (!revenueByDay) return 0;
+    const today = currentDate.date();
+    const todayData = revenueByDay.find((item) => item.key === today);
+    return todayData?.value || 0;
+  }, [revenueByDay, currentDate]);
+
+  // Calculate this month's revenue
+  const thisMonthRevenue = useMemo(() => {
+    if (!revenueByMonth) return 0;
+    const currentMonth = currentDate.month() + 1;
+    const monthData = revenueByMonth.find((item) => item.key === currentMonth);
+    return monthData?.value || 0;
+  }, [revenueByMonth, currentDate]);
+
+  // Calculate this year's revenue
+  const thisYearRevenue = useMemo(() => {
+    if (!revenueByYear) return 0;
+    const currentYear = currentDate.year();
+    const yearData = revenueByYear.find((item) => item.key === currentYear);
+    return yearData?.value || 0;
+  }, [revenueByYear, currentDate]);
+
+  // Format data for charts
+  const dayChartData = useMemo(() => {
+    if (!revenueByDay) return [];
+    return revenueByDay.map((item) => ({
+      day: `Ngày ${item.key}`,
+      revenue: item.value,
+    }));
+  }, [revenueByDay]);
+
+  const monthChartData = useMemo(() => {
+    if (!revenueByMonth) return [];
+    const monthNames = [
+      'T1',
+      'T2',
+      'T3',
+      'T4',
+      'T5',
+      'T6',
+      'T7',
+      'T8',
+      'T9',
+      'T10',
+      'T11',
+      'T12',
+    ];
+    return revenueByMonth.map((item) => ({
+      month: monthNames[item.key - 1],
+      revenue: item.value,
+    }));
+  }, [revenueByMonth]);
+
+  const yearChartData = useMemo(() => {
+    if (!revenueByYear) return [];
+    return revenueByYear.map((item) => ({
+      year: item.key.toString(),
+      revenue: item.value,
+    }));
+  }, [revenueByYear]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(value);
   };
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '400px',
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'user_registration':
-        return <UsergroupAddOutlined style={{ color: '#52c41a' }} />;
-      case 'question_created':
-        return <QuestionCircleOutlined style={{ color: '#1890ff' }} />;
-      case 'test_completed':
-        return <TrophyOutlined style={{ color: '#faad14' }} />;
-      case 'user_banned':
-        return <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />;
-      default:
-        return <BarChartOutlined style={{ color: '#722ed1' }} />;
-    }
+  const handleRefreshAll = () => {
+    refetchDay();
+    refetchMonth();
+    refetchYear();
   };
+
+  const isLoading = loadingDay || loadingMonth || loadingYear;
 
   return (
-    <div
-      style={{
-        padding: '24px',
-        backgroundColor: '#f0f2f5',
-        minHeight: '100vh',
-      }}
-    >
+    <div>
       {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <Title level={2}>Bảng điều khiển Admin</Title>
-        <Paragraph type="secondary">Tổng quan hệ thống và quản lý</Paragraph>
+      <div
+        style={{
+          marginBottom: '32px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <Title level={2} style={{ margin: 0 }}>
+            Bảng điều khiển Admin
+          </Title>
+          <Typography.Text type="secondary">
+            Tổng quan doanh thu và thống kê
+          </Typography.Text>
+        </div>
+        <Space>
+          <DatePicker
+            picker="month"
+            value={dayjs(`${selectedYear}-${selectedMonth}`, 'YYYY-M')}
+            onChange={(date) => {
+              if (date) {
+                setSelectedYear(date.year());
+                setSelectedMonth(date.month() + 1);
+              }
+            }}
+            format="MM/YYYY"
+            allowClear={false}
+          />
+          <DatePicker
+            picker="year"
+            value={dayjs(`${selectedYear}`, 'YYYY')}
+            onChange={(date) => {
+              if (date) {
+                setSelectedYear(date.year());
+              }
+            }}
+            format="YYYY"
+            allowClear={false}
+          />
+          <ReloadOutlined
+            style={{
+              fontSize: '20px',
+              cursor: 'pointer',
+              color: '#1890ff',
+            }}
+            onClick={handleRefreshAll}
+            spin={isLoading}
+          />
+        </Space>
       </div>
 
-      {/* Stats Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng người dùng"
-              value={stats?.totalUsers || 0}
-              prefix={<UserOutlined style={{ color: '#1890ff' }} />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Người dùng hoạt động"
-              value={stats?.activeUsers || 0}
-              prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng câu hỏi"
-              value={stats?.totalQuestions || 0}
-              prefix={<QuestionCircleOutlined style={{ color: '#faad14' }} />}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Bài test hoàn thành"
-              value={stats?.testsCompleted || 0}
-              prefix={<BarChartOutlined style={{ color: '#722ed1' }} />}
-              valueStyle={{ color: '#722ed1' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {isLoading && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '400px',
+          }}
+        >
+          <Spin size="large" tip="Đang tải dữ liệu..." />
+        </div>
+      )}
 
-      {/* Quick Actions & Recent Activities */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Thao tác nhanh" extra={<Space />}>
-            <Row gutter={[16, 16]}>
-              <Col span={12}>
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<UserOutlined />}
-                  onClick={() => onNavigate('user-management')}
-                  block
-                >
-                  Quản lý người dùng
-                </Button>
-              </Col>
-              <Col span={12}>
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<QuestionCircleOutlined />}
-                  onClick={() => onNavigate('question-management')}
-                  block
-                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                >
-                  Quản lý câu hỏi
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
+      {!isLoading && (
+        <>
+          {/* Revenue Summary Cards */}
+          <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
+            <Col xs={24} sm={12} lg={8}>
+              <Card
+                style={{
+                  background:
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                }}
+              >
+                <Statistic
+                  title={
+                    <span style={{ color: '#fff', fontSize: '16px' }}>
+                      💰 Doanh thu hôm nay
+                    </span>
+                  }
+                  value={todayRevenue}
+                  prefix={<DollarOutlined />}
+                  suffix="₫"
+                  valueStyle={{ color: '#fff', fontSize: '28px' }}
+                  formatter={(value) =>
+                    new Intl.NumberFormat('vi-VN').format(Number(value))
+                  }
+                />
+                <Typography.Text style={{ color: '#fff', opacity: 0.8 }}>
+                  {currentDate.format('DD/MM/YYYY')}
+                </Typography.Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8}>
+              <Card
+                style={{
+                  background:
+                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  border: 'none',
+                }}
+              >
+                <Statistic
+                  title={
+                    <span style={{ color: '#fff', fontSize: '16px' }}>
+                      📅 Doanh thu tháng này
+                    </span>
+                  }
+                  value={thisMonthRevenue}
+                  prefix={<CalendarOutlined />}
+                  suffix="₫"
+                  valueStyle={{ color: '#fff', fontSize: '28px' }}
+                  formatter={(value) =>
+                    new Intl.NumberFormat('vi-VN').format(Number(value))
+                  }
+                />
+                <Typography.Text style={{ color: '#fff', opacity: 0.8 }}>
+                  Tháng {currentDate.format('MM/YYYY')}
+                </Typography.Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={8}>
+              <Card
+                style={{
+                  background:
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  border: 'none',
+                }}
+              >
+                <Statistic
+                  title={
+                    <span style={{ color: '#fff', fontSize: '16px' }}>
+                      🎯 Doanh thu năm nay
+                    </span>
+                  }
+                  value={thisYearRevenue}
+                  prefix={<RiseOutlined />}
+                  suffix="₫"
+                  valueStyle={{ color: '#fff', fontSize: '28px' }}
+                  formatter={(value) =>
+                    new Intl.NumberFormat('vi-VN').format(Number(value))
+                  }
+                />
+                <Typography.Text style={{ color: '#fff', opacity: 0.8 }}>
+                  Năm {currentDate.format('YYYY')}
+                </Typography.Text>
+              </Card>
+            </Col>
+          </Row>
 
-        <Col xs={24} lg={12}>
-          <Card title="Hoạt động gần đây">
-            <List
-              dataSource={activities}
-              renderItem={(activity) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={<Avatar icon={getActivityIcon(activity.type)} />}
-                    title={activity.description}
-                    description={new Date(activity.timestamp).toLocaleString(
-                      'vi-VN'
-                    )}
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
+          {/* Daily Revenue Chart */}
+          <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+            <Col xs={24}>
+              <Card
+                title={
+                  <span>
+                    📈 Doanh thu theo ngày - Tháng {selectedMonth}/
+                    {selectedYear}
+                  </span>
+                }
+                bordered={false}
+              >
+                {dayChartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart data={dayChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="day" />
+                      <YAxis
+                        tickFormatter={(value) =>
+                          `${(value / 1000).toFixed(0)}k`
+                        }
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          formatCurrency(value),
+                          'Doanh thu',
+                        ]}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#8884d8"
+                        strokeWidth={3}
+                        dot={{ r: 5 }}
+                        activeDot={{ r: 8 }}
+                        name="Doanh thu (VNĐ)"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Empty description="Không có dữ liệu" />
+                )}
+              </Card>
+            </Col>
+          </Row>
 
-      {/* Additional Stats */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={8}>
-          <Card>
-            <Statistic
-              title="Đăng ký hôm nay"
-              value={stats?.todaySignups || 0}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card>
-            <Statistic
-              title="Người dùng Premium"
-              value={stats?.premiumUsers || 0}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card>
-            <Statistic
-              title="Người dùng bị cấm"
-              value={stats?.bannedUsers || 0}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
-          </Card>
-        </Col>
-      </Row>
+          {/* Monthly Revenue Chart */}
+          <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+            <Col xs={24}>
+              <Card
+                title={
+                  <span>📊 Doanh thu theo tháng - Năm {selectedYear}</span>
+                }
+                bordered={false}
+              >
+                {monthChartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart data={monthChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis
+                        tickFormatter={(value) =>
+                          `${(value / 1000).toFixed(0)}k`
+                        }
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          formatCurrency(value),
+                          'Doanh thu',
+                        ]}
+                      />
+                      <Legend />
+                      <Bar
+                        dataKey="revenue"
+                        fill="#82ca9d"
+                        name="Doanh thu (VNĐ)"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Empty description="Không có dữ liệu" />
+                )}
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Yearly Revenue Chart */}
+          <Row gutter={[16, 16]}>
+            <Col xs={24}>
+              <Card title={<span>📉 Doanh thu theo năm</span>} bordered={false}>
+                {yearChartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <AreaChart data={yearChartData}>
+                      <defs>
+                        <linearGradient
+                          id="colorRevenue"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#ffc658"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#ffc658"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" />
+                      <YAxis
+                        tickFormatter={(value) =>
+                          `${(value / 1000).toFixed(0)}k`
+                        }
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          formatCurrency(value),
+                          'Doanh thu',
+                        ]}
+                      />
+                      <Legend />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#ffc658"
+                        fillOpacity={1}
+                        fill="url(#colorRevenue)"
+                        name="Doanh thu (VNĐ)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Empty description="Không có dữ liệu" />
+                )}
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
     </div>
   );
 };
