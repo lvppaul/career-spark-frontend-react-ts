@@ -133,6 +133,33 @@ export interface RevenueByYearResponse {
 }
 
 /**
+ * Top spender data item
+ */
+export interface TopSpender {
+  userId: number;
+  userName: string;
+  email: string;
+  total: number;
+}
+
+/**
+ * Query parameters for fetching top spenders
+ */
+export interface GetTopSpendersParams {
+  top?: number;
+}
+
+/**
+ * API Response for top spenders
+ */
+export interface TopSpendersResponse {
+  success: boolean;
+  message: string;
+  data: TopSpender[];
+  timestamp?: string;
+}
+
+/**
  * Admin service for managing orders
  */
 export const adminOrderService = {
@@ -259,6 +286,42 @@ export const adminOrderService = {
 
     const url = `/Order/revenue/years`;
     const resp = await api.get<RevenueByYearResponse>(url, { headers });
+    return resp.data;
+  },
+
+  /**
+   * Get top spenders for current month
+   */
+  getTopSpendersCurrentMonth: async (
+    params?: GetTopSpendersParams,
+    options?: { skipLoading?: boolean }
+  ): Promise<TopSpendersResponse> => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+
+    const queryParams = new URLSearchParams();
+    if (params?.top) queryParams.append('top', params.top.toString());
+
+    const url = `/Order/top-spenders/current-month${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const resp = await api.get<TopSpendersResponse>(url, { headers });
+    return resp.data;
+  },
+
+  /**
+   * Get top spenders for last 7 days
+   */
+  getTopSpendersLast7Days: async (
+    params?: GetTopSpendersParams,
+    options?: { skipLoading?: boolean }
+  ): Promise<TopSpendersResponse> => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+
+    const queryParams = new URLSearchParams();
+    if (params?.top) queryParams.append('top', params.top.toString());
+
+    const url = `/Order/top-spenders/last-7-days${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const resp = await api.get<TopSpendersResponse>(url, { headers });
     return resp.data;
   },
 };

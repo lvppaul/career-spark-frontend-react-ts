@@ -9,12 +9,17 @@ import {
   DatePicker,
   Space,
   Empty,
+  Table,
+  Avatar,
+  Tag,
 } from 'antd';
 import {
   DollarOutlined,
   RiseOutlined,
   CalendarOutlined,
   ReloadOutlined,
+  UserOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 import {
   LineChart,
@@ -34,6 +39,9 @@ import dayjs from 'dayjs';
 import { useRevenueByDay } from '../hooks/useRevenueByDay';
 import { useRevenueByMonth } from '../hooks/useRevenueByMonth';
 import { useRevenueByYear } from '../hooks/useRevenueByYear';
+import { useTopSpenders } from '../hooks/useTopSpenders';
+import { useTopSpendersLast7Days } from '../hooks/useTopSpendersLast7Days';
+import type { TopSpender } from '../services/orderService';
 
 const { Title } = Typography;
 
@@ -53,6 +61,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     data: revenueByDay,
     isLoading: loadingDay,
     refetch: refetchDay,
+    updateParams: updateDayParams,
   } = useRevenueByDay({
     year: selectedYear,
     month: selectedMonth,
@@ -62,6 +71,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     data: revenueByMonth,
     isLoading: loadingMonth,
     refetch: refetchMonth,
+    updateParams: updateMonthParams,
   } = useRevenueByMonth({
     year: selectedYear,
   });
@@ -71,6 +81,27 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     isLoading: loadingYear,
     refetch: refetchYear,
   } = useRevenueByYear();
+
+  const {
+    data: topSpenders,
+    isLoading: loadingTopSpenders,
+    refetch: refetchTopSpenders,
+  } = useTopSpenders({ top: 10 });
+
+  const {
+    data: topSpendersLast7Days,
+    isLoading: loadingTopSpenders7Days,
+    refetch: refetchTopSpenders7Days,
+  } = useTopSpendersLast7Days({ top: 10 });
+
+  // Update hooks params when selectedYear or selectedMonth changes
+  React.useEffect(() => {
+    updateDayParams({ year: selectedYear, month: selectedMonth });
+  }, [selectedYear, selectedMonth, updateDayParams]);
+
+  React.useEffect(() => {
+    updateMonthParams({ year: selectedYear });
+  }, [selectedYear, updateMonthParams]);
 
   // Calculate today's revenue
   const todayRevenue = useMemo(() => {
@@ -146,9 +177,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
     refetchDay();
     refetchMonth();
     refetchYear();
+    refetchTopSpenders();
+    refetchTopSpenders7Days();
   };
 
-  const isLoading = loadingDay || loadingMonth || loadingYear;
+  const isLoading =
+    loadingDay ||
+    loadingMonth ||
+    loadingYear ||
+    loadingTopSpenders ||
+    loadingTopSpenders7Days;
 
   return (
     <div>
@@ -305,9 +343,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
             </Col>
           </Row>
 
-          {/* Daily Revenue Chart */}
+          {/* Daily Revenue Chart and Top Spenders Last 7 Days */}
           <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-            <Col xs={24}>
+            <Col xs={24} lg={16}>
               <Card
                 title={
                   <span>
@@ -350,11 +388,152 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                 )}
               </Card>
             </Col>
+
+            {/* Top Spenders Last 7 Days */}
+            <Col xs={24} lg={8}>
+              <Card
+                title={
+                  <span>
+                    <CrownOutlined style={{ color: '#ff4d4f' }} /> Top 10 Người
+                    Chi Tiêu 7 Ngày Qua
+                  </span>
+                }
+                bordered={false}
+                style={{ height: '100%' }}
+              >
+                {loadingTopSpenders7Days ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      padding: '40px 0',
+                    }}
+                  >
+                    <Spin />
+                  </div>
+                ) : topSpendersLast7Days && topSpendersLast7Days.length > 0 ? (
+                  <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                    <Table<TopSpender>
+                      dataSource={topSpendersLast7Days}
+                      pagination={false}
+                      size="small"
+                      rowKey="userId"
+                      columns={[
+                        {
+                          title: '#',
+                          key: 'rank',
+                          width: 50,
+                          align: 'center',
+                          render: (_, __, index) => {
+                            if (index === 0)
+                              return (
+                                <Tag
+                                  color="gold"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥇
+                                </Tag>
+                              );
+                            if (index === 1)
+                              return (
+                                <Tag
+                                  color="silver"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥈
+                                </Tag>
+                              );
+                            if (index === 2)
+                              return (
+                                <Tag
+                                  color="orange"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥉
+                                </Tag>
+                              );
+                            return (
+                              <span style={{ color: '#8c8c8c' }}>
+                                {index + 1}
+                              </span>
+                            );
+                          },
+                        },
+                        {
+                          title: 'Người dùng',
+                          key: 'user',
+                          render: (_, record) => (
+                            <div
+                              style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                              <Avatar
+                                size={32}
+                                icon={<UserOutlined />}
+                                style={{
+                                  backgroundColor: '#ff4d4f',
+                                  marginRight: '8px',
+                                }}
+                              />
+                              <div style={{ minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontWeight: 500,
+                                    fontSize: '13px',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {record.userName}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '11px',
+                                    color: '#8c8c8c',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {record.email}
+                                </div>
+                              </div>
+                            </div>
+                          ),
+                        },
+                        {
+                          title: 'Tổng chi',
+                          key: 'total',
+                          align: 'right',
+                          width: 100,
+                          render: (_, record) => (
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                color: '#ff4d4f',
+                                fontSize: '13px',
+                              }}
+                            >
+                              {new Intl.NumberFormat('vi-VN').format(
+                                record.total
+                              )}
+                              ₫
+                            </span>
+                          ),
+                        },
+                      ]}
+                    />
+                  </div>
+                ) : (
+                  <Empty description="Không có dữ liệu" />
+                )}
+              </Card>
+            </Col>
           </Row>
 
           {/* Monthly Revenue Chart */}
           <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-            <Col xs={24}>
+            <Col xs={24} lg={16}>
               <Card
                 title={
                   <span>📊 Doanh thu theo tháng - Năm {selectedYear}</span>
@@ -386,6 +565,147 @@ const AdminDashboard: React.FC<AdminDashboardProps> = () => {
                       />
                     </BarChart>
                   </ResponsiveContainer>
+                ) : (
+                  <Empty description="Không có dữ liệu" />
+                )}
+              </Card>
+            </Col>
+
+            {/* Top Spenders Table */}
+            <Col xs={24} lg={8}>
+              <Card
+                title={
+                  <span>
+                    <CrownOutlined style={{ color: '#faad14' }} /> Top 10 Người
+                    Chi Tiêu Tháng Này
+                  </span>
+                }
+                bordered={false}
+                style={{ height: '100%' }}
+              >
+                {loadingTopSpenders ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      padding: '40px 0',
+                    }}
+                  >
+                    <Spin />
+                  </div>
+                ) : topSpenders && topSpenders.length > 0 ? (
+                  <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                    <Table<TopSpender>
+                      dataSource={topSpenders}
+                      pagination={false}
+                      size="small"
+                      rowKey="userId"
+                      columns={[
+                        {
+                          title: '#',
+                          key: 'rank',
+                          width: 50,
+                          align: 'center',
+                          render: (_, __, index) => {
+                            if (index === 0)
+                              return (
+                                <Tag
+                                  color="gold"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥇
+                                </Tag>
+                              );
+                            if (index === 1)
+                              return (
+                                <Tag
+                                  color="silver"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥈
+                                </Tag>
+                              );
+                            if (index === 2)
+                              return (
+                                <Tag
+                                  color="orange"
+                                  style={{ fontWeight: 'bold' }}
+                                >
+                                  🥉
+                                </Tag>
+                              );
+                            return (
+                              <span style={{ color: '#8c8c8c' }}>
+                                {index + 1}
+                              </span>
+                            );
+                          },
+                        },
+                        {
+                          title: 'Người dùng',
+                          key: 'user',
+                          render: (_, record) => (
+                            <div
+                              style={{ display: 'flex', alignItems: 'center' }}
+                            >
+                              <Avatar
+                                size={32}
+                                icon={<UserOutlined />}
+                                style={{
+                                  backgroundColor: '#1890ff',
+                                  marginRight: '8px',
+                                }}
+                              />
+                              <div style={{ minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontWeight: 500,
+                                    fontSize: '13px',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {record.userName}
+                                </div>
+                                <div
+                                  style={{
+                                    fontSize: '11px',
+                                    color: '#8c8c8c',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {record.email}
+                                </div>
+                              </div>
+                            </div>
+                          ),
+                        },
+                        {
+                          title: 'Tổng chi',
+                          key: 'total',
+                          align: 'right',
+                          width: 100,
+                          render: (_, record) => (
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                color: '#52c41a',
+                                fontSize: '13px',
+                              }}
+                            >
+                              {new Intl.NumberFormat('vi-VN').format(
+                                record.total
+                              )}
+                              ₫
+                            </span>
+                          ),
+                        },
+                      ]}
+                    />
+                  </div>
                 ) : (
                   <Empty description="Không có dữ liệu" />
                 )}
