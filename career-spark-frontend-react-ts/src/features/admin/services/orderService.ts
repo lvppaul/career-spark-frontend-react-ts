@@ -64,6 +64,75 @@ export interface GetOrdersParams {
 }
 
 /**
+ * Revenue by day data item
+ */
+export interface RevenueByDay {
+  key: number; // day of the month
+  value: number; // revenue amount
+}
+
+/**
+ * Query parameters for fetching revenue by day
+ */
+export interface GetRevenueByDayParams {
+  year: number;
+  month: number;
+}
+
+/**
+ * API Response for revenue by day
+ */
+export interface RevenueByDayResponse {
+  success: boolean;
+  message: string;
+  data: RevenueByDay[];
+  timestamp?: string;
+}
+
+/**
+ * Revenue by month data item
+ */
+export interface RevenueByMonth {
+  key: number; // month of the year (1-12)
+  value: number; // revenue amount
+}
+
+/**
+ * Query parameters for fetching revenue by month
+ */
+export interface GetRevenueByMonthParams {
+  year: number;
+}
+
+/**
+ * API Response for revenue by month
+ */
+export interface RevenueByMonthResponse {
+  success: boolean;
+  message: string;
+  data: RevenueByMonth[];
+  timestamp?: string;
+}
+
+/**
+ * Revenue by year data item
+ */
+export interface RevenueByYear {
+  key: number; // year
+  value: number; // revenue amount
+}
+
+/**
+ * API Response for revenue by year
+ */
+export interface RevenueByYearResponse {
+  success: boolean;
+  message: string;
+  data: RevenueByYear[];
+  timestamp?: string;
+}
+
+/**
  * Admin service for managing orders
  */
 export const adminOrderService = {
@@ -139,6 +208,57 @@ export const adminOrderService = {
       message?: string;
       timestamp?: string;
     }>(`/Order/${id}`, { headers });
+    return resp.data;
+  },
+
+  /**
+   * Get revenue by day for a specific month and year
+   */
+  getRevenueByDay: async (
+    params: GetRevenueByDayParams,
+    options?: { skipLoading?: boolean }
+  ): Promise<RevenueByDayResponse> => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+
+    const queryParams = new URLSearchParams();
+    queryParams.append('year', params.year.toString());
+    queryParams.append('month', params.month.toString());
+
+    const url = `/Order/revenue/days?${queryParams.toString()}`;
+    const resp = await api.get<RevenueByDayResponse>(url, { headers });
+    return resp.data;
+  },
+
+  /**
+   * Get revenue by month for a specific year
+   */
+  getRevenueByMonth: async (
+    params: GetRevenueByMonthParams,
+    options?: { skipLoading?: boolean }
+  ): Promise<RevenueByMonthResponse> => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+
+    const queryParams = new URLSearchParams();
+    queryParams.append('year', params.year.toString());
+
+    const url = `/Order/revenue/months?${queryParams.toString()}`;
+    const resp = await api.get<RevenueByMonthResponse>(url, { headers });
+    return resp.data;
+  },
+
+  /**
+   * Get revenue by year (all years)
+   */
+  getRevenueByYear: async (options?: {
+    skipLoading?: boolean;
+  }): Promise<RevenueByYearResponse> => {
+    const headers: Record<string, string> = {};
+    if (options?.skipLoading) headers['x-skip-loading'] = 'true';
+
+    const url = `/Order/revenue/years`;
+    const resp = await api.get<RevenueByYearResponse>(url, { headers });
     return resp.data;
   },
 };

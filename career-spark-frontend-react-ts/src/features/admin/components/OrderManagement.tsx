@@ -9,12 +9,8 @@ import {
   Row,
   Col,
   Statistic,
-  Popconfirm,
-  Tooltip,
 } from 'antd';
 import {
-  DeleteOutlined,
-  EyeOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -23,7 +19,6 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
 import useOrders from '@/features/admin/hooks/useOrders';
-import useDeleteOrder from '@/features/admin/hooks/useDeleteOrder';
 import type { AdminOrderData } from '@/features/admin/services/orderService';
 
 /**
@@ -37,7 +32,6 @@ export function OrderManagement() {
     updateParams,
     refetch,
   } = useOrders();
-  const { deleteOrder, isLoading: isDeleting } = useDeleteOrder();
 
   // Handle date picker change
   const handleDateChange = (date: Dayjs | null) => {
@@ -53,16 +47,6 @@ export function OrderManagement() {
   // Handle pagination change
   const handleTableChange = (page: number, pageSize: number) => {
     updateParams({ pageNumber: page, pageSize });
-  };
-
-  // Handle delete order
-  const handleDelete = async (id: number) => {
-    try {
-      await deleteOrder(id);
-      refetch();
-    } catch (error) {
-      console.error('Delete failed:', error);
-    }
   };
 
   // Get status color
@@ -218,31 +202,6 @@ export function OrderManagement() {
       key: 'expiredAt',
       width: 140,
       render: formatDateTime,
-    },
-    {
-      title: 'Thao tác',
-      key: 'action',
-      width: 120,
-      fixed: 'right',
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Xem chi tiết">
-            <Button type="link" icon={<EyeOutlined />} size="small">
-              Chi tiết
-            </Button>
-          </Tooltip>
-          <Popconfirm
-            title="Xóa đơn hàng"
-            description="Bạn có chắc chắn muốn xóa đơn hàng này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true, loading: isDeleting }}
-          >
-            <Button type="link" danger icon={<DeleteOutlined />} size="small" />
-          </Popconfirm>
-        </Space>
-      ),
     },
   ];
 
