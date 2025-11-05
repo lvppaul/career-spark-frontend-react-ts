@@ -25,7 +25,7 @@ export default function LangflowEmbed() {
         __html: `
         <langflow-chat
           window_title="CareerSpark AI Assistant"
-          flow_id="8a3c25f3-5ddb-46ee-9838-fe841fb72e84"
+          flow_id="cfcce0b6-8871-48d5-b368-9d0d3cf88e4f"
           host_url="${hostUrl}"
           chat_position="top-left"
           height="600"
