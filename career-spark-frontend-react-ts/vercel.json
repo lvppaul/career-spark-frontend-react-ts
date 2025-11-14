@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/langflow/:path*",
-      "destination": "http://careersparklangflowai0910.southeastasia.azurecontainer.io:7860/:path*"
+      "destination": "http://careersparklangflowai0511.h6gdawenfggmh8fb.eastasia.azurecontainer.io:7860/:path*"
     },
     {
       "source": "/(.*)",
