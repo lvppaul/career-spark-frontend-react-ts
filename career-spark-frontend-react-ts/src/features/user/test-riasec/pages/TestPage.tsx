@@ -86,11 +86,44 @@ const TYPE_ORDER: Array<{
 export default function TestPage() {
   const navigate = useNavigate();
   const { data: questions, isLoading, error, refresh } = useRiasecTest();
-  const [currentTypeIndex, setCurrentTypeIndex] = useState(0);
-  // selected ids set
-  const [selected, setSelected] = useState<Record<number, boolean>>({});
+
+  // Initialize state from localStorage if available (restored after login)
+  const [currentTypeIndex, setCurrentTypeIndex] = useState(() => {
+    const saved = localStorage.getItem('riasecTestProgress');
+    if (saved) {
+      try {
+        const { currentTypeIndex: savedIndex, timestamp } = JSON.parse(saved);
+        // Only restore if saved within last 24 hours
+        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+          return savedIndex;
+        }
+      } catch (e) {
+        console.error('Error parsing saved progress:', e);
+      }
+    }
+    return 0;
+  });
+
+  const [selected, setSelected] = useState<Record<number, boolean>>(() => {
+    const saved = localStorage.getItem('riasecTestProgress');
+    if (saved) {
+      try {
+        const { selected: savedSelected, timestamp } = JSON.parse(saved);
+        // Only restore if saved within last 24 hours
+        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
+          message.info('Đã khôi phục tiến trình làm bài của bạn');
+          return savedSelected;
+        }
+      } catch (e) {
+        console.error('Error parsing saved progress:', e);
+      }
+    }
+    return {};
+  });
+
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const { start, isLoading: isStarting } = useStartRiasecTest();
   const { submit, isLoading: isSubmittingRemote } = useSubmitRiasecTest();
@@ -116,15 +149,38 @@ export default function TestPage() {
   }
 
   function goNext() {
-    setCurrentTypeIndex((i) => Math.min(TYPE_ORDER.length - 1, i + 1));
+    setCurrentTypeIndex((i: number) => Math.min(TYPE_ORDER.length - 1, i + 1));
   }
 
   function goPrev() {
-    setCurrentTypeIndex((i) => Math.max(0, i - 1));
+    setCurrentTypeIndex((i: number) => Math.max(0, i - 1));
   }
 
   async function handleSubmit() {
-    // prevent submit when no selections
+    // Check if user is authenticated with valid token
+    const isAuthenticated = tokenUtils.isAuthenticated();
+    const user = tokenUtils.getUserData();
+
+    if (!isAuthenticated || !user || !user.sub) {
+      // Show warning message
+      message.warning('Bạn cần đăng nhập để nộp bài test và xem kết quả!', 3);
+
+      // Save current selections to localStorage before navigating
+      localStorage.setItem(
+        'riasecTestProgress',
+        JSON.stringify({
+          selected,
+          currentTypeIndex,
+          timestamp: Date.now(),
+        })
+      );
+
+      // Show custom login modal
+      setLoginModalOpen(true);
+      return;
+    }
+
+    // Prevent submit when no selections
     if (Object.values(selected).filter(Boolean).length === 0) {
       message.warning(
         'Bạn chưa chọn câu nào. Vui lòng chọn ít nhất một câu trước khi nộp.'
@@ -140,12 +196,6 @@ export default function TestPage() {
         isSelected: Boolean(selected[q.id]),
       }));
 
-      // Get current user id from token
-      const user = tokenUtils.getUserData();
-      if (!user || !user.sub) {
-        message.error('Bạn cần đăng nhập để nộp bài');
-        return;
-      }
       const userId = Number(user.sub);
 
       // Start test session
@@ -163,10 +213,12 @@ export default function TestPage() {
 
       const result = await submit(payload);
       message.success('Nộp bài thành công');
-      // store session locally for history access
+      // Store session locally for history access
       localStorage.setItem('riasecSession', JSON.stringify(session));
+      // Clear saved progress after successful submission
+      localStorage.removeItem('riasecTestProgress');
       console.log('RIASEC submit result:', result);
-      // navigate to result view after successful submit
+      // Navigate to result view after successful submit
       navigate('/test-riasec/result', { state: { result } });
     } catch (err) {
       console.error('Submit failed', err);
@@ -178,15 +230,9 @@ export default function TestPage() {
   }
 
   function onConfirmSubmit() {
-    // Close modal and run submit
+    // Close modal
     setConfirmOpen(false);
-    // double-check selections just before submitting
-    if (selectedCount === 0) {
-      message.warning(
-        'Bạn chưa chọn câu nào. Vui lòng chọn ít nhất một câu trước khi nộp.'
-      );
-      return;
-    }
+    // Run submit (authentication check is inside handleSubmit)
     void handleSubmit();
   }
 
@@ -614,6 +660,106 @@ export default function TestPage() {
               <Text>
                 Bạn có chắc chắn muốn nộp bài không? Sau khi nộp, bạn sẽ nhận
                 được kết quả phân tích tính cách và gợi ý nghề nghiệp phù hợp.
+              </Text>
+            </Space>
+          </div>
+        </Modal>
+
+        {/* Login Required Modal */}
+        <Modal
+          title={
+            <Space>
+              <div
+                style={{
+                  fontSize: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                ⚠️
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 600 }}>
+                Yêu cầu đăng nhập
+              </span>
+            </Space>
+          }
+          open={loginModalOpen}
+          onOk={() => {
+            setLoginModalOpen(false);
+            navigate('/login', { state: { from: '/test-riasec' } });
+          }}
+          onCancel={() => setLoginModalOpen(false)}
+          okText="Đăng nhập ngay"
+          cancelText="Để sau"
+          width={520}
+          okButtonProps={{
+            size: 'large',
+            style: {
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderColor: 'transparent',
+              height: 48,
+              fontSize: 16,
+              fontWeight: 600,
+            },
+          }}
+          cancelButtonProps={{
+            size: 'large',
+            style: { height: 48 },
+          }}
+        >
+          <div style={{ padding: '24px 0' }}>
+            <Space direction="vertical" size={20} style={{ width: '100%' }}>
+              <div
+                style={{
+                  padding: 20,
+                  background: '#fff7e6',
+                  borderRadius: 12,
+                  border: '2px solid #ffd591',
+                }}
+              >
+                <Title level={5} style={{ margin: 0, marginBottom: 12 }}>
+                  📝 Bạn cần đăng nhập để:
+                </Title>
+                <ul
+                  style={{
+                    paddingLeft: 24,
+                    margin: 0,
+                    fontSize: 15,
+                    lineHeight: '28px',
+                  }}
+                >
+                  <li>Lưu kết quả bài test của bạn</li>
+                  <li>Xem phân tích chi tiết về tính cách</li>
+                  <li>Nhận gợi ý nghề nghiệp phù hợp</li>
+                  <li>Xem lại lịch sử các bài test đã làm</li>
+                </ul>
+              </div>
+
+              <div
+                style={{
+                  padding: 16,
+                  background: '#f6ffed',
+                  borderRadius: 8,
+                  border: '1px solid #b7eb8f',
+                  textAlign: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: '#52c41a',
+                    fontWeight: 500,
+                  }}
+                >
+                  ✓ Tiến trình làm bài của bạn đã được lưu tự động!
+                </Text>
+              </div>
+
+              <Text
+                type="secondary"
+                style={{ fontSize: 14, textAlign: 'center', display: 'block' }}
+              >
+                Bạn có thể tiếp tục làm bài sau khi đăng nhập
               </Text>
             </Space>
           </div>

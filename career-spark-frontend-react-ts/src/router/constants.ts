@@ -1,19 +1,26 @@
-// Public routes
+// Public routes (accessible without login)
 export const PUBLIC_ROUTES = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   CONFIRM_EMAIL: '/confirm-email',
   RESET_PASSWORD: '/reset-password',
   UNAUTHORIZED: '/unauthorized',
-} as const;
-
-// User routes (protected)
-export const USER_ROUTES = {
   HOME: '/',
   FORUM: '/forum',
   NEWS: '/news',
-  ROADMAP: '/roadmap',
   TEST_RIASEC: '/test-riasec',
+} as const;
+
+// User routes (protected - require authentication)
+export const USER_ROUTES = {
+  PROFILE: '/profile',
+  PROFILE_EDIT: '/profile/edit',
+  ROADMAP: '/roadmap',
+  TEST_RIASEC_RESULT: '/test-riasec/result',
+  TEST_RIASEC_HISTORY: '/test-riasec/history',
+  MATCHING_JOBS: '/matching-jobs',
+  SUBSCRIPTION: '/subscription',
+  PAYMENT_RESULT: '/payment/result',
   SETTINGS: '/settings',
 } as const;
 
@@ -47,10 +54,10 @@ export const ROUTE_GROUPS = {
 // Navigation items for different user roles
 export const NAVIGATION_ITEMS = {
   USER: [
-    { label: 'Trang chủ', path: USER_ROUTES.HOME },
-    { label: 'Diễn đàn', path: USER_ROUTES.FORUM },
-    { label: 'Tin tức', path: USER_ROUTES.NEWS },
-    { label: 'Test RIASEC', path: USER_ROUTES.TEST_RIASEC },
+    { label: 'Trang chủ', path: PUBLIC_ROUTES.HOME },
+    { label: 'Diễn đàn', path: PUBLIC_ROUTES.FORUM },
+    { label: 'Tin tức', path: PUBLIC_ROUTES.NEWS },
+    { label: 'Test RIASEC', path: PUBLIC_ROUTES.TEST_RIASEC },
   ],
   ADMIN: [
     { label: 'Dashboard', path: ADMIN_ROUTES.DASHBOARD },
@@ -70,7 +77,7 @@ export const getDefaultRouteByRole = (role: string | null): string => {
       return ADMIN_ROUTES.DASHBOARD;
     case 'User':
     default:
-      return USER_ROUTES.HOME;
+      return PUBLIC_ROUTES.HOME;
   }
 };
 
@@ -79,9 +86,15 @@ export const isRouteAccessibleByRole = (
   route: string,
   role: string | null
 ): boolean => {
-  if (!role) return false;
-
+  const publicRoutes = Object.values(PUBLIC_ROUTES) as string[];
   const userRoutes = Object.values(USER_ROUTES) as string[];
+
+  // Public routes are accessible by everyone
+  if (publicRoutes.some((publicRoute) => route.startsWith(publicRoute))) {
+    return true;
+  }
+
+  if (!role) return false;
 
   if (role === 'Admin') {
     // Admin can access both admin and user routes
