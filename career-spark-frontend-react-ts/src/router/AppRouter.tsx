@@ -134,19 +134,9 @@ const AppRouter: React.FC = () => {
           {/* <Route path="settings" element={<AdminSettingsPage />} /> */}
         </Route>
 
-        {/* Public Home route (accessible without login) */}
+        {/* Public Routes with User Layout (accessible without login) */}
         <Route path="/" element={<UserLayoutWrapper />}>
           <Route index element={<HomePage />} />
-        </Route>
-
-        {/* Protected User Routes (other pages require authentication) */}
-        <Route
-          element={
-            <ProtectedRoute requiredRole="User">
-              <UserLayoutWrapper />
-            </ProtectedRoute>
-          }
-        >
           <Route path="forum" element={<ForumPage />} />
           <Route path="news" element={<NewsPage />} />
           <Route
@@ -157,8 +147,18 @@ const AppRouter: React.FC = () => {
               </Suspense>
             }
           />
-          {/* AI Assistant route removed */}
           <Route path="test-riasec" element={<TestPage />} />
+        </Route>
+
+        {/* Protected User Routes (other pages require authentication) */}
+        <Route
+          element={
+            <ProtectedRoute requiredRole="User">
+              <UserLayoutWrapper />
+            </ProtectedRoute>
+          }
+        >
+          {/* Protected test results and history */}
           <Route path="test-riasec/result" element={<RiasecResultPage />} />
           <Route path="test-riasec/history" element={<RiasecHistoryPage />} />
           <Route path="profile" element={<UserProfileView />} />

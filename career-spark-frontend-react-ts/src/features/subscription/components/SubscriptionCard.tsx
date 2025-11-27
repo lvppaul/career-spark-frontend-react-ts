@@ -8,6 +8,7 @@ import type { SubscriptionPlan } from '@/features/subscription/services/subscrip
 import { useNavigate } from 'react-router-dom';
 import { tokenUtils } from '@/utils/tokenUtils';
 import useCreateOrder from '@/features/order/hooks/useCreateOrder';
+import { useState } from 'react';
 
 interface Props {
   plan: SubscriptionPlan;
@@ -16,6 +17,7 @@ interface Props {
 
 export default function SubscriptionCard({ plan, featured = false }: Props) {
   const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
   const { create, isLoading } = useCreateOrder();
 
@@ -54,17 +56,33 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
   const getCardStyle = () => {
     if (featured || isPremium) {
       return {
-        border: '2px solid #1890ff',
-        boxShadow: '0 8px 24px rgba(24, 144, 255, 0.2)',
-        transform: 'scale(1.02)',
+        border: '3px solid transparent',
+        boxShadow: '0 8px 24px rgba(102, 126, 234, 0.25)',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: '#fff',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       };
     }
     return {
-      border: '1px solid #f0f0f0',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-      transition: 'all 0.3s ease',
+      border: '2px solid #f0f0f0',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+      background: '#ffffff',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    };
+  };
+
+  const getHoverStyle = () => {
+    if (featured || isPremium) {
+      return {
+        boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
+        transform: 'translateY(-8px) scale(1.02)',
+        border: '3px solid rgba(255, 255, 255, 0.5)',
+      };
+    }
+    return {
+      border: '2px solid #1890ff',
+      boxShadow: '0 8px 24px rgba(24, 144, 255, 0.2)',
+      transform: 'translateY(-8px)',
     };
   };
 
@@ -75,7 +93,11 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
       .filter(Boolean) || [];
 
   return (
-    <div style={{ position: 'relative', height: '100%' }}>
+    <div
+      style={{ position: 'relative', height: '100%' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {featured && (
         <Badge.Ribbon text="PHỔ BIẾN" color="red" style={{ fontSize: 12 }}>
           <div />
@@ -85,6 +107,7 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
         hoverable
         style={{
           ...getCardStyle(),
+          ...(isHovered ? getHoverStyle() : {}),
           borderRadius: 16,
           height: '100%',
           overflow: 'hidden',
@@ -100,8 +123,8 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div
             style={{
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               margin: '0 auto 16px',
               background:
                 featured || isPremium ? 'rgba(255,255,255,0.2)' : '#f0f5ff',
@@ -109,27 +132,37 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'all 0.3s ease',
+              transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1)',
+              boxShadow: isHovered
+                ? featured || isPremium
+                  ? '0 8px 20px rgba(255,255,255,0.3)'
+                  : '0 8px 20px rgba(24, 144, 255, 0.3)'
+                : 'none',
             }}
           >
             {isPremium ? (
               <CrownOutlined
                 style={{
-                  fontSize: 32,
+                  fontSize: 36,
                   color: featured || isPremium ? '#fff' : '#1890ff',
+                  transition: 'all 0.3s ease',
                 }}
               />
             ) : isFree ? (
               <StarOutlined
                 style={{
-                  fontSize: 32,
+                  fontSize: 36,
                   color: featured || isPremium ? '#fff' : '#52c41a',
+                  transition: 'all 0.3s ease',
                 }}
               />
             ) : (
               <CheckCircleOutlined
                 style={{
-                  fontSize: 32,
+                  fontSize: 36,
                   color: featured || isPremium ? '#fff' : '#1890ff',
+                  transition: 'all 0.3s ease',
                 }}
               />
             )}
@@ -161,7 +194,20 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
         </div>
 
         {/* Price */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: 24,
+            padding: '16px 0',
+            borderRadius: 12,
+            background: isHovered
+              ? featured || isPremium
+                ? 'rgba(255,255,255,0.1)'
+                : 'rgba(24, 144, 255, 0.05)'
+              : 'transparent',
+            transition: 'all 0.3s ease',
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -172,10 +218,11 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
           >
             <span
               style={{
-                fontSize: 42,
+                fontSize: isHovered ? 46 : 42,
                 fontWeight: 800,
                 color: featured || isPremium ? '#fff' : '#262626',
                 lineHeight: 1,
+                transition: 'all 0.3s ease',
               }}
             >
               {plan.price === 0 ? 'Miễn phí' : plan.price.toLocaleString()}
@@ -198,6 +245,7 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
               color:
                 featured || isPremium ? 'rgba(255,255,255,0.9)' : '#8c8c8c',
               fontSize: 14,
+              fontWeight: 500,
             }}
           >
             {plan.durationDays} ngày sử dụng
@@ -254,13 +302,20 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
             borderRadius: 8,
             fontSize: 16,
             fontWeight: 600,
+            transition: 'all 0.3s ease',
             ...(featured || isPremium
               ? {
                   background: '#fff',
                   borderColor: '#fff',
-                  color: '#1890ff',
+                  color: '#667eea',
+                  boxShadow: isHovered ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
                 }
-              : {}),
+              : {
+                  boxShadow: isHovered
+                    ? '0 4px 12px rgba(24, 144, 255, 0.3)'
+                    : 'none',
+                  transform: isHovered ? 'translateY(-2px)' : 'none',
+                }),
           }}
         >
           {isFree ? 'Bắt đầu miễn phí' : 'Chọn gói này'}

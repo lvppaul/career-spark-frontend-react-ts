@@ -320,19 +320,6 @@ export default function MatchingJobsPage() {
                               </Text>
                             </Space>
                           </Col>
-                          <Col>
-                            <Tag
-                              color={difficultyColor}
-                              style={{
-                                borderRadius: 12,
-                                padding: '2px 12px',
-                                border: 'none',
-                              }}
-                            >
-                              {(p as { difficultyLevel?: string })
-                                .difficultyLevel ?? 'Medium'}
-                            </Tag>
-                          </Col>
                         </Row>
 
                         <Row justify="space-between" align="middle">
