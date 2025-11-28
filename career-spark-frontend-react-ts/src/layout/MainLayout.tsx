@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import { Link } from 'react-router-dom';
-import { USER_ROUTES } from '@/router/constants';
+import { PUBLIC_ROUTES } from '@/router/constants';
 import LangflowEmbed from '@/components/LangflowEmbed';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
@@ -35,7 +35,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <ul className="space-y-3 text-sm text-gray-300">
                 <li>
                   <Link
-                    to={USER_ROUTES.TEST_RIASEC}
+                    to={PUBLIC_ROUTES.TEST_RIASEC}
                     className="hover:text-white transition-colors"
                   >
                     Test RIASEC
@@ -44,7 +44,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
                 <li>
                   <Link
-                    to={USER_ROUTES.FORUM}
+                    to={PUBLIC_ROUTES.FORUM}
                     className="hover:text-white transition-colors"
                   >
                     Diễn đàn
@@ -52,7 +52,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 </li>
                 <li>
                   <Link
-                    to={USER_ROUTES.NEWS}
+                    to={PUBLIC_ROUTES.NEWS}
                     className="hover:text-white transition-colors"
                   >
                     Tin tức
@@ -136,7 +136,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     href="mailto:careerspark86@gmail.com"
                     className="hover:text-white transition-colors"
                   >
-                    minquan141104@gmail.com
+                    careerspark86@gmail.com
                   </a>
                 </div>
               </div>

@@ -14,6 +14,11 @@ import {
   message,
   Upload,
 } from 'antd';
+import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import useActiveNews from '@/features/user/news/hooks/useActiveNews';
 import useNewsById from '@/features/user/news/hooks/useNewsById';
@@ -116,28 +121,28 @@ const AdminNewsManagement: React.FC = () => {
       width: 180,
     },
     {
-      title: 'Hành động',
+      title: 'Thao tác',
       key: 'actions',
+      width: 150,
       render: (_: unknown, record: NewsItem) => (
         <Space>
           <Button
-            type="link"
+            icon={<EyeOutlined />}
             onClick={() => {
               setSelectedId(record.id);
             }}
-          >
-            Xem
-          </Button>
+            size="small"
+            type="default"
+          />
           <Button
-            type="link"
+            icon={<EditOutlined />}
             onClick={() => {
               setEditingId(record.id);
               setEditVisible(true);
             }}
-          >
-            Sửa
-          </Button>
-
+            size="small"
+            type="primary"
+          />
           <Popconfirm
             title="Bạn có chắc muốn xóa tin tức này?"
             okText="Xóa"
@@ -156,9 +161,12 @@ const AdminNewsManagement: React.FC = () => {
               }
             }}
           >
-            <Button type="link" danger loading={deletingId === record.id}>
-              Xóa
-            </Button>
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              loading={deletingId === record.id}
+              size="small"
+            />
           </Popconfirm>
         </Space>
       ),

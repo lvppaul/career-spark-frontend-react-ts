@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Alert, Typography } from 'antd';
+import { Card, Alert, Typography, Modal } from 'antd';
 import logoXX from '@/assets/images/only-logo-xx.jpg';
 import bgLogin from '@/assets/images/career_spark_login_background.png';
 import {
@@ -48,6 +48,8 @@ const SignUpPage: React.FC = () => {
   const { register, isLoading, error, isAuthenticated, clearError } = useAuth();
 
   const [registered, setRegistered] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const [formData, setFormData] = useState<SignUpFormData>({
     name: '',
@@ -569,22 +571,178 @@ const SignUpPage: React.FC = () => {
           <div className="text-center mt-4">
             <p className="text-xs text-gray-500">
               Bằng việc tạo tài khoản, bạn đồng ý với{' '}
-              <Link
-                to="/terms"
-                className="text-indigo-600 hover:text-indigo-500"
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-indigo-600 hover:text-indigo-500 underline bg-transparent border-none cursor-pointer"
               >
                 Điều khoản sử dụng
-              </Link>{' '}
+              </button>{' '}
               và{' '}
-              <Link
-                to="/privacy"
-                className="text-indigo-600 hover:text-indigo-500"
+              <button
+                type="button"
+                onClick={() => setShowPrivacyModal(true)}
+                className="text-indigo-600 hover:text-indigo-500 underline bg-transparent border-none cursor-pointer"
               >
                 Chính sách bảo mật
-              </Link>{' '}
+              </button>{' '}
               của chúng tôi.
             </p>
           </div>
+
+          {/* Terms Modal */}
+          <Modal
+            title="Điều khoản sử dụng"
+            open={showTermsModal}
+            onOk={() => setShowTermsModal(false)}
+            onCancel={() => setShowTermsModal(false)}
+            width={800}
+            okText="Đã hiểu"
+            cancelText="Đóng"
+          >
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-800 mb-2">
+                  Mục đích sử dụng
+                </h3>
+                <p className="text-blue-700">
+                  CareerSpark cung cấp dịch vụ tư vấn nghề nghiệp và test RIASEC
+                  nhằm giúp người dùng khám phá và phát triển sự nghiệp phù hợp
+                  với năng lực và sở thích cá nhân.
+                </p>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-green-800 mb-2">
+                  Quyền của người dùng
+                </h3>
+                <ul className="list-disc list-inside text-green-700 space-y-1">
+                  <li>Được sử dụng tất cả tính năng sau khi đăng ký</li>
+                  <li>Được bảo vệ thông tin cá nhân theo quy định</li>
+                  <li>Được hỗ trợ kỹ thuật khi gặp vấn đề</li>
+                  <li>Có thể hủy tài khoản bất cứ lúc nào</li>
+                </ul>
+              </div>
+
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-orange-800 mb-2">
+                  Nghĩa vụ của người dùng
+                </h3>
+                <ul className="list-disc list-inside text-orange-700 space-y-1">
+                  <li>Cung cấp thông tin chính xác khi đăng ký</li>
+                  <li>Không chia sẻ tài khoản cho người khác sử dụng</li>
+                  <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp</li>
+                  <li>Tuân thủ các quy định của cộng đồng</li>
+                </ul>
+              </div>
+
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-red-800 mb-2">
+                  Các hành vi bị nghiêm cấm
+                </h3>
+                <ul className="list-disc list-inside text-red-700 space-y-1">
+                  <li>Tạo nhiều tài khoản giả mạo</li>
+                  <li>Chia sẻ nội dung không phù hợp</li>
+                  <li>Cố gắng hack hoặc phá hoại hệ thống</li>
+                  <li>Sử dụng bot hoặc công cụ tự động</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  Điều khoản khác
+                </h3>
+                <p className="text-gray-700">
+                  CareerSpark có quyền cập nhật điều khoản này bất cứ lúc nào.
+                  Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa
+                  với việc bạn chấp nhận các điều khoản mới.
+                </p>
+              </div>
+            </div>
+          </Modal>
+
+          {/* Privacy Modal */}
+          <Modal
+            title="Chính sách bảo mật"
+            open={showPrivacyModal}
+            onOk={() => setShowPrivacyModal(false)}
+            onCancel={() => setShowPrivacyModal(false)}
+            width={800}
+            okText="Đã hiểu"
+            cancelText="Đóng"
+          >
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-800 mb-2">
+                  Thông tin chúng tôi thu thập
+                </h3>
+                <ul className="list-disc list-inside text-blue-700 space-y-1">
+                  <li>Thông tin cá nhân: họ tên, email, số điện thoại</li>
+                  <li>Kết quả test RIASEC và lịch sử hoạt động</li>
+                  <li>Thông tin kỹ thuật: IP, browser, thiết bị</li>
+                  <li>Cookies và dữ liệu phiên làm việc</li>
+                </ul>
+              </div>
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-green-800 mb-2">
+                  Mục đích sử dụng dữ liệu
+                </h3>
+                <ul className="list-disc list-inside text-green-700 space-y-1">
+                  <li>Cung cấp dịch vụ tư vấn nghề nghiệp</li>
+                  <li>Cải thiện trải nghiệm người dùng</li>
+                  <li>Gửi thông báo quan trọng về dịch vụ</li>
+                  <li>Phân tích và thống kê sử dụng</li>
+                </ul>
+              </div>
+
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-purple-800 mb-2">
+                  Bảo vệ thông tin
+                </h3>
+                <ul className="list-disc list-inside text-purple-700 space-y-1">
+                  <li>Mã hóa SSL/TLS cho tất cả giao tiếp</li>
+                  <li>Lưu trữ dữ liệu trên server bảo mật</li>
+                  <li>Giới hạn quyền truy cập theo chức năng</li>
+                  <li>Backup và sao lưu dữ liệu định kỳ</li>
+                </ul>
+              </div>
+
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-yellow-800 mb-2">
+                  Chia sẻ thông tin
+                </h3>
+                <p className="text-yellow-700">
+                  Chúng tôi cam kết <strong>KHÔNG</strong> chia sẻ thông tin cá
+                  nhân của bạn cho bên thứ ba trừ khi có yêu cầu pháp lý hoặc
+                  được sự đồng ý của bạn.
+                </p>
+              </div>
+
+              <div className="bg-orange-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-orange-800 mb-2">
+                  Quyền của bạn
+                </h3>
+                <ul className="list-disc list-inside text-orange-700 space-y-1">
+                  <li>Xem, sửa đổi thông tin cá nhân</li>
+                  <li>Yêu cầu xóa tài khoản và dữ liệu</li>
+                  <li>Từ chối nhận email marketing</li>
+                  <li>Khiếu nại về việc xử lý dữ liệu</li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-800 mb-2">Liên hệ</h3>
+                <p className="text-gray-700">
+                  Nếu có thắc mắc về chính sách bảo mật, vui lòng liên hệ:
+                  <br />
+                  Email: careerspark86@gmail.com
+                  <br />
+                  Hotline: 096 234 90 26
+                </p>
+              </div>
+            </div>
+          </Modal>
         </Card>
       </div>
     </div>
