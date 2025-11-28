@@ -10,6 +10,12 @@ import {
   Input,
   Select,
 } from 'antd';
+import {
+  EyeOutlined,
+  EyeInvisibleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import usePublishedBlogs from '@/features/admin/hooks/usePublishedBlogs';
 import CreateBlogModal from '@/features/user/forum/components/CreateBlogModal';
@@ -125,32 +131,32 @@ const BlogManagement: React.FC = () => {
       render: (d: string) => <span>{new Date(d).toLocaleString()}</span>,
     },
     {
-      title: 'Hành động',
+      title: 'Thao tác',
       key: 'actions',
+      width: 180,
       render: (_: unknown, record: BlogItem) => (
         <Space>
           <Button
-            type="link"
+            icon={<EyeOutlined />}
             onClick={() => {
               setSelectedBlogId(record.id);
               setDetailVisible(true);
             }}
-          >
-            Xem
-          </Button>
+            size="small"
+            type="default"
+          />
           <Button
-            type="link"
+            icon={<EyeInvisibleOutlined />}
             loading={unpublishingId === record.id}
             onClick={() => {
               setUnpublishTargetId(record.id);
               setUnpublishModalOpen(true);
             }}
-          >
-            Ẩn
-          </Button>
+            size="small"
+          />
 
           <Button
-            type="link"
+            icon={<EditOutlined />}
             onClick={() => {
               setEditingId(record.id);
               editForm.setFieldsValue({
@@ -160,20 +166,19 @@ const BlogManagement: React.FC = () => {
               });
               setEditModalOpen(true);
             }}
-          >
-            Sửa
-          </Button>
+            size="small"
+            type="primary"
+          />
           <Button
-            type="link"
+            icon={<DeleteOutlined />}
             danger
             loading={deletingId === record.id}
             onClick={() => {
               setDeleteTargetId(record.id);
               setDeleteModalOpen(true);
             }}
-          >
-            Xóa
-          </Button>
+            size="small"
+          />
         </Space>
       ),
     },

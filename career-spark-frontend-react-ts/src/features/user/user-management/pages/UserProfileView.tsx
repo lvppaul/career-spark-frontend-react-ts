@@ -18,6 +18,7 @@ import type { SessionSummary } from '../../test-riasec/types';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import useMyActiveSubscription from '@/features/subscription/hooks/useMyActiveSubscription';
+import type { ActiveSubscription } from '@/features/subscription/services/userSubscriptionService';
 
 const { Title, Text } = Typography;
 
@@ -32,32 +33,37 @@ export default function UserProfileView() {
   const [loadingSessions, setLoadingSessions] = React.useState(false);
   const { data: activeSub, isLoading: loadingSub } = useMyActiveSubscription();
 
-  const computeSubscriptionPercent = React.useCallback((sub: any) => {
-    if (!sub) return 0;
-    const now = Date.now();
-    const start = sub.startDate ? new Date(sub.startDate).getTime() : NaN;
-    const end = sub.endDate ? new Date(sub.endDate).getTime() : NaN;
+  const computeSubscriptionPercent = React.useCallback(
+    (sub: ActiveSubscription | null) => {
+      if (!sub) return 0;
+      const now = Date.now();
+      const start = sub.startDate ? new Date(sub.startDate).getTime() : NaN;
+      const end = sub.endDate ? new Date(sub.endDate).getTime() : NaN;
 
-    // If valid dates available, compute percent from time range
-    if (!isNaN(start) && !isNaN(end) && end > start) {
-      const total = end - start;
-      const remaining = Math.max(0, end - now);
-      const percent = Math.round((remaining / total) * 100);
-      return Math.max(0, Math.min(100, percent));
-    }
+      // If valid dates available, compute percent from time range
+      if (!isNaN(start) && !isNaN(end) && end > start) {
+        const total = end - start;
+        const remaining = Math.max(0, end - now);
+        const percent = Math.round((remaining / total) * 100);
+        return Math.max(0, Math.min(100, percent));
+      }
 
-    // Fallback: use remainingDays and planDurationDays if provided
-    if (
-      typeof sub.remainingDays === 'number' &&
-      typeof sub.planDurationDays === 'number' &&
-      sub.planDurationDays > 0
-    ) {
-      const pct = Math.round((sub.remainingDays / sub.planDurationDays) * 100);
-      return Math.max(0, Math.min(100, pct));
-    }
+      // Fallback: use remainingDays and planDurationDays if provided
+      if (
+        typeof sub.remainingDays === 'number' &&
+        typeof sub.planDurationDays === 'number' &&
+        sub.planDurationDays > 0
+      ) {
+        const pct = Math.round(
+          (sub.remainingDays / sub.planDurationDays) * 100
+        );
+        return Math.max(0, Math.min(100, pct));
+      }
 
-    return 0;
-  }, []);
+      return 0;
+    },
+    []
+  );
 
   const percentRemaining = React.useMemo(
     () => computeSubscriptionPercent(activeSub),
@@ -87,23 +93,31 @@ export default function UserProfileView() {
     load();
   }, [id]);
 
-  if (isLoading) return <Spin />;
+  if (isLoading)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Spin size="large" />
+          <Text className="text-gray-600">
+            Đang tải thông tin người dùng...
+          </Text>
+        </div>
+      </div>
+    );
 
   if (!data)
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: 'calc(100vh - 80px)',
-          paddingTop: 24,
-          paddingBottom: 10,
-        }}
-      >
-        <Card>
-          <Text>Người dùng không tồn tại</Text>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">❌</span>
+            </div>
+            <Text className="text-gray-600 text-lg">
+              Người dùng không tồn tại
+            </Text>
+          </div>
+        </div>
       </div>
     );
 
@@ -203,125 +217,163 @@ export default function UserProfileView() {
         </Card>
       </div>
 
-      {/* Active subscription - full width below profile and tests */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
-        {String(authUser?.sub) === String(id) && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
-            <div style={{ margin: 30 }}>
-              <Card
-                title="Gói đăng ký hiện tại"
-                style={{
-                  width: 1200,
-                  borderRadius: 12,
-                  border: '2px solid #d9d9d9',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                }}
-              >
-                {loadingSub ? (
-                  <Spin />
-                ) : activeSub ? (
-                  <div
-                    style={{ display: 'flex', gap: 24, alignItems: 'center' }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <div style={{ fontSize: 16, fontWeight: 700 }}>
-                          {activeSub.planName}
-                        </div>
-                        {/* Badge showing active/expired */}
-                        {isExpired ? (
-                          <Badge status="error" text="Expired" />
-                        ) : (
-                          <Badge status="success" text="Active" />
-                        )}
-                      </div>
-
-                      <div style={{ color: '#666', marginTop: 6 }}>
-                        Cấp độ: {activeSub.level}
-                      </div>
-                      <div style={{ color: '#666', marginTop: 6 }}>
-                        Thời gian:{' '}
-                        {new Date(activeSub.startDate).toLocaleDateString()} →{' '}
-                        {new Date(activeSub.endDate).toLocaleDateString()}
-                      </div>
-
-                      <div style={{ marginTop: 10 }}>
-                        <Progress
-                          percent={percentRemaining}
-                          status={isExpired ? 'exception' : 'active'}
-                        />
-                        <div style={{ color: '#666', marginTop: 6 }}>
-                          {isExpired
-                            ? 'Gói đã hết hạn'
-                            : `Còn lại: ${
-                                typeof activeSub.remainingDays === 'number'
-                                  ? activeSub.remainingDays
-                                  : Math.max(
-                                      0,
-                                      Math.ceil(
-                                        (new Date(activeSub.endDate).getTime() -
-                                          Date.now()) /
-                                          (1000 * 60 * 60 * 24)
-                                      )
-                                    )
-                              } ngày (${percentRemaining}%)`}
-                        </div>
-                      </div>
-
-                      {activeSub.benefits ? (
-                        <div style={{ marginTop: 8, color: '#444' }}>
-                          <strong>Lợi ích:</strong> {activeSub.benefits}
-                        </div>
-                      ) : null}
-
-                      <div style={{ marginTop: 12, textAlign: 'right' }}>
-                        <Button
-                          type="primary"
-                          onClick={() =>
-                            navigate('/subscription', {
-                              state: { planId: activeSub.planId },
-                            })
-                          }
-                        >
-                          Gia hạn
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div>Chưa có gói đăng ký hoạt động</div>
-                    <div style={{ marginTop: 12, textAlign: 'right' }}>
-                      <Button
-                        type="primary"
-                        onClick={() => navigate('/subscription')}
-                      >
-                        Mua gói
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </Card>
+      {/* Subscription Section */}
+      {String(authUser?.sub) === String(id) && (
+        <div
+          style={{
+            maxWidth: 1200,
+            width: 'min(1200px, 98%)',
+            marginTop: 30,
+          }}
+        >
+          <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+            <div className="flex items-center space-x-3 mb-6">
+              <Title level={4} className="!mb-0">
+                Gói đăng ký hiện tại
+              </Title>
             </div>
+
+            {loadingSub ? (
+              <div className="flex items-center justify-center py-12">
+                <Spin size="large" />
+              </div>
+            ) : activeSub ? (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-2xl font-bold text-gray-800">
+                        {activeSub.planName}
+                      </div>
+                      {isExpired ? (
+                        <Badge
+                          status="error"
+                          text="Đã hết hạn"
+                          className="text-lg"
+                        />
+                      ) : (
+                        <Badge
+                          status="success"
+                          text="Đang hoạt động"
+                          className="text-lg"
+                        />
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <div className="text-sm text-gray-500">Cấp độ</div>
+                          <div className="font-medium text-gray-800">
+                            {activeSub.level}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <div className="text-sm text-gray-500">Thời gian</div>
+                          <div className="font-medium text-gray-800">
+                            {new Date(activeSub.startDate).toLocaleDateString(
+                              'vi-VN'
+                            )}{' '}
+                            →{' '}
+                            {new Date(activeSub.endDate).toLocaleDateString(
+                              'vi-VN'
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          Thời gian còn lại
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {percentRemaining}%
+                        </span>
+                      </div>
+                      <Progress
+                        percent={percentRemaining}
+                        status={isExpired ? 'exception' : 'active'}
+                        strokeColor={
+                          isExpired
+                            ? '#ef4444'
+                            : { '0%': '#3b82f6', '100%': '#6366f1' }
+                        }
+                      />
+                      <div className="text-sm text-gray-600 mt-2">
+                        {isExpired
+                          ? 'Gói đã hết hạn'
+                          : `Còn lại: ${
+                              typeof activeSub.remainingDays === 'number'
+                                ? activeSub.remainingDays
+                                : Math.max(
+                                    0,
+                                    Math.ceil(
+                                      (new Date(activeSub.endDate).getTime() -
+                                        Date.now()) /
+                                        (1000 * 60 * 60 * 24)
+                                    )
+                                  )
+                            } ngày`}
+                      </div>
+                    </div>
+
+                    {activeSub.benefits && (
+                      <div className="bg-white rounded-xl p-4 border border-blue-100">
+                        <div className="text-sm font-medium text-gray-700 mb-2">
+                          Lợi ích gói:
+                        </div>
+                        <div className="text-gray-600">
+                          {activeSub.benefits}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col space-y-3">
+                    <Button
+                      type="primary"
+                      size="large"
+                      onClick={() =>
+                        navigate('/subscription', {
+                          state: { planId: activeSub.planId },
+                        })
+                      }
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 border-none hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                    >
+                      {isExpired ? 'Gia hạn ngay' : 'Nâng cấp gói'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-3xl">💎</span>
+                </div>
+                <div className="text-xl font-medium text-gray-800 mb-2">
+                  Chưa có gói đăng ký
+                </div>
+                <div className="text-gray-500 mb-6">
+                  Nâng cấp tài khoản để trải nghiệm đầy đủ tính năng
+                </div>
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={() => navigate('/subscription')}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 border-none hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                >
+                  Mua gói ngay
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

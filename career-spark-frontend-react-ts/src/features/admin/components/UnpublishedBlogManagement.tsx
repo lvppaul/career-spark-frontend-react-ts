@@ -7,6 +7,12 @@ import {
   message as antdMessage,
   Avatar,
 } from 'antd';
+import {
+  EyeOutlined,
+  CheckCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import usePublishBlog from '@/features/user/forum/hooks/usePublishBlog';
 import useUpdateBlog from '@/features/admin/hooks/useUpdateBlog';
 import useDeleteBlog from '@/features/admin/hooks/useDeleteBlog';
@@ -129,30 +135,32 @@ const UnpublishedBlogManagement: React.FC = () => {
       render: (d: string) => <span>{new Date(d).toLocaleString()}</span>,
     },
     {
-      title: 'Hành động',
+      title: 'Thao tác',
       key: 'actions',
+      width: 180,
       render: (_: unknown, record: BlogItem) => (
         <Space>
           <Button
-            type="link"
+            icon={<EyeOutlined />}
             onClick={() => {
               setSelectedBlogId(record.id);
               setDetailVisible(true);
             }}
-          >
-            Xem
-          </Button>
+            size="small"
+            type="default"
+          />
 
           <Button
-            type="link"
+            icon={<CheckCircleOutlined />}
             loading={publishingId === record.id}
             onClick={() => handlePublish(record.id)}
-          >
-            Đăng
-          </Button>
+            size="small"
+            type="primary"
+            style={{ backgroundColor: '#52c41a' }}
+          />
 
           <Button
-            type="link"
+            icon={<EditOutlined />}
             onClick={() => {
               setEditingId(record.id);
               editForm.setFieldsValue({
@@ -162,17 +170,16 @@ const UnpublishedBlogManagement: React.FC = () => {
               });
               setEditModalOpen(true);
             }}
-          >
-            Sửa
-          </Button>
+            size="small"
+            type="primary"
+          />
           <Button
-            type="link"
+            icon={<DeleteOutlined />}
             danger
             loading={deletingId === record.id}
             onClick={() => handleDelete(record.id)}
-          >
-            Xóa
-          </Button>
+            size="small"
+          />
         </Space>
       ),
     },

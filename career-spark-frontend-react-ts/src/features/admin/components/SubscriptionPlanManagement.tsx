@@ -175,18 +175,16 @@ export function SubscriptionPlanManagement() {
     {
       title: 'Thao tác',
       key: 'action',
-      width: 150,
+      width: 120,
       fixed: 'right',
       render: (_, record) => (
-        <Space size="small">
+        <Space>
           <Button
-            type="link"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
             size="small"
-          >
-            Sửa
-          </Button>
+            type="primary"
+          />
           <Popconfirm
             title="Xóa gói đăng ký"
             description="Bạn có chắc chắn muốn xóa gói đăng ký này?"
@@ -195,9 +193,7 @@ export function SubscriptionPlanManagement() {
             cancelText="Hủy"
             okButtonProps={{ danger: true, loading: isDeleting }}
           >
-            <Button type="link" danger icon={<DeleteOutlined />} size="small">
-              Xóa
-            </Button>
+            <Button icon={<DeleteOutlined />} size="small" danger />
           </Popconfirm>
         </Space>
       ),
