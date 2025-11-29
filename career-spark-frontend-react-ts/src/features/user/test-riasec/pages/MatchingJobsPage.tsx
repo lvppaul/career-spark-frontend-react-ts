@@ -11,7 +11,6 @@ import {
   Empty,
   Spin,
   Space,
-  Progress,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -25,14 +24,18 @@ import {
   ArrowRightOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useLatestSession from '../hooks/useLatestSession';
 
 import { useRiasecRoadmap } from '../hooks/useRiasecRoadmap';
 import { tokenUtils } from '@/utils/tokenUtils';
+import { USER_ROUTES } from '@/router/constants';
 
 const { Title, Text, Paragraph } = Typography;
 
 export default function MatchingJobsPage() {
+  const navigate = useNavigate();
+
   // Use latest session from server instead of localStorage
   const {
     data: latestSession,
@@ -58,6 +61,19 @@ export default function MatchingJobsPage() {
 
   const [selectedPath, setSelectedPath] = useState<any | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Handle view course button click - check subscription level
+  const handleViewCourse = (courseUrl: string) => {
+    const subscriptionLevel = tokenUtils.getSubscriptionLevel();
+
+    if (subscriptionLevel === 0 || subscriptionLevel === null) {
+      // Redirect to subscription page if user has no subscription
+      navigate(USER_ROUTES.SUBSCRIPTION);
+    } else {
+      // Open course in new tab
+      window.open(courseUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   // compute aggregate info for the selected path (total weeks)
   const totalWeeks = (selectedPath?.roadmaps ?? []).reduce(
@@ -603,9 +619,9 @@ export default function MatchingJobsPage() {
                             >
                               <Button
                                 type="primary"
-                                href={step.suggestedCourseUrl}
-                                target="_blank"
-                                rel="noreferrer"
+                                onClick={() =>
+                                  handleViewCourse(step.suggestedCourseUrl)
+                                }
                                 icon={<BookOutlined />}
                                 style={{ width: '100%' }}
                               >

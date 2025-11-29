@@ -24,7 +24,6 @@ import {
 } from '@ant-design/icons';
 import type { SubmitResponse } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { tokenUtils } from '@/utils/tokenUtils';
 
 const { Title, Text } = Typography;
 
@@ -391,12 +390,7 @@ export default function RiasecResultPage() {
                   borderRadius: 8,
                 }}
                 onClick={() => {
-                  const level = tokenUtils.getSubscriptionLevel();
-                  if (level && level > 0) {
-                    navigate('/matching-jobs');
-                  } else {
-                    navigate('/subscription');
-                  }
+                  navigate('/matching-jobs');
                 }}
               >
                 🎯 Khám phá các công việc phù hợp
