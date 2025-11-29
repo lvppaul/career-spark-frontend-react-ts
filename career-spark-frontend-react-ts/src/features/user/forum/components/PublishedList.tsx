@@ -96,10 +96,15 @@ export default function PublishedList({
               borderRadius: 3,
               overflow: 'hidden',
               transition: 'all 0.3s ease',
+              cursor: 'pointer',
               '&:hover': {
                 transform: 'translateY(-4px)',
                 boxShadow: '0 12px 24px rgba(0,0,0,0.1)',
               },
+            }}
+            onClick={() => {
+              setSelectedId(item.id);
+              setDetailVisible(true);
             }}
           >
             <Card sx={{ border: 'none', boxShadow: 'none' }}>
@@ -149,15 +154,10 @@ export default function PublishedList({
                   fontWeight={700}
                   gutterBottom
                   sx={{
-                    cursor: 'pointer',
                     color: 'primary.main',
                     '&:hover': {
                       textDecoration: 'underline',
                     },
-                  }}
-                  onClick={() => {
-                    setSelectedId(item.id);
-                    setDetailVisible(true);
                   }}
                 >
                   {item.title}
