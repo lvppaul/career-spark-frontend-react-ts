@@ -256,36 +256,49 @@ export default function SubscriptionCard({ plan, featured = false }: Props) {
         {benefits.length > 0 && (
           <div style={{ flex: 1, marginBottom: 24 }}>
             <Space direction="vertical" size={12} style={{ width: '100%' }}>
-              {benefits.map((benefit, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 8,
-                  }}
-                >
-                  <CheckCircleOutlined
-                    style={{
-                      color: featured || isPremium ? '#fff' : '#52c41a',
-                      fontSize: 16,
-                      marginTop: 2,
-                    }}
-                  />
-                  <span
-                    style={{
-                      color:
-                        featured || isPremium
-                          ? 'rgba(255,255,255,0.95)'
-                          : '#595959',
-                      fontSize: 14,
-                      lineHeight: 1.6,
-                    }}
+              {benefits.map((benefit, idx) => {
+                // Split each benefit by newline to handle multi-line benefits
+                const lines = benefit.split('\n').filter((line) => line.trim());
+
+                return (
+                  <div
+                    key={idx}
+                    style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
                   >
-                    {benefit}
-                  </span>
-                </div>
-              ))}
+                    {lines.map((line, lineIdx) => (
+                      <div
+                        key={lineIdx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 8,
+                        }}
+                      >
+                        <CheckCircleOutlined
+                          style={{
+                            color: featured || isPremium ? '#fff' : '#52c41a',
+                            fontSize: 16,
+                            marginTop: 2,
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span
+                          style={{
+                            color:
+                              featured || isPremium
+                                ? 'rgba(255,255,255,0.95)'
+                                : '#595959',
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {line.trim()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </Space>
           </div>
         )}
