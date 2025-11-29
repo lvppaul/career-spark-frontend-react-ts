@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 import {
   Card,
-  List,
-  Typography,
-  Pagination,
-  Empty,
-  Spin,
-  Modal,
+  CardContent,
   Avatar,
-  Space,
-} from 'antd';
+  Typography,
+  Chip,
+  Box,
+  CircularProgress,
+  Pagination,
+  Dialog,
+  DialogContent,
+  Stack,
+  Paper,
+  IconButton,
+  Divider,
+} from '@mui/material';
+import { MessageCircle, Clock, User as UserIcon } from 'lucide-react';
+import { Empty, Modal } from 'antd';
 import { usePublishedBlogs } from '../hooks/usePublishedBlogs';
 import BlogDetail from './BlogDetail';
 import type { BlogItem } from '../type';
-
-const { Paragraph } = Typography;
 
 function stripMarkdown(md = ''): string {
   // Very small utility to remove common markdown tokens for excerpting
@@ -59,9 +64,14 @@ export default function PublishedList({
 
   if (isLoading)
     return (
-      <div style={{ textAlign: 'center', padding: 24 }}>
-        <Spin />
-      </div>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="300px"
+      >
+        <CircularProgress />
+      </Box>
     );
 
   if (!data || data.length === 0)
@@ -76,119 +86,139 @@ export default function PublishedList({
   });
 
   return (
-    <div>
-      <Card>
-        <List<BlogItem>
-          itemLayout="vertical"
-          dataSource={filtered}
-          renderItem={(item) => (
-            <List.Item key={item.id}>
-              <List.Item.Meta
-                avatar={
+    <Box>
+      <Stack spacing={3}>
+        {filtered.map((item) => (
+          <Paper
+            key={item.id}
+            elevation={2}
+            sx={{
+              borderRadius: 3,
+              overflow: 'hidden',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 24px rgba(0,0,0,0.1)',
+              },
+            }}
+          >
+            <Card sx={{ border: 'none', boxShadow: 'none' }}>
+              <CardContent sx={{ p: 3 }}>
+                {/* Author Info */}
+                <Box display="flex" alignItems="center" mb={2}>
                   <Avatar
                     src={item.authorAvatarUrl}
                     alt={item.authorName}
-                    style={{ backgroundColor: '#87d068' }}
-                  >
-                    {!item.authorAvatarUrl && item.authorName
-                      ? item.authorName
-                          .split(' ')
-                          .map((s) => s[0])
-                          .slice(0, 2)
-                          .join('')
-                          .toUpperCase()
-                      : null}
-                  </Avatar>
-                }
-                title={
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      bgcolor: 'primary.main',
+                      mr: 2,
                     }}
                   >
-                    <div>
-                      <Typography.Text
-                        strong
-                        style={{ fontSize: 18, cursor: 'pointer' }}
-                      >
-                        <a
-                          onClick={() => {
-                            setSelectedId(item.id);
-                            setDetailVisible(true);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              setSelectedId(item.id);
-                              setDetailVisible(true);
-                            }
-                          }}
-                          role="button"
-                          tabIndex={0}
-                          className="no-underline"
-                        >
-                          {item.title}
-                        </a>
-                      </Typography.Text>
-                    </div>
-                  </div>
-                }
-                description={
-                  <div style={{ marginTop: 8 }}>
-                    <Space
-                      direction="vertical"
-                      size={4}
-                      style={{ width: '100%' }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                        }}
-                      >
-                        <span style={{ fontWeight: 600 }}>
-                          {item.authorName || 'Người dùng'}
-                        </span>
-                        <span
-                          style={{ color: 'rgba(0,0,0,0.45)', fontSize: 12 }}
-                        >
-                          • {new Date(item.createAt).toLocaleString()}
-                        </span>
-                      </div>
+                    {!item.authorAvatarUrl && item.authorName ? (
+                      <UserIcon size={24} />
+                    ) : null}
+                  </Avatar>
+                  <Box flex={1}>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {item.authorName || 'Người dùng'}
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Clock size={14} color="#666" />
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(item.createAt).toLocaleString('vi-VN')}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {item.tag && (
+                    <Chip
+                      label={item.tag}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
 
-                      <Paragraph type="secondary" style={{ margin: 0 }}>
-                        {excerpt(item.content)}
-                      </Paragraph>
-                    </Space>
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-        />
-        <Modal
-          open={detailVisible}
-          onCancel={() => setDetailVisible(false)}
-          footer={null}
-          width={900}
-          bodyStyle={{ padding: 0 }}
-        >
-          <BlogDetail id={selectedId} onBack={() => setDetailVisible(false)} />
-        </Modal>
-        {pagination ? (
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <Pagination
-              current={pagination.pageNumber}
-              pageSize={pagination.pageSize}
-              total={pagination.totalCount}
-              onChange={(p) => setPage(p)}
-              showSizeChanger={false}
-            />
-          </div>
-        ) : null}
-      </Card>
-    </div>
+                <Divider sx={{ my: 2 }} />
+
+                {/* Title */}
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  gutterBottom
+                  sx={{
+                    cursor: 'pointer',
+                    color: 'primary.main',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                  onClick={() => {
+                    setSelectedId(item.id);
+                    setDetailVisible(true);
+                  }}
+                >
+                  {item.title}
+                </Typography>
+
+                {/* Excerpt */}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {excerpt(item.content)}
+                </Typography>
+
+                {/* Footer */}
+                <Box display="flex" alignItems="center" gap={2} mt={2}>
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    <MessageCircle size={16} color="#666" />
+                    <Typography variant="caption" color="text.secondary">
+                      Thảo luận
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Paper>
+        ))}
+      </Stack>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={pagination.totalPages}
+            page={pagination.pageNumber}
+            onChange={(_, page) => setPage(page)}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
+
+      {/* Modal */}
+      <Modal
+        open={detailVisible}
+        onCancel={() => setDetailVisible(false)}
+        footer={null}
+        width={900}
+        bodyStyle={{ padding: 0 }}
+      >
+        <BlogDetail id={selectedId} onBack={() => setDetailVisible(false)} />
+      </Modal>
+    </Box>
   );
 }

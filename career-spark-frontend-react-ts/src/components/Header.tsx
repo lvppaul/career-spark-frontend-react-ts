@@ -3,6 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { useScrollVisibility } from '../hooks/useScrollDirection';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import logoXX from '@/assets/images/only-logo-xx.jpg';
+import {
+  Home,
+  MessageCircle,
+  Newspaper,
+  BarChart3,
+  User,
+  Settings,
+  Map,
+  LogOut,
+  LogIn,
+  UserPlus,
+} from 'lucide-react';
 const Header: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
@@ -82,7 +94,7 @@ const Header: React.FC = () => {
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
           >
-            <span>🏠</span>
+            <Home size={18} />
             <span>Trang chủ</span>
           </Link>
           <Link
@@ -94,7 +106,7 @@ const Header: React.FC = () => {
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
           >
-            <span>💬</span>
+            <MessageCircle size={18} />
             <span>Diễn đàn</span>
           </Link>
           <Link
@@ -106,7 +118,7 @@ const Header: React.FC = () => {
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
           >
-            <span>📰</span>
+            <Newspaper size={18} />
             <span>Tin tức</span>
           </Link>
           <Link
@@ -118,7 +130,7 @@ const Header: React.FC = () => {
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
           >
-            <span>📊</span>
+            <BarChart3 size={18} />
             <span>Test RIASEC</span>
           </Link>
         </nav>
@@ -131,12 +143,14 @@ const Header: React.FC = () => {
                 to="/login"
                 className="flex items-center space-x-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-300"
               >
+                <LogIn size={18} />
                 <span>Đăng nhập</span>
               </Link>
               <Link
                 to="/signup"
-                className="flex items-center space-x-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-300"
+                className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
               >
+                <UserPlus size={18} />
                 <span>Đăng ký</span>
               </Link>
             </>
@@ -194,7 +208,10 @@ const Header: React.FC = () => {
                     }`}
                     onClick={() => setShowUserMenu(false)}
                   >
-                    👤 Thông tin cá nhân
+                    <div className="flex items-center space-x-2">
+                      <User size={16} />
+                      <span>Thông tin cá nhân</span>
+                    </div>
                   </Link>
                   <Link
                     to="/settings"
@@ -205,7 +222,10 @@ const Header: React.FC = () => {
                     }`}
                     onClick={() => setShowUserMenu(false)}
                   >
-                    ⚙️ Cài đặt
+                    <div className="flex items-center space-x-2">
+                      <Settings size={16} />
+                      <span>Cài đặt</span>
+                    </div>
                   </Link>
                   <Link
                     to="/matching-jobs"
@@ -216,14 +236,20 @@ const Header: React.FC = () => {
                     }`}
                     onClick={() => setShowUserMenu(false)}
                   >
-                    🗺️ Roadmap cụ thể
+                    <div className="flex items-center space-x-2">
+                      <Map size={16} />
+                      <span>Roadmap cụ thể</span>
+                    </div>
                   </Link>
                   <hr className="my-1" />
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200"
                   >
-                    🚪 Đăng xuất
+                    <div className="flex items-center space-x-2">
+                      <LogOut size={16} />
+                      <span>Đăng xuất</span>
+                    </div>
                   </button>
                 </div>
               )}
