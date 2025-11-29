@@ -61,6 +61,7 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
   const [editContent, setEditContent] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
+  const [visibleCommentsCount, setVisibleCommentsCount] = useState(3);
 
   const handleSubmitComment = async () => {
     if (!commentContent.trim() || !user || !id) return;
@@ -264,106 +265,130 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
               <CircularProgress />
             </Box>
           ) : comments && comments.length > 0 ? (
-            <Stack spacing={2}>
-              {comments.map((comment) => (
-                <Paper key={comment.id} sx={{ p: 2 }}>
-                  <Stack direction="row" spacing={2}>
-                    <Avatar src={comment.userAvatarUrl} alt={comment.userName}>
-                      {!comment.userAvatarUrl && comment.userName
-                        ? comment.userName
-                            .split(' ')
-                            .map((s) => s[0])
-                            .slice(0, 2)
-                            .join('')
-                            .toUpperCase()
-                        : null}
-                    </Avatar>
-                    <Box flex={1}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
+            <>
+              <Stack spacing={2}>
+                {comments.slice(0, visibleCommentsCount).map((comment) => (
+                  <Paper key={comment.id} sx={{ p: 2 }}>
+                    <Stack direction="row" spacing={2}>
+                      <Avatar
+                        src={comment.userAvatarUrl}
+                        alt={comment.userName}
                       >
-                        <Box>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            {comment.userName}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {new Date(comment.createAt).toLocaleString('vi-VN')}
-                            {comment.updateAt && ' (đã chỉnh sửa)'}
-                          </Typography>
-                        </Box>
-                        {user && parseInt(user.sub) === comment.userId && (
-                          <Box>
-                            {editingCommentId === comment.id ? (
-                              <Stack direction="row" spacing={0.5}>
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={() => handleSaveEdit(comment.id)}
-                                  disabled={isUpdating}
-                                >
-                                  <Check size={16} />
-                                </IconButton>
-                                <IconButton
-                                  size="small"
-                                  onClick={handleCancelEdit}
-                                  disabled={isUpdating}
-                                >
-                                  <XIcon size={16} />
-                                </IconButton>
-                              </Stack>
-                            ) : (
-                              <Stack direction="row" spacing={0.5}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() =>
-                                    handleEditComment(
-                                      comment.id,
-                                      comment.content
-                                    )
-                                  }
-                                >
-                                  <Edit size={16} />
-                                </IconButton>
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() =>
-                                    handleDeleteComment(comment.id)
-                                  }
-                                  disabled={isDeleting}
-                                >
-                                  <Trash2 size={16} />
-                                </IconButton>
-                              </Stack>
-                            )}
-                          </Box>
-                        )}
-                      </Stack>
-                      {editingCommentId === comment.id ? (
-                        <TextField
-                          fullWidth
-                          multiline
-                          rows={2}
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          sx={{ mt: 1 }}
-                          disabled={isUpdating}
-                        />
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          sx={{ whiteSpace: 'pre-wrap', mt: 1 }}
+                        {!comment.userAvatarUrl && comment.userName
+                          ? comment.userName
+                              .split(' ')
+                              .map((s) => s[0])
+                              .slice(0, 2)
+                              .join('')
+                              .toUpperCase()
+                          : null}
+                      </Avatar>
+                      <Box flex={1}>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="flex-start"
                         >
-                          {comment.content}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
+                          <Box>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              {comment.userName}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {new Date(comment.createAt).toLocaleString(
+                                'vi-VN'
+                              )}
+                              {comment.updateAt && ' (đã chỉnh sửa)'}
+                            </Typography>
+                          </Box>
+                          {user && parseInt(user.sub) === comment.userId && (
+                            <Box>
+                              {editingCommentId === comment.id ? (
+                                <Stack direction="row" spacing={0.5}>
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => handleSaveEdit(comment.id)}
+                                    disabled={isUpdating}
+                                  >
+                                    <Check size={16} />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    onClick={handleCancelEdit}
+                                    disabled={isUpdating}
+                                  >
+                                    <XIcon size={16} />
+                                  </IconButton>
+                                </Stack>
+                              ) : (
+                                <Stack direction="row" spacing={0.5}>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() =>
+                                      handleEditComment(
+                                        comment.id,
+                                        comment.content
+                                      )
+                                    }
+                                  >
+                                    <Edit size={16} />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() =>
+                                      handleDeleteComment(comment.id)
+                                    }
+                                    disabled={isDeleting}
+                                  >
+                                    <Trash2 size={16} />
+                                  </IconButton>
+                                </Stack>
+                              )}
+                            </Box>
+                          )}
+                        </Stack>
+                        {editingCommentId === comment.id ? (
+                          <TextField
+                            fullWidth
+                            multiline
+                            rows={2}
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            sx={{ mt: 1 }}
+                            disabled={isUpdating}
+                          />
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{ whiteSpace: 'pre-wrap', mt: 1 }}
+                          >
+                            {comment.content}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Stack>
+                  </Paper>
+                ))}
+              </Stack>
+
+              {/* Load More Button */}
+              {visibleCommentsCount < comments.length && (
+                <Box display="flex" justifyContent="center" mt={3}>
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      setVisibleCommentsCount((prev) => prev + 6)
+                    }
+                  >
+                    Xem thêm ({comments.length - visibleCommentsCount} bình luận)
+                  </Button>
+                </Box>
+              )}
+            </>
           ) : (
             <Box textAlign="center" py={4}>
               <Typography variant="body2" color="text.secondary">
