@@ -47,10 +47,10 @@ export default function NewsPage() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
             Tin Tức Nghề Nghiệp
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-600">
             Cập nhật xu hướng và kiến thức nghề nghiệp mới nhất để phát triển sự
             nghiệp của bạn
           </p>
