@@ -380,11 +380,10 @@ const BlogDetail: React.FC<BlogDetailProps> = ({
                 <Box display="flex" justifyContent="center" mt={3}>
                   <Button
                     variant="outlined"
-                    onClick={() =>
-                      setVisibleCommentsCount((prev) => prev + 6)
-                    }
+                    onClick={() => setVisibleCommentsCount((prev) => prev + 6)}
                   >
-                    Xem thêm ({comments.length - visibleCommentsCount} bình luận)
+                    Xem thêm ({comments.length - visibleCommentsCount} bình
+                    luận)
                   </Button>
                 </Box>
               )}
