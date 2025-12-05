@@ -209,7 +209,7 @@ export function OrderManagement() {
     <div>
       {/* Statistics Cards */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Tổng đơn hàng"
@@ -218,7 +218,7 @@ export function OrderManagement() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Đã thanh toán"
@@ -228,24 +228,13 @@ export function OrderManagement() {
             />
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={24} sm={12} lg={8}>
           <Card>
             <Statistic
               title="Chờ thanh toán"
               value={stats.pending}
               valueStyle={{ color: '#faad14' }}
               prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Doanh thu"
-              value={stats.revenue}
-              precision={0}
-              valueStyle={{ color: '#1890ff' }}
-              suffix="₫"
             />
           </Card>
         </Col>
