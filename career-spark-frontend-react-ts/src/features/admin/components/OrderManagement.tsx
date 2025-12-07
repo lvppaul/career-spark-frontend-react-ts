@@ -131,6 +131,13 @@ export function OrderManagement() {
       ellipsis: true,
     },
     {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      width: 200,
+      ellipsis: true,
+    },
+    {
       title: 'Gói dịch vụ',
       dataIndex: 'subscriptionPlanName',
       key: 'subscriptionPlanName',
@@ -276,7 +283,7 @@ export function OrderManagement() {
             showTotal: (total) => `Tổng ${total} đơn hàng`,
             onChange: handleTableChange,
           }}
-          scroll={{ x: 1400 }}
+          scroll={{ x: 1600 }}
         />
       </Card>
     </div>
