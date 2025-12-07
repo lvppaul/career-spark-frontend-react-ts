@@ -203,13 +203,6 @@ export function OrderManagement() {
       width: 140,
       render: formatDateTime,
     },
-    {
-      title: 'Ngày hết hạn',
-      dataIndex: 'expiredAt',
-      key: 'expiredAt',
-      width: 140,
-      render: formatDateTime,
-    },
   ];
 
   return (
